@@ -1,0 +1,549 @@
+import java_cup.runtime.*;
+import java.util.HashMap;
+
+/*
+ * =========================================================
+ *  ANALIZADOR SINTÁCTICO (CUP)
+ * =========================================================
+ * Este archivo define la gramática del lenguaje y las acciones
+ * que se ejecutan durante el análisis sintáctico.
+ *
+ * El parser recibe los tokens generados por el Lexer y verifica
+ * si el programa fuente cumple con las reglas gramaticales.
+ * Además, se integra con la tabla de símbolos y con el manejador
+ * de errores para registrar información útil durante el análisis.
+ */
+
+parser code {:
+    /*
+     * Referencia al analizador léxico.
+     * A través de este objeto el parser obtiene los tokens.
+     */
+    Lexer lex;
+
+    /*
+     * Tabla donde se almacenan funciones, parámetros, variables
+     * y arreglos encontrados durante el análisis.
+     */
+    TablaSimbolos tabla;
+
+    /*
+     * Manejador encargado de registrar los errores sintácticos.
+     * Se obtiene desde el lexer para centralizar los errores léxicos
+     * y sintácticos en un mismo archivo.
+     */
+    ManejadorErrores manejadorErrores;
+
+    /*
+     * Contadores utilizados para generar nombres únicos de scopes,
+     * por ejemplo if1_main, switch1_main, dowhile1_main, etc.
+     */
+    HashMap<String, Integer> contadores = new HashMap<>();
+
+    /*
+     * Última línea y columna leída. Se usan como respaldo cuando
+     * ocurre un error y el token no trae una posición clara.
+     */
+    private int lastLine = 1;
+    private int lastColumn = 1;
+
+    /*
+     * Constructor del parser.
+     * Recibe el lexer, crea la tabla de símbolos y obtiene el
+     * manejador de errores para poder reportar errores sintácticos.
+     */
+    public parser(Lexer lex) {
+        this.lex = lex;
+        this.tabla = new TablaSimbolos();
+        this.manejadorErrores = lex.getManejadorErrores();
+    }
+
+    /*
+     * Permite acceder a la tabla de símbolos desde el Main.
+     * Esto es útil para escribir la tabla al finalizar el análisis.
+     */
+    public TablaSimbolos getTabla() {
+        return tabla;
+    }
+
+    /*
+     * Genera un nombre único para cada scope interno.
+     * Se utiliza principalmente en if, else, do-while y switch.
+     */
+    private String nuevoScope(String tipo) {
+        String key = tipo + "_" + tabla.getCurrentScope();
+        int count = contadores.getOrDefault(key, 0) + 1;
+        contadores.put(key, count);
+        return tipo + count + "_" + tabla.getCurrentScope();
+    }
+
+    /*
+     * Método llamado automáticamente por CUP cuando detecta
+     * un error sintáctico. Aquí se construye un mensaje claro
+     * y se envía al manejador de errores.
+     */
+    public void syntax_error(Symbol token) {
+        String msj;
+
+        if (token == null || token.sym == sym.EOF) {
+            msj = "Fin de archivo inesperado";
+        } else if (token.value != null) {
+            msj = "Token inesperado: " + token.value;
+        } else {
+            msj = "Token inesperado: " + sym.terminalNames[token.sym];
+        }
+
+        if (manejadorErrores != null) {
+            manejadorErrores.agregarErrorSintactico(
+                msj,
+                (token != null ? token.left : lastLine - 1),
+                (token != null ? token.right : lastColumn - 1)
+            );
+        } else {
+            System.err.println("Error Sintáctico: " + msj);
+        }
+    }
+
+    /*
+     * Método llamado cuando CUP no logra recuperarse del error.
+     * Se deja como último recurso 
+     */
+    public void unrecovered_syntax_error(Symbol token) throws Exception {
+        if (token == null || token.sym == sym.EOF) {
+            return;
+        }
+
+        String msj = "Error sintáctico no recuperable: token inesperado";
+
+        if (manejadorErrores != null) {
+            manejadorErrores.agregarErrorSintactico(
+                msj,
+                token.left,
+                token.right
+            );
+        }
+    }
+:};
+
+init with {: :};
+/*
+ * Este bloque indica cómo el parser obtiene el siguiente token.
+ * Además, actualiza la última línea y columna leída para poder
+ * reportar errores con una posición aproximada.
+ */
+scan with {:
+    Symbol token = lex.next_token();
+
+    if (token != null) {
+        if (token.left >= 0) lastLine = token.left + 1;
+        if (token.right >= 0) lastColumn = token.right + 1;
+    }
+
+    return token;
+:};
+
+/*
+ * =========================================================
+ *  TERMINALES
+ * =========================================================
+ * Los terminales representan los tokens que vienen desde el lexer.
+ * Estos nombres deben coincidir con los símbolos retornados en
+ * scanner.flex mediante sym.NOMBRE_TOKEN.
+ */
+terminal IF, ELSE, DO, WHILE, SWITCH, CASE, DEFAULT, BREAK, RETURN;
+terminal CIN, COUT, EMPTY, MAIN;
+terminal STRING, CHAR, FLOAT, BOOL, INT;
+terminal TRUE, FALSE;
+
+terminal EQUAL, N_EQUAL, LESS_T, LESS_TE, GREATHER_T, GREATHER_TE;
+
+terminal ID, ENTERO, FLOTANTE, EXPONENCIAL, FRACCION;
+terminal CHAR_LIT, STRING_LITERAL;
+
+terminal ASIGNAR;
+terminal INICIO_INDICES, FINAL_INDICES;
+terminal INICIO_PAREN, FINAL_PAREN;
+terminal INICIO_BLOQUE, FINAL_BLOQUE;
+terminal MASMAS, MENOSMENOS;
+terminal SUMA, RESTA, MULTI, DIV, MOD, POT;
+terminal OR, AND, NOT;
+terminal SEPARADOR, FIN_EXPR, COMA, DOS_PUNTOS;
+
+/*
+ * =========================================================
+ *  NO TERMINALES
+ * =========================================================
+ * Los no terminales representan las estructuras de la gramática:
+ * programa, funciones, bloques, sentencias, expresiones, condiciones,
+ * estructuras de control, llamadas a funciones, etc.
+ */
+non terminal programa, main, funciones, encabezado_funcion, funcion;
+non terminal lista_parametros, parametro;
+non terminal bloque, lista_sentencias, sentencia;
+non terminal llamada_funcion, lista_expresiones;
+
+non terminal tipo;
+non terminal creacion, creacion_array;
+non terminal asignacion, asignacion_array, acceso_array;
+non terminal creacion_asignacion, creacion_asignacion_array;
+non terminal valores_array, lista_valores, elemento_valor;
+
+non terminal expresion, expresion_logica, expresion_conjuncion;
+non terminal expresion_negacion, expresion_relacional;
+non terminal expresion_aritmetica, expresion_termino;
+non terminal expresion_factor, expresion_potencia;
+non terminal expresion_unarios, expresion_valores;
+
+non terminal primer_termino_or, siguientes_terminos_or;
+non terminal primer_termino_and, siguientes_terminos_and;
+non terminal primer_termino_arit, siguientes_terminos_arit;
+non terminal primer_factor_term, siguientes_factores_term;
+non terminal primer_potencia, siguientes_potencias;
+
+non terminal comparacion, equal, n_equal, less_t, less_te, greather_t, greather_te;
+non terminal condicion;
+non terminal abrir_scope_if, abrir_scope_else, cerrar_scope;
+non terminal abrir_scope_while, abrir_scope_switch;
+non terminal bloque_if_else, bloque_do_while, bloque_switch;
+non terminal bloque_casos, lista_casos, caso, default_case;
+
+non terminal break_nt, return_nt, cin_nt, cout_nt;
+non terminal literal, numero, bool_lit;
+
+/*
+ * Símbolo inicial de la gramática.
+ * El análisis sintáctico inicia tratando de reconocer un programa completo.
+ */
+start with programa;
+
+programa ::= funciones main
+             {: tabla.escribirArchivo(); :}
+           | main
+             {: tabla.escribirArchivo(); :}
+           ;
+
+main ::= EMPTY SEPARADOR MAIN INICIO_PAREN FINAL_PAREN
+         {: tabla.crearNuevoScope("main"); :}
+         bloque
+         {: tabla.salirDelScope(); :};
+
+funciones ::= funcion funciones
+            | funcion;
+
+encabezado_funcion ::= tipo:t SEPARADOR ID:i
+                       {:
+                           TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
+                               t.toString(),
+                               i.toString(),
+                               ileft + 1,
+                               iright + 1
+                           );
+                           nodo.setCategoria("funcion");
+                           tabla.agregarNodo(nodo);
+
+                           tabla.crearNuevoScope(nuevoScope(i.toString()));
+                       :}
+                     ;
+
+funcion ::= encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN bloque
+            {: tabla.salirDelScope(); :}
+
+          | encabezado_funcion INICIO_PAREN FINAL_PAREN bloque
+            {: tabla.salirDelScope(); :}
+
+          | encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN error FINAL_BLOQUE
+            {: tabla.salirDelScope(); :}
+
+          | encabezado_funcion INICIO_PAREN FINAL_PAREN error FINAL_BLOQUE
+            {: tabla.salirDelScope(); :}
+          ;
+
+lista_parametros ::= parametro COMA lista_parametros
+                   | parametro;
+
+parametro ::= tipo:t SEPARADOR ID:i
+              {:
+                  TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
+                      t.toString(), i.toString(), ileft + 1, iright + 1
+                  );
+                  nodo.setCategoria("parametro");
+                  tabla.agregarNodo(nodo);
+
+                  TablaSimbolos.NodoToken nodoFuncion = tabla.buscarSimboloEnScope(
+                      tabla.getCurrentScope(),
+                      tabla.getParentScope()
+                  );
+                  if (nodoFuncion != null) {
+                      nodoFuncion.agregarParametro(
+                          new TablaSimbolos.Parametro(t.toString(), i.toString())
+                      );
+                  }
+              :}
+            ;
+
+bloque ::= INICIO_BLOQUE lista_sentencias FINAL_BLOQUE
+         | INICIO_BLOQUE FINAL_BLOQUE
+         | INICIO_BLOQUE error FINAL_BLOQUE
+         ;
+
+lista_sentencias ::= sentencia lista_sentencias
+                   | sentencia
+                   | error FIN_EXPR lista_sentencias
+                   | error FIN_EXPR
+                   ;
+
+sentencia ::= creacion FIN_EXPR
+            | asignacion FIN_EXPR
+            | creacion_array FIN_EXPR
+            | asignacion_array FIN_EXPR
+            | creacion_asignacion FIN_EXPR
+            | creacion_asignacion_array FIN_EXPR
+            | return_nt FIN_EXPR
+            | break_nt FIN_EXPR
+            | bloque_if_else
+            | bloque_do_while
+            | bloque_switch
+            | expresion FIN_EXPR
+            | cin_nt FIN_EXPR
+            | cout_nt FIN_EXPR
+            ;
+
+creacion ::= tipo:t SEPARADOR ID:i
+             {:
+                 TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                 nodo.setCategoria("variable");
+                 tabla.agregarNodo(nodo);
+             :};
+
+creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES
+                   {:
+                       TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                       nodo.setCategoria("arreglo");
+                       tabla.agregarNodo(nodo);
+                   :};
+
+lista_expresiones ::= expresion COMA lista_expresiones
+                    | expresion;
+
+asignacion ::= ID ASIGNAR expresion;
+
+asignacion_array ::= ID INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expresion FINAL_INDICES ASIGNAR expresion;
+
+acceso_array ::= ID INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expresion FINAL_INDICES;
+
+creacion_asignacion ::= tipo:t SEPARADOR ID:i ASIGNAR expresion
+                        {:
+                            TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                            nodo.setCategoria("variable");
+                            tabla.agregarNodo(nodo);
+                        :};
+
+creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES ASIGNAR valores_array
+                               {:
+                                   TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                                   nodo.setCategoria("arreglo");
+                                   tabla.agregarNodo(nodo);
+                               :};
+
+valores_array ::= INICIO_BLOQUE lista_valores FINAL_BLOQUE;
+
+lista_valores ::= elemento_valor COMA lista_valores
+                | elemento_valor;
+
+elemento_valor ::= expresion
+                 | valores_array;
+
+llamada_funcion ::= ID INICIO_PAREN lista_expresiones FINAL_PAREN
+                  | ID INICIO_PAREN FINAL_PAREN;
+
+expresion ::= expresion_logica;
+
+expresion_logica ::= primer_termino_or siguientes_terminos_or;
+
+primer_termino_or ::= expresion_conjuncion;
+
+siguientes_terminos_or ::= OR expresion_conjuncion siguientes_terminos_or
+                         | /* epsilon */;
+
+expresion_conjuncion ::= primer_termino_and siguientes_terminos_and;
+
+primer_termino_and ::= expresion_negacion;
+
+siguientes_terminos_and ::= AND expresion_negacion siguientes_terminos_and
+                          | /* epsilon */;
+
+expresion_negacion ::= NOT expresion_negacion
+                     | expresion_relacional;
+
+expresion_relacional ::= expresion_aritmetica
+                       | comparacion;
+
+comparacion ::= equal
+              | n_equal
+              | less_t
+              | less_te
+              | greather_t
+              | greather_te;
+
+equal       ::= EQUAL       INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
+n_equal     ::= N_EQUAL     INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
+less_t      ::= LESS_T      INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
+less_te     ::= LESS_TE     INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
+greather_t  ::= GREATHER_T  INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
+greather_te ::= GREATHER_TE INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
+
+expresion_aritmetica ::= primer_termino_arit siguientes_terminos_arit;
+
+primer_termino_arit ::= expresion_termino;
+
+siguientes_terminos_arit ::= SUMA  expresion_termino siguientes_terminos_arit
+                           | RESTA expresion_termino siguientes_terminos_arit
+                           | /* epsilon */;
+
+expresion_termino ::= primer_factor_term siguientes_factores_term;
+
+primer_factor_term ::= expresion_factor;
+
+siguientes_factores_term ::= MULTI expresion_factor siguientes_factores_term
+                           | DIV   expresion_factor siguientes_factores_term
+                           | MOD   expresion_factor siguientes_factores_term
+                           | /* epsilon */;
+
+expresion_factor ::= primer_potencia siguientes_potencias;
+
+primer_potencia ::= expresion_potencia;
+
+siguientes_potencias ::= POT expresion_potencia siguientes_potencias
+                       | /* epsilon */;
+
+expresion_potencia ::= expresion_unarios;
+
+expresion_unarios ::= MASMAS ID
+                    | MASMAS acceso_array
+                    | MENOSMENOS ID
+                    | MENOSMENOS acceso_array
+                    | RESTA numero
+                    | expresion_valores;
+
+expresion_valores ::= literal
+                    | ID
+                    | acceso_array
+                    | llamada_funcion
+                    | INICIO_PAREN expresion FINAL_PAREN;
+
+abrir_scope_if ::=
+    {:
+        tabla.crearNuevoScope(nuevoScope("if"));
+    :}
+;
+
+abrir_scope_else ::=
+    {:
+        tabla.crearNuevoScope(nuevoScope("else"));
+    :}
+;
+
+cerrar_scope ::=
+    {:
+        tabla.salirDelScope();
+    :}
+;
+
+condicion ::= expresion_logica;
+
+bloque_if_else ::= IF SEPARADOR INICIO_PAREN condicion FINAL_PAREN
+                   abrir_scope_if
+                   bloque
+                   cerrar_scope
+
+                 | IF SEPARADOR INICIO_PAREN condicion FINAL_PAREN
+                   abrir_scope_if
+                   bloque
+                   cerrar_scope
+                   ELSE SEPARADOR
+                   abrir_scope_else
+                   bloque
+                   cerrar_scope
+
+                 | IF SEPARADOR INICIO_PAREN error FINAL_PAREN
+                   abrir_scope_if
+                   bloque
+                   cerrar_scope
+                 ;
+
+abrir_scope_while ::=
+    {:
+        tabla.crearNuevoScope(nuevoScope("dowhile"));
+    :}
+;
+
+bloque_do_while ::= DO SEPARADOR abrir_scope_while
+                    bloque WHILE SEPARADOR INICIO_PAREN condicion FINAL_PAREN FIN_EXPR
+                    {: tabla.salirDelScope(); :}
+
+                  | DO SEPARADOR abrir_scope_while
+                    bloque WHILE SEPARADOR INICIO_PAREN error FINAL_PAREN FIN_EXPR
+                    {: tabla.salirDelScope(); :}
+                  ;
+
+abrir_scope_switch ::=
+    {:
+        tabla.crearNuevoScope(nuevoScope("switch"));
+    :}
+;
+
+bloque_switch ::= SWITCH SEPARADOR INICIO_PAREN condicion FINAL_PAREN
+                  abrir_scope_switch
+                  bloque_casos
+                  {: tabla.salirDelScope(); :}
+
+                | SWITCH SEPARADOR INICIO_PAREN error FINAL_PAREN
+                  abrir_scope_switch
+                  bloque_casos
+                  {: tabla.salirDelScope(); :}
+                ;
+
+bloque_casos ::= INICIO_BLOQUE lista_casos FINAL_BLOQUE
+               | INICIO_BLOQUE lista_casos default_case FINAL_BLOQUE;
+
+lista_casos ::= caso lista_casos
+              | caso;
+
+caso ::= CASE SEPARADOR literal DOS_PUNTOS lista_sentencias
+        | CASE SEPARADOR literal DOS_PUNTOS
+        | CASE error DOS_PUNTOS lista_sentencias
+        ;
+
+default_case ::= DEFAULT SEPARADOR DOS_PUNTOS lista_sentencias
+                | DEFAULT SEPARADOR DOS_PUNTOS
+                | DEFAULT error lista_sentencias
+                ;
+
+break_nt ::= BREAK;
+
+return_nt ::= RETURN
+            | RETURN SEPARADOR expresion;
+
+cin_nt ::= CIN INICIO_PAREN ID FINAL_PAREN;
+
+cout_nt ::= COUT INICIO_PAREN expresion FINAL_PAREN;
+
+literal ::= numero
+          | bool_lit
+          | CHAR_LIT
+          | STRING_LITERAL;
+
+numero ::= ENTERO
+         | FLOTANTE
+         | EXPONENCIAL
+         | FRACCION;
+
+bool_lit ::= TRUE
+           | FALSE;
+
+tipo ::= STRING {: RESULT = "string"; :}
+       | CHAR   {: RESULT = "char"; :}
+       | FLOAT  {: RESULT = "float"; :}
+       | BOOL   {: RESULT = "bool"; :}
+       | INT    {: RESULT = "int"; :};
+

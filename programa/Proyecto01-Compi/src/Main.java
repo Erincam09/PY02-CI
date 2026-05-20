@@ -1,0 +1,67 @@
+import java.io.File;
+import java.io.FileReader;
+import java.util.Scanner;
+
+/*
+ * Clase principal del proyecto.
+ *
+ * Objetivo:
+ * Solicitar al usuario el archivo fuente que desea analizar y ejecutar
+ * el proceso completo de análisis léxico y sintáctico.
+ *
+ * Entradas:
+ * - Nombre o ruta del archivo fuente ingresado por consola.
+ *
+ * Salidas:
+ * - Mensaje en consola indicando si el análisis terminó correctamente
+ *   o si se encontraron errores.
+ * - Archivos generados por los componentes del sistema:
+ *   tokens.txt, errores.txt y tabla_simbolos.txt.
+ *
+ * Restricciones:
+ * - El archivo ingresado debe existir.
+ * - El lexer y el parser deben haberse generado previamente con JFlex y CUP.
+ */
+public class Main {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        Lexer lexer = null;
+        parser p = null;
+
+        try {
+            System.out.print("Ingrese el nombre del archivo: ");
+            String nombreArchivo = input.nextLine();
+
+            File archivo = new File(nombreArchivo);
+
+            if (!archivo.exists()) {
+                System.err.println("El archivo no existe");
+                return;
+            }
+
+            lexer = new Lexer(new FileReader(archivo));
+            p = new parser(lexer);
+
+            p.parse();
+
+            if (lexer.getManejadorErrores().hayErrores()) {
+                System.out.println("Análisis finalizado con errores");
+            } else {
+                System.out.println("Compilación exitosa");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Análisis finalizado con errores");
+        } finally {
+            if (p != null) {
+                p.getTabla().escribirArchivo();
+            }
+
+            if (lexer != null) {
+                lexer.cerrar();
+            }
+
+            input.close();
+        }
+    }
+}
