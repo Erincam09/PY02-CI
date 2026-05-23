@@ -385,8 +385,11 @@ comparacion ::= equal
               | greather_t
               | greather_te;
 
-equal       ::= EQUAL       INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
-n_equal     ::= N_EQUAL     INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
+// Los operadores igual y diferente permiten adicionalmente tipo booleano.
+// equal y notequal deben funcionar con expresion booleana en general (id,literal,funcion,opRelacional)
+
+equal       ::= EQUAL       INICIO_PAREN expresion_logica COMA expresion_logica FINAL_PAREN;
+n_equal     ::= N_EQUAL     INICIO_PAREN expresion_logica COMA expresion_logica FINAL_PAREN;
 less_t      ::= LESS_T      INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
 less_te     ::= LESS_TE     INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
 greather_t  ::= GREATHER_T  INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
@@ -521,8 +524,7 @@ default_case ::= DEFAULT SEPARADOR DOS_PUNTOS lista_sentencias
 
 break_nt ::= BREAK;
 
-return_nt ::= RETURN
-            | RETURN SEPARADOR expresion;
+return_nt ::= RETURN SEPARADOR expresion;
 
 cin_nt ::= CIN INICIO_PAREN ID FINAL_PAREN;
 

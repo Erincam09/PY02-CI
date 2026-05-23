@@ -81,9 +81,9 @@ digito       = [0-9]
 digitoNoCero = [1-9]
 id           = {letra}({digito}|{letra})*
 entero       = 0|{digitoNoCero}{digito}*
-flotante     = (0\.0|((0|-?{digitoNoCero}{digito}*)\.{digito}*{digitoNoCero}0*))
+flotante     = (0\.0|((0|{digitoNoCero}{digito}*)\.{digito}*{digitoNoCero}0*))
 exponencial  = {entero}e{entero}
-fraccion     = -?{entero}(\/\/?){entero}
+fraccion     = {entero}(\/\/?){entero}
 charLiteral  = \' [^\'\n] \'
 
 LineTerminator   = \r|\n|\r\n
