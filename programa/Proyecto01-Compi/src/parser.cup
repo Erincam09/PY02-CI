@@ -123,6 +123,30 @@ parser code {:
             );
         }
     }
+
+    private String crearExpr(String valor, String tipo) {
+        return valor + ":" + tipo;
+    }
+
+    private String getValorExpr(String expr) {
+        if (expr == null || !expr.contains(":")) {
+            return "";
+        }
+
+        return expr.substring(0, expr.lastIndexOf(":"));
+    }
+
+    private String getTipoExpr(String expr) {
+        if (expr == null || !expr.contains(":")) {
+            return "error";
+        }
+
+        return expr.substring(expr.lastIndexOf(":") + 1);
+    }
+
+    // private boolean esNumerico(String tipo) {
+    //     return tipo.equals("int") || tipo.equals("float");
+    // }
 :};
 
 init with {: :};
@@ -356,83 +380,182 @@ elemento_valor ::= expresion
 llamada_funcion ::= ID INICIO_PAREN lista_expresiones FINAL_PAREN
                   | ID INICIO_PAREN FINAL_PAREN;
 
-expresion ::= expresion_logica;
+expresion ::= expresion_logica:e
+             {: RESULT = e; :}
+           ;
 
-expresion_logica ::= primer_termino_or siguientes_terminos_or;
+expresion_logica ::= primer_termino_or:p siguientes_terminos_or
+                    {: RESULT = p; :};
 
-primer_termino_or ::= expresion_conjuncion;
+primer_termino_or ::= expresion_conjuncion:e
+                     {: RESULT = e; :};
 
 siguientes_terminos_or ::= OR expresion_conjuncion siguientes_terminos_or
                          | /* epsilon */;
 
-expresion_conjuncion ::= primer_termino_and siguientes_terminos_and;
+expresion_conjuncion ::= primer_termino_and:p siguientes_terminos_and
+                        {: RESULT = p; :};
 
-primer_termino_and ::= expresion_negacion;
+primer_termino_and ::= expresion_negacion:e
+                      {: RESULT = e; :};
 
 siguientes_terminos_and ::= AND expresion_negacion siguientes_terminos_and
                           | /* epsilon */;
 
-expresion_negacion ::= NOT expresion_negacion
-                     | expresion_relacional;
+expresion_negacion ::= NOT expresion_negacion:e
+                       {: RESULT = crearExpr("!(" + getValorExpr(e.toString()) + ")", "bool"); :}
+                     | expresion_relacional:e
+                       {: RESULT = e; :};
 
-expresion_relacional ::= expresion_aritmetica
-                       | comparacion;
+expresion_relacional ::= expresion_aritmetica:e
+                        {: RESULT = e; :}
+                       | comparacion:c
+                         {: RESULT = c; :};
 
-comparacion ::= equal
-              | n_equal
-              | less_t
-              | less_te
-              | greather_t
-              | greather_te;
+comparacion ::= equal:e
+                {: RESULT = e; :}
+              | n_equal:e
+                {: RESULT = e; :}
+              | less_t:e
+                {: RESULT = e; :}
+              | less_te:e
+                {: RESULT = e; :}
+              | greather_t:e
+                {: RESULT = e; :}
+              | greather_te:e
+                {: RESULT = e; :};
 
 // Los operadores igual y diferente permiten adicionalmente tipo booleano.
 // equal y notequal deben funcionar con expresion booleana en general (id,literal,funcion,opRelacional)
 
-equal       ::= EQUAL       INICIO_PAREN expresion_logica COMA expresion_logica FINAL_PAREN;
-n_equal     ::= N_EQUAL     INICIO_PAREN expresion_logica COMA expresion_logica FINAL_PAREN;
-less_t      ::= LESS_T      INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
-less_te     ::= LESS_TE     INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
-greather_t  ::= GREATHER_T  INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
-greather_te ::= GREATHER_TE INICIO_PAREN expresion_aritmetica COMA expresion_aritmetica FINAL_PAREN;
+equal       ::= EQUAL       INICIO_PAREN expresion_logica:e1 COMA expresion_logica:e2 FINAL_PAREN
+                {: RESULT = crearExpr("equal", "bool"); :};
+n_equal     ::= N_EQUAL     INICIO_PAREN expresion_logica:e1 COMA expresion_logica:e2 FINAL_PAREN
+                {: RESULT = crearExpr("n_equal", "bool"); :};
+less_t      ::= LESS_T      INICIO_PAREN expresion_aritmetica:e1 COMA expresion_aritmetica:e2 FINAL_PAREN
+                {: RESULT = crearExpr("less_t", "bool"); :};
+less_te     ::= LESS_TE     INICIO_PAREN expresion_aritmetica:e1 COMA expresion_aritmetica:e2 FINAL_PAREN
+                {: RESULT = crearExpr("less_te", "bool"); :};
+greather_t  ::= GREATHER_T  INICIO_PAREN expresion_aritmetica:e1 COMA expresion_aritmetica:e2 FINAL_PAREN
+                {: RESULT = crearExpr("greather_t", "bool"); :};
+greather_te ::= GREATHER_TE INICIO_PAREN expresion_aritmetica:e1 COMA expresion_aritmetica:e2 FINAL_PAREN
+                {: RESULT = crearExpr("greather_te", "bool"); :};
 
-expresion_aritmetica ::= primer_termino_arit siguientes_terminos_arit;
+expresion_aritmetica ::= primer_termino_arit:p siguientes_terminos_arit
+                        {: RESULT = p; :};
 
-primer_termino_arit ::= expresion_termino;
+primer_termino_arit ::= expresion_termino:e
+                       {: RESULT = e; :};
 
 siguientes_terminos_arit ::= SUMA  expresion_termino siguientes_terminos_arit
                            | RESTA expresion_termino siguientes_terminos_arit
                            | /* epsilon */;
 
-expresion_termino ::= primer_factor_term siguientes_factores_term;
+expresion_termino ::= primer_factor_term:p siguientes_factores_term
+                       {: RESULT = p; :};
 
-primer_factor_term ::= expresion_factor;
+primer_factor_term ::= expresion_factor:e
+                       {: RESULT = e; :};
 
 siguientes_factores_term ::= MULTI expresion_factor siguientes_factores_term
                            | DIV   expresion_factor siguientes_factores_term
                            | MOD   expresion_factor siguientes_factores_term
                            | /* epsilon */;
 
-expresion_factor ::= primer_potencia siguientes_potencias;
+expresion_factor ::= primer_potencia:p siguientes_potencias
+                       {: RESULT = p; :};
 
-primer_potencia ::= expresion_potencia;
+primer_potencia ::= expresion_potencia:e
+                    {: RESULT = e; :};
 
 siguientes_potencias ::= POT expresion_potencia siguientes_potencias
                        | /* epsilon */;
 
-expresion_potencia ::= expresion_unarios;
+expresion_potencia ::= expresion_unarios:e
+                       {: RESULT = e; :};
 
-expresion_unarios ::= MASMAS ID
-                    | MASMAS acceso_array
-                    | MENOSMENOS ID
-                    | MENOSMENOS acceso_array
-                    | RESTA numero
-                    | expresion_valores;
+expresion_unarios ::= MASMAS ID:i
+                    {:
+                        TablaSimbolos.NodoToken nodo = tabla.buscarSimbolo(i.toString());
 
-expresion_valores ::= literal
-                    | ID
-                    | acceso_array
-                    | llamada_funcion
-                    | INICIO_PAREN expresion FINAL_PAREN;
+                        if (nodo == null) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "La variable '" + i + "' no ha sido declarada",
+                                ileft + 1,
+                                iright + 1
+                            );
+                            RESULT = crearExpr(i.toString(), "error");
+                        } else {
+                            String tipo = nodo.getTipo();
+                            if (tipo.equals("int") || tipo.equals("float")) {
+                                RESULT = crearExpr("++" + i.toString(),tipo);
+                            } else {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El operador ++ solo se puede aplicar a int y float",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                                RESULT = crearExpr(i.toString(), "error");
+                            }
+                        }
+                    :}
+                    | MASMAS acceso_array:a
+                    {: RESULT = a; :}
+                    | MENOSMENOS ID:i
+                    {:
+                        TablaSimbolos.NodoToken nodo = tabla.buscarSimbolo(i.toString());
+
+                        if (nodo == null) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "La variable '" + i + "' no ha sido declarada",
+                                ileft + 1,
+                                iright + 1
+                            );
+                            RESULT = crearExpr(i.toString(), "error");
+                        } else {
+                            String tipo = nodo.getTipo();
+                            if (tipo.equals("int") || tipo.equals("float")) {
+                                RESULT = crearExpr("--" + i.toString(),tipo);
+                            } else {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El operador -- solo se puede aplicar a int y float",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                                RESULT = crearExpr(i.toString(), "error");
+                            }
+                        }
+                    :}
+                    | MENOSMENOS acceso_array:a
+                    {: RESULT = a; :}
+                    | RESTA numero:n
+                    {: RESULT = crearExpr("-" + getValorExpr(n.toString()), getTipoExpr(n.toString())); :}
+                    | expresion_valores:e
+                    {: RESULT = e; :};
+
+expresion_valores ::= literal:l
+                    {: RESULT = l; :}
+                    | ID:i
+                    {:
+                        TablaSimbolos.NodoToken nodo = tabla.buscarSimbolo(i.toString());
+
+                        if (nodo == null) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "La variable '" + i + "' no ha sido declarada",
+                                ileft + 1,
+                                iright + 1
+                            );
+                            RESULT = crearExpr(i.toString(), "error");
+                        } else {
+                            RESULT = crearExpr(i.toString(),nodo.getTipo());
+                        }
+                    :}
+                    | acceso_array:a
+                    {: RESULT = a; :}
+                    | llamada_funcion:f
+                    {: RESULT = f; :}
+                    | INICIO_PAREN expresion:e FINAL_PAREN
+                    {: RESULT = e; :};
 
 abrir_scope_if ::=
     {:
@@ -530,18 +653,31 @@ cin_nt ::= CIN INICIO_PAREN ID FINAL_PAREN;
 
 cout_nt ::= COUT INICIO_PAREN expresion FINAL_PAREN;
 
-literal ::= numero
-          | bool_lit
-          | CHAR_LIT
-          | STRING_LITERAL;
+literal ::= numero:n
+            {: RESULT = n; :}
+          | bool_lit:b
+            {: RESULT = b; :}
+          | CHAR_LIT:c
+            {: RESULT = crearExpr(c.toString(), "char"); :}
+          | STRING_LITERAL:s
+            {: RESULT = crearExpr(s.toString(), "string"); :}
+            ;
 
-numero ::= ENTERO
-         | FLOTANTE
-         | EXPONENCIAL
-         | FRACCION;
+numero ::= ENTERO:e
+            {: RESULT = crearExpr(e.toString(), "int"); :}
+         | FLOTANTE:f
+            {: RESULT = crearExpr(f.toString(), "float"); :}
+         | EXPONENCIAL:exp
+            {: RESULT = crearExpr(exp.toString(), "float"); :}
+         | FRACCION:fr
+            {: RESULT = crearExpr(fr.toString(), "float"); :}
+         ;
 
 bool_lit ::= TRUE
-           | FALSE;
+            {: RESULT = crearExpr("true", "bool"); :}
+           | FALSE
+            {: RESULT = crearExpr("false", "bool"); :}
+           ;
 
 tipo ::= STRING {: RESULT = "string"; :}
        | CHAR   {: RESULT = "char"; :}
