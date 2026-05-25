@@ -256,16 +256,25 @@ funciones ::= funcion funciones
 
 encabezado_funcion ::= tipo:t SEPARADOR ID:i
                        {:
-                           TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
-                               t.toString(),
-                               i.toString(),
-                               ileft + 1,
-                               iright + 1
-                           );
-                           nodo.setCategoria("funcion");
-                           tabla.agregarNodo(nodo);
+                           // Validar que no exista otra función con el mismo nombre
+                           if (tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope()) != null) {
+                               manejadorErrores.agregarErrorSemantico(
+                                   "Función '" + i + "' ya ha sido declarada",
+                                   ileft + 1,
+                                   iright + 1
+                               );
+                           } else {
+                               TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
+                                   t.toString(),
+                                   i.toString(),
+                                   ileft + 1,
+                                   iright + 1
+                               );
+                               nodo.setCategoria("funcion");
+                               tabla.agregarNodo(nodo);
 
-                           tabla.crearNuevoScope(nuevoScope(i.toString()));
+                               tabla.crearNuevoScope(i.toString());
+                           }
                        :}
                      ;
 
