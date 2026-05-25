@@ -730,14 +730,44 @@ greather_te ::= GREATHER_TE INICIO_PAREN expresion_aritmetica:e1 COMA expresion_
                 :};
 
 expresion_aritmetica ::= primer_termino_arit:p siguientes_terminos_arit
-                        {: RESULT = p; :};
+                        {:
+                            String tipoS = getTipoExpr(s.toString());
+
+                            if (tipoS.equals("epsilon")) {
+                                RESULT = p;
+                            } else {
+                                String tipoP = getTipoExpr(p.toString());
+                                
+                                if (tipoP.equals(tipoS)) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "No se pueden operar valores de tipo "
+                                        + tipoP + " y " + tipoS,
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("arit","error");
+                                } else if (!tipoP.equals("int") && !tipoP.equals("float")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "Las operaciones aritmeticas solo aceptan int y float "
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("arit", "error");
+                                } else {
+                                    RESULT = crearExpr("arit",tipoP);
+                                }
+                            }
+                        :};
 
 primer_termino_arit ::= expresion_termino:e
                        {: RESULT = e; :};
 
-siguientes_terminos_arit ::= SUMA  expresion_termino siguientes_terminos_arit
-                           | RESTA expresion_termino siguientes_terminos_arit
-                           | /* epsilon */;
+siguientes_terminos_arit ::= SUMA  expresion_termino:e siguientes_terminos_arit
+                            {: RESULT = e; :}
+                           | RESTA expresion_termino:e siguientes_terminos_arit
+                            {: RESULT = e; :}
+                           | /* epsilon */
+                           {: RESULT = crearExpr("epsilon", "epsilon"); :};
 
 expresion_termino ::= primer_factor_term:p siguientes_factores_term
                        {: RESULT = p; :};
