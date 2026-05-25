@@ -741,7 +741,18 @@ default_case ::= DEFAULT SEPARADOR DOS_PUNTOS lista_sentencias
 
 break_nt ::= BREAK;
 
-return_nt ::= RETURN SEPARADOR expresion;
+return_nt ::= RETURN SEPARADOR expresion
+              {:
+                  // Validar que main no tenga return
+                  String scopeActual = tabla.getCurrentScope();
+                  if (scopeActual.equals("main")) {
+                      manejadorErrores.agregarErrorSemantico(
+                          "La función main no puede tener return",
+                          ileft + 1,
+                          iright + 1
+                      );
+                  }
+              :};
 
 cin_nt ::= CIN INICIO_PAREN ID:i FINAL_PAREN
            {:
