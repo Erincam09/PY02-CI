@@ -2153,8 +2153,7 @@ class CUP$parser$actions {
                                 e1right + 1
                             );
                             RESULT = crearExpr("less_t", "error");
-                        } else if (
-                            !tipo1.equals("int") && !tipo1.equals("float")
+                        } else if (!tipo1.equals("int") && !tipo1.equals("float")
                         ) {
                             manejadorErrores.agregarErrorSemantico(
                                 "El operador less_t solo acepta int y float",
@@ -2196,8 +2195,7 @@ class CUP$parser$actions {
                                 e1right + 1
                             );
                             RESULT = crearExpr("less_te", "error");
-                        } else if (
-                            !tipo1.equals("int") && !tipo1.equals("float")
+                        } else if (!tipo1.equals("int") && !tipo1.equals("float")
                         ) {
                             manejadorErrores.agregarErrorSemantico(
                                 "El operador less_te solo acepta int y float",
@@ -2239,8 +2237,7 @@ class CUP$parser$actions {
                                 e1right + 1
                             );
                             RESULT = crearExpr("greather_t", "error");
-                        } else if (
-                            !tipo1.equals("int") && !tipo1.equals("float")
+                        } else if (!tipo1.equals("int") && !tipo1.equals("float")
                         ) {
                             manejadorErrores.agregarErrorSemantico(
                                 "El operador greather_t solo acepta int y float",
@@ -2282,8 +2279,7 @@ class CUP$parser$actions {
                                 e1right + 1
                             );
                             RESULT = crearExpr("greather_te", "error");
-                        } else if (
-                            !tipo1.equals("int") && !tipo1.equals("float")
+                        } else if (!tipo1.equals("int") && !tipo1.equals("float")
                         ) {
                             manejadorErrores.agregarErrorSemantico(
                                 "El operador greather_te solo acepta int y float",
@@ -2309,7 +2305,37 @@ class CUP$parser$actions {
 		int pleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int pright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object p = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = p; 
+		int sleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object s = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                            String tipoS = getTipoExpr(s.toString());
+
+                            if (tipoS.equals("epsilon")) {
+                                RESULT = p;
+                            } else {
+                                String tipoP = getTipoExpr(p.toString());
+                                
+                                if (!tipoP.equals(tipoS)) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "No se pueden operar valores de tipo "
+                                        + tipoP + " y " + tipoS,
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("arit","error");
+                                } else if (!tipoP.equals("int") && !tipoP.equals("float")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "Las operaciones aritmeticas solo aceptan int y float ",
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("arit", "error");
+                                } else {
+                                    RESULT = crearExpr("arit",tipoP);
+                                }
+                            }
+                        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expresion_aritmetica",28, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2330,7 +2356,10 @@ class CUP$parser$actions {
           case 79: // siguientes_terminos_arit ::= SUMA expresion_termino siguientes_terminos_arit 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		 RESULT = e; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_arit",39, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2339,7 +2368,10 @@ class CUP$parser$actions {
           case 80: // siguientes_terminos_arit ::= RESTA expresion_termino siguientes_terminos_arit 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		 RESULT = e; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_arit",39, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2348,7 +2380,7 @@ class CUP$parser$actions {
           case 81: // siguientes_terminos_arit ::= 
             {
               Object RESULT =null;
-
+		 RESULT = crearExpr("epsilon", "epsilon"); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_arit",39, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2360,7 +2392,37 @@ class CUP$parser$actions {
 		int pleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int pright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object p = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = p; 
+		int sleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object s = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                            String tipoS = getTipoExpr(s.toString());
+
+                            if (tipoS.equals("epsilon")) {
+                                RESULT = p;
+                            } else {
+                                String tipoP = getTipoExpr(p.toString());
+                                
+                                if (!tipoP.equals(tipoS)) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "No se pueden operar valores de tipo "
+                                        + tipoP + " y " + tipoS,
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("term","error");
+                                } else if (!tipoP.equals("int") && !tipoP.equals("float")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "Las operaciones * / % solo aceptan int y float ",
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("term", "error");
+                                } else {
+                                    RESULT = crearExpr("term",tipoP);
+                                }
+                            }
+                       
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expresion_termino",29, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2381,7 +2443,10 @@ class CUP$parser$actions {
           case 84: // siguientes_factores_term ::= MULTI expresion_factor siguientes_factores_term 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		 RESULT = e; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_factores_term",41, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2390,7 +2455,10 @@ class CUP$parser$actions {
           case 85: // siguientes_factores_term ::= DIV expresion_factor siguientes_factores_term 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		 RESULT = e; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_factores_term",41, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2399,7 +2467,10 @@ class CUP$parser$actions {
           case 86: // siguientes_factores_term ::= MOD expresion_factor siguientes_factores_term 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		 RESULT = e; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_factores_term",41, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2408,7 +2479,7 @@ class CUP$parser$actions {
           case 87: // siguientes_factores_term ::= 
             {
               Object RESULT =null;
-
+		 RESULT = crearExpr("epsilon", "epsilon"); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_factores_term",41, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;

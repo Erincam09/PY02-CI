@@ -3,9 +3,14 @@
 ======================================================
 Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
-Semántico    39       23       No se pueden comparar valores de tipo int y bool
-Semántico    44       23       No se pueden comparar valores de tipo float y int
-Semántico    49       25       No se pueden comparar valores de tipo char y string
+Semántico    23       22       No se pueden operar valores de tipo int y bool
+Semántico    24       22       No se pueden operar valores de tipo int y float
+Semántico    25       27       No se pueden operar valores de tipo string y int
+Semántico    26       22       No se pueden operar valores de tipo char y int
+Semántico    27       22       Las operaciones * / % solo aceptan int y float 
+Semántico    43       22       No se pueden operar valores de tipo int y float
+Semántico    44       22       No se pueden operar valores de tipo int y bool
+Semántico    45       22       No se pueden operar valores de tipo string y int
 ------------------------------------------------------
-Total de Errores: 3
+Total de Errores: 8
 ======================================================

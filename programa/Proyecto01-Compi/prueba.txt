@@ -1,52 +1,45 @@
-int ~ suma <| int ~ a, int ~ b |>
-|:
-    int ~ x <- 5!
-    int ~ y <- 10!
-    bool ~ flag <- true!
-    float ~ f <- 3.5!
-    string ~ texto <- "hola"!
-    char ~ letra <- 'a'!
-
-
-
-    if ~ <| equal <| x , y |> |>
-    |:
-        cout <| "equal int correcto" |>!
-    :|
-
-    if ~ <| n_equal <| flag , false |> |>
-    |:
-        cout <| "n_equal bool correcto" |>!
-    :|
-
-    if ~ <| equal <| texto , "hola" |> |>
-    |:
-        cout <| "equal string correcto" |>!
-    :|
-
-    if ~ <| equal <| letra , 'a' |> |>
-    |:
-        cout <| "equal char correcto" |>!
-    :|
-
-    return ~ 0!
-:|
-
 empty ~ __main__ <| |>
 |:
+    
 
-    if ~ <| equal <| 5 , true |> |>
-    |:
-        cout <| "error 1" |>!
-    :|
+    int ~ sumaInt <- 5 + 3!
+    int ~ restaInt <- 10 - 2!
+    int ~ multiInt <- 4 * 3!
+    int ~ divInt <- 20 / 5!
+    int ~ modInt <- 10 % 3!
 
-    if ~ <| equal <| 3.5 , 2 |> |>
-    |:
-        cout <| "error 2" |>!
-    :|
+    float ~ sumaFloat <- 3.5 + 2.1!
+    float ~ restaFloat <- 8.4 - 1.2!
+    float ~ multiFloat <- 2.5 * 4.1!
+    float ~ divFloat <- 9.6 / 2.4!
+    float ~ modFloat <- 8.4 % 2.1!
 
-    if ~ <| n_equal <| 'a' , "hola" |> |>
-    |:
-        cout <| "error 3" |>!
-    :|
+    int ~ negativoInt <- -5 + 3!
+    float ~ negativoFloat <- -3.5 * 2.6!
+
+  
+
+    int ~ error1 <- 5 + true!
+    int ~ error2 <- 10 - 2.5!
+    int ~ error3 <- "hola" * 3!
+    int ~ error4 <- 'a' / 2!
+    int ~ error5 <- true % false!
+
+    
+
+    int ~ x <- 5!
+    int ~ y <- 2!
+
+    float ~ a <- 3.5!
+    float ~ b <- 1.5!
+
+    bool ~ flag <- true!
+    string ~ texto <- "hola"!
+
+    int ~ ok1 <- x + y!
+    float ~ ok2 <- a * b!
+
+    int ~ error6 <- x + a!
+    int ~ error7 <- y * flag!
+    int ~ error8 <- texto - x!
 :|
