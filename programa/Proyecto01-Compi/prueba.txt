@@ -1,6 +1,52 @@
+int ~ suma <| int ~ a, int ~ b |>
+|:
+    int ~ x <- 5!
+    int ~ y <- 10!
+    bool ~ flag <- true!
+    float ~ f <- 3.5!
+    string ~ texto <- "hola"!
+    char ~ letra <- 'a'!
+
+
+
+    if ~ <| equal <| x , y |> |>
+    |:
+        cout <| "equal int correcto" |>!
+    :|
+
+    if ~ <| n_equal <| flag , false |> |>
+    |:
+        cout <| "n_equal bool correcto" |>!
+    :|
+
+    if ~ <| equal <| texto , "hola" |> |>
+    |:
+        cout <| "equal string correcto" |>!
+    :|
+
+    if ~ <| equal <| letra , 'a' |> |>
+    |:
+        cout <| "equal char correcto" |>!
+    :|
+
+    return ~ 0!
+:|
+
 empty ~ __main__ <| |>
 |:
-    int ~ x <- 3.5!
-    float ~ y <- true!
-    bool ~ flag <- 10!
+
+    if ~ <| equal <| 5 , true |> |>
+    |:
+        cout <| "error 1" |>!
+    :|
+
+    if ~ <| equal <| 3.5 , 2 |> |>
+    |:
+        cout <| "error 2" |>!
+    :|
+
+    if ~ <| n_equal <| 'a' , "hola" |> |>
+    |:
+        cout <| "error 3" |>!
+    :|
 :|

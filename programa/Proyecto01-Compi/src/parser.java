@@ -1936,7 +1936,20 @@ class CUP$parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		 RESULT = crearExpr("!(" + getValorExpr(e.toString()) + ")", "bool"); 
+		
+                           String tipo = getTipoExpr(e.toString());
+
+                           if (!tipo.equals("bool") && !tipo.equals("error")) {
+                               manejadorErrores.agregarErrorSemantico(
+                                   "El operador NOT solo se puede aplicar a bool, pero se encontró " + tipo,
+                                   eleft + 1,
+                                   eright + 1
+                               );
+                               RESULT = crearExpr("not", "error");
+                           } else {
+                               RESULT = crearExpr("not", "bool");
+                           }
+                       
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expresion_negacion",26, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2059,7 +2072,26 @@ class CUP$parser$actions {
 		int e2left = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int e2right = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = crearExpr("equal", "bool"); 
+		
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("equal", "error");
+                        } else {
+                            RESULT = crearExpr("equal", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("equal", "error");
+                    }
+                
               CUP$parser$result = parser.getSymbolFactory().newSymbol("equal",45, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2074,7 +2106,26 @@ class CUP$parser$actions {
 		int e2left = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int e2right = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = crearExpr("n_equal", "bool"); 
+		
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("n_equal", "error");
+                        } else {
+                            RESULT = crearExpr("n_equal", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("n_equal", "error");
+                    }
+                
               CUP$parser$result = parser.getSymbolFactory().newSymbol("n_equal",46, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2089,7 +2140,35 @@ class CUP$parser$actions {
 		int e2left = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int e2right = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = crearExpr("less_t", "bool"); 
+		
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("less_t", "error");
+                        } else if (
+                            !tipo1.equals("int") && !tipo1.equals("float")
+                        ) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El operador less_t solo acepta int y float",
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("less_t", "error");
+                        } else {
+                            RESULT = crearExpr("less_t", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("less_t", "error");
+                    }
+                
               CUP$parser$result = parser.getSymbolFactory().newSymbol("less_t",47, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2104,7 +2183,35 @@ class CUP$parser$actions {
 		int e2left = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int e2right = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = crearExpr("less_te", "bool"); 
+		
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("less_te", "error");
+                        } else if (
+                            !tipo1.equals("int") && !tipo1.equals("float")
+                        ) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El operador less_te solo acepta int y float",
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("less_te", "error");
+                        } else {
+                            RESULT = crearExpr("less_te", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("less_te", "error");
+                    }
+                
               CUP$parser$result = parser.getSymbolFactory().newSymbol("less_te",48, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2119,7 +2226,35 @@ class CUP$parser$actions {
 		int e2left = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int e2right = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = crearExpr("greather_t", "bool"); 
+		
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("greather_t", "error");
+                        } else if (
+                            !tipo1.equals("int") && !tipo1.equals("float")
+                        ) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El operador greather_t solo acepta int y float",
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("greather_t", "error");
+                        } else {
+                            RESULT = crearExpr("greather_t", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("greather_t", "error");
+                    }
+                
               CUP$parser$result = parser.getSymbolFactory().newSymbol("greather_t",49, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2134,7 +2269,35 @@ class CUP$parser$actions {
 		int e2left = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int e2right = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = crearExpr("greather_te", "bool"); 
+		
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("greather_te", "error");
+                        } else if (
+                            !tipo1.equals("int") && !tipo1.equals("float")
+                        ) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El operador greather_te solo acepta int y float",
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("greather_te", "error");
+                        } else {
+                            RESULT = crearExpr("greather_te", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("greather_te", "error");
+                    }
+                
               CUP$parser$result = parser.getSymbolFactory().newSymbol("greather_te",50, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2532,7 +2695,22 @@ class CUP$parser$actions {
           case 107: // condicion ::= expresion_logica 
             {
               Object RESULT =null;
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                  String tipo = getTipoExpr(e.toString());
 
+                  if (!tipo.equals("bool") && !tipo.equals("error")) {
+                      manejadorErrores.agregarErrorSemantico(
+                          "La condición debe ser de tipo bool, pero se encontró " + tipo,
+                          eleft + 1,
+                          eright + 1
+                      );
+                  }
+
+                  RESULT = e;
+              
               CUP$parser$result = parser.getSymbolFactory().newSymbol("condicion",51, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2751,14 +2929,24 @@ class CUP$parser$actions {
 		int iright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
 		
-               // Validar que la variable exista en un scope accesible
                TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+
                if (nodo == null) {
                    manejadorErrores.agregarErrorSemantico(
                        "La variable '" + i + "' no ha sido declarada",
                        ileft + 1,
                        iright + 1
                    );
+               } else {
+                   String tipo = nodo.getTipo();
+                   if (!tipo.equals("int") && !tipo.equals("float")) {
+                       manejadorErrores.agregarErrorSemantico(
+                           "cin solo puede leer variables int o float, pero '" +
+                           i + "' es de tipo " + tipo,
+                           ileft + 1,
+                           iright + 1
+                       );
+                   }
                }
            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("cin_nt",66, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);

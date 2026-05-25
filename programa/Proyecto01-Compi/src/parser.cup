@@ -528,7 +528,20 @@ siguientes_terminos_and ::= AND expresion_negacion siguientes_terminos_and
                           | /* epsilon */;
 
 expresion_negacion ::= NOT expresion_negacion:e
-                       {: RESULT = crearExpr("!(" + getValorExpr(e.toString()) + ")", "bool"); :}
+                       {:
+                           String tipo = getTipoExpr(e.toString());
+
+                           if (!tipo.equals("bool") && !tipo.equals("error")) {
+                               manejadorErrores.agregarErrorSemantico(
+                                   "El operador NOT solo se puede aplicar a bool, pero se encontró " + tipo,
+                                   eleft + 1,
+                                   eright + 1
+                               );
+                               RESULT = crearExpr("not", "error");
+                           } else {
+                               RESULT = crearExpr("not", "bool");
+                           }
+                       :}
                      | expresion_relacional:e
                        {: RESULT = e; :};
 
@@ -554,17 +567,167 @@ comparacion ::= equal:e
 // equal y notequal deben funcionar con expresion booleana en general (id,literal,funcion,opRelacional)
 
 equal       ::= EQUAL       INICIO_PAREN expresion_logica:e1 COMA expresion_logica:e2 FINAL_PAREN
-                {: RESULT = crearExpr("equal", "bool"); :};
+                {:
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("equal", "error");
+                        } else {
+                            RESULT = crearExpr("equal", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("equal", "error");
+                    }
+                :};
 n_equal     ::= N_EQUAL     INICIO_PAREN expresion_logica:e1 COMA expresion_logica:e2 FINAL_PAREN
-                {: RESULT = crearExpr("n_equal", "bool"); :};
+                {:
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("n_equal", "error");
+                        } else {
+                            RESULT = crearExpr("n_equal", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("n_equal", "error");
+                    }
+                :};
 less_t      ::= LESS_T      INICIO_PAREN expresion_aritmetica:e1 COMA expresion_aritmetica:e2 FINAL_PAREN
-                {: RESULT = crearExpr("less_t", "bool"); :};
+                {:
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("less_t", "error");
+                        } else if (
+                            !tipo1.equals("int") && !tipo1.equals("float")
+                        ) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El operador less_t solo acepta int y float",
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("less_t", "error");
+                        } else {
+                            RESULT = crearExpr("less_t", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("less_t", "error");
+                    }
+                :};
 less_te     ::= LESS_TE     INICIO_PAREN expresion_aritmetica:e1 COMA expresion_aritmetica:e2 FINAL_PAREN
-                {: RESULT = crearExpr("less_te", "bool"); :};
+                {:
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("less_te", "error");
+                        } else if (
+                            !tipo1.equals("int") && !tipo1.equals("float")
+                        ) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El operador less_te solo acepta int y float",
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("less_te", "error");
+                        } else {
+                            RESULT = crearExpr("less_te", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("less_te", "error");
+                    }
+                :};
 greather_t  ::= GREATHER_T  INICIO_PAREN expresion_aritmetica:e1 COMA expresion_aritmetica:e2 FINAL_PAREN
-                {: RESULT = crearExpr("greather_t", "bool"); :};
+                {:
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("greather_t", "error");
+                        } else if (
+                            !tipo1.equals("int") && !tipo1.equals("float")
+                        ) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El operador greather_t solo acepta int y float",
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("greather_t", "error");
+                        } else {
+                            RESULT = crearExpr("greather_t", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("greather_t", "error");
+                    }
+                :};
 greather_te ::= GREATHER_TE INICIO_PAREN expresion_aritmetica:e1 COMA expresion_aritmetica:e2 FINAL_PAREN
-                {: RESULT = crearExpr("greather_te", "bool"); :};
+                {:
+                    String tipo1 = getTipoExpr(e1.toString());
+                    String tipo2 = getTipoExpr(e2.toString());
+
+                    if (!tipo1.equals("error") && !tipo2.equals("error")) {
+                        if (!tipo1.equals(tipo2)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se pueden comparar valores de tipo "
+                                + tipo1 + " y " + tipo2,
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("greather_te", "error");
+                        } else if (
+                            !tipo1.equals("int") && !tipo1.equals("float")
+                        ) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El operador greather_te solo acepta int y float",
+                                e1left + 1,
+                                e1right + 1
+                            );
+                            RESULT = crearExpr("greather_te", "error");
+                        } else {
+                            RESULT = crearExpr("greather_te", "bool");
+                        }
+                    } else {
+                        RESULT = crearExpr("greather_te", "error");
+                    }
+                :};
 
 expresion_aritmetica ::= primer_termino_arit:p siguientes_terminos_arit
                         {: RESULT = p; :};
@@ -700,7 +863,20 @@ cerrar_scope ::=
     :}
 ;
 
-condicion ::= expresion_logica;
+condicion ::= expresion_logica:e
+              {:
+                  String tipo = getTipoExpr(e.toString());
+
+                  if (!tipo.equals("bool") && !tipo.equals("error")) {
+                      manejadorErrores.agregarErrorSemantico(
+                          "La condición debe ser de tipo bool, pero se encontró " + tipo,
+                          eleft + 1,
+                          eright + 1
+                      );
+                  }
+
+                  RESULT = e;
+              :};
 
 bloque_if_else ::= IF SEPARADOR INICIO_PAREN condicion FINAL_PAREN
                    abrir_scope_if
@@ -787,14 +963,24 @@ return_nt ::= RETURN SEPARADOR expresion:e
 
 cin_nt ::= CIN INICIO_PAREN ID:i FINAL_PAREN
            {:
-               // Validar que la variable exista en un scope accesible
                TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+
                if (nodo == null) {
                    manejadorErrores.agregarErrorSemantico(
                        "La variable '" + i + "' no ha sido declarada",
                        ileft + 1,
                        iright + 1
                    );
+               } else {
+                   String tipo = nodo.getTipo();
+                   if (!tipo.equals("int") && !tipo.equals("float")) {
+                       manejadorErrores.agregarErrorSemantico(
+                           "cin solo puede leer variables int o float, pero '" +
+                           i + "' es de tipo " + tipo,
+                           ileft + 1,
+                           iright + 1
+                       );
+                   }
                }
            :};
 
