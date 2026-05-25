@@ -1,0 +1,11 @@
+======================================================
+                REPORTE DE ERRORES
+======================================================
+Tipo         Línea    Columna  Mensaje
+------------------------------------------------------
+Semántico    4        12       No se puede inicializar la variable 'x' de tipo int con un valor de tipo float
+Semántico    5        14       No se puede inicializar la variable 'y' de tipo float con un valor de tipo bool
+Semántico    6        13       No se puede inicializar la variable 'flag' de tipo bool con un valor de tipo int
+------------------------------------------------------
+Total de Errores: 3
+======================================================

@@ -1,0 +1,6 @@
+empty ~ __main__ <| |>
+|:
+    int ~ x <- 3.5!
+    float ~ y <- true!
+    bool ~ flag <- 10!
+:|

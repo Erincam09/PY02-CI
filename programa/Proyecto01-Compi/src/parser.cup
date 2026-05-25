@@ -386,16 +386,27 @@ creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INI
 lista_expresiones ::= expresion COMA lista_expresiones
                     | expresion;
 
-asignacion ::= ID:i ASIGNAR expresion
+asignacion ::= ID:i ASIGNAR expresion:e
                {:
-                   // Validar que la variable esté declarada en un scope accesible
                    TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+
                    if (nodo == null) {
                        manejadorErrores.agregarErrorSemantico(
                            "La variable '" + i + "' no ha sido declarada",
                            ileft + 1,
                            iright + 1
                        );
+                   } else {
+                       String tipoVariable = nodo.getTipo();
+                       String tipoExpr = getTipoExpr(e.toString());
+                       if (!tipoExpr.equals("error") && !tipoVariable.equals(tipoExpr)) {
+                           manejadorErrores.agregarErrorSemantico(
+                               "No se puede asignar un valor de tipo " + tipoExpr +
+                               " a la variable '" + i + "' de tipo " + tipoVariable,
+                               ileft + 1,
+                               iright + 1
+                           );
+                       }
                    }
                :};
 
@@ -440,9 +451,8 @@ acceso_array ::= ID:i INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expr
                      }
                  :};
 
-creacion_asignacion ::= tipo:t SEPARADOR ID:i ASIGNAR expresion
+creacion_asignacion ::= tipo:t SEPARADOR ID:i ASIGNAR expresion:e
                         {:
-                            // Validar que no esté redeclarada en el scope actual
                             if (tabla.existeEnScopeActual(i.toString())) {
                                 manejadorErrores.agregarErrorSemantico(
                                     "Variable '" + i + "' ya ha sido declarada en este scope",
@@ -450,7 +460,19 @@ creacion_asignacion ::= tipo:t SEPARADOR ID:i ASIGNAR expresion
                                     iright + 1
                                 );
                             } else {
-                                TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                                String tipoVariable = t.toString();
+                                String tipoExpr = getTipoExpr(e.toString());
+
+                                if (!tipoExpr.equals("error") && !tipoVariable.equals(tipoExpr)) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "No se puede inicializar la variable '" + i +
+                                        "' de tipo " + tipoVariable +
+                                        " con un valor de tipo " + tipoExpr,
+                                        ileft + 1,
+                                        iright + 1
+                                    );
+                                }
+                                TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(tipoVariable, i.toString(), lastLine, lastColumn);
                                 nodo.setCategoria("variable");
                                 tabla.agregarNodo(nodo);
                             }
@@ -750,15 +772,15 @@ default_case ::= DEFAULT SEPARADOR DOS_PUNTOS lista_sentencias
 
 break_nt ::= BREAK;
 
-return_nt ::= RETURN SEPARADOR expresion
+return_nt ::= RETURN SEPARADOR expresion:e
               {:
                   // Validar que main no tenga return
                   String scopeActual = tabla.getCurrentScope();
                   if (scopeActual.equals("main")) {
                       manejadorErrores.agregarErrorSemantico(
                           "La función main no puede tener return",
-                          ileft + 1,
-                          iright + 1
+                          eleft + 1,
+                          eright + 1
                       );
                   }
               :};
