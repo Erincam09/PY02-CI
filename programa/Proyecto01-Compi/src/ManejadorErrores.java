@@ -104,6 +104,28 @@ public class ManejadorErrores {
     }
 
     /*
+     * Registra un error semántico.
+     *
+     * Objetivo:
+     * Guardar errores producidos en análisis semántico: variables no declaradas,
+     * redeclaraciones, violaciones de scope, errores de tipado, etc.
+     *
+     * Entradas:
+     * - mensaje: descripción del error.
+     * - linea: línea donde ocurre el error.
+     * - columna: columna donde ocurre el error.
+     *
+     * Salidas:
+     * - Envía el error al método general de registro.
+     *
+     * Restricciones:
+     * - Se utiliza durante el análisis semántico del parser.
+     */
+    public void agregarErrorSemantico(String mensaje, int linea, int columna) {
+        registrarError("Semántico", mensaje, linea, columna);
+    }
+
+    /*
      * Registra un error en la lista interna, en el archivo y en consola.
      *
      * Objetivo:

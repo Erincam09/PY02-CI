@@ -287,20 +287,30 @@ lista_parametros ::= parametro COMA lista_parametros
 
 parametro ::= tipo:t SEPARADOR ID:i
               {:
-                  TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
-                      t.toString(), i.toString(), ileft + 1, iright + 1
-                  );
-                  nodo.setCategoria("parametro");
-                  tabla.agregarNodo(nodo);
-
-                  TablaSimbolos.NodoToken nodoFuncion = tabla.buscarSimboloEnScope(
-                      tabla.getCurrentScope(),
-                      tabla.getParentScope()
-                  );
-                  if (nodoFuncion != null) {
-                      nodoFuncion.agregarParametro(
-                          new TablaSimbolos.Parametro(t.toString(), i.toString())
+                  // Validar que no esté redeclarado en el scope actual de la función
+                  if (tabla.existeEnScopeActual(i.toString())) {
+                      manejadorErrores.agregarErrorSemantico(
+                          "Parámetro '" + i + "' ya ha sido declarado en esta función",
+                          ileft + 1,
+                          iright + 1
                       );
+                  } else {
+                      TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
+                          t.toString(), i.toString(), ileft + 1, iright + 1
+                      );
+                      nodo.setCategoria("parametro");
+                      tabla.agregarNodo(nodo);
+
+                      // Agregar el parámetro a la función padre
+                      TablaSimbolos.NodoToken nodoFuncion = tabla.buscarSimboloEnScope(
+                          tabla.getCurrentScope(),
+                          tabla.getParentScope()
+                      );
+                      if (nodoFuncion != null) {
+                          nodoFuncion.agregarParametro(
+                              new TablaSimbolos.Parametro(t.toString(), i.toString())
+                          );
+                      }
                   }
               :}
             ;
@@ -334,39 +344,123 @@ sentencia ::= creacion FIN_EXPR
 
 creacion ::= tipo:t SEPARADOR ID:i
              {:
-                 TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
-                 nodo.setCategoria("variable");
-                 tabla.agregarNodo(nodo);
+                 // Validar que no esté redeclarada en el scope actual
+                 if (tabla.existeEnScopeActual(i.toString())) {
+                     manejadorErrores.agregarErrorSemantico(
+                         "Variable '" + i + "' ya ha sido declarada en este scope",
+                         ileft + 1,
+                         iright + 1
+                     );
+                 } else {
+                     TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                     nodo.setCategoria("variable");
+                     tabla.agregarNodo(nodo);
+                 }
              :};
 
 creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES
                    {:
-                       TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
-                       nodo.setCategoria("arreglo");
-                       tabla.agregarNodo(nodo);
+                       // Validar que no esté redeclarada en el scope actual
+                       if (tabla.existeEnScopeActual(i.toString())) {
+                           manejadorErrores.agregarErrorSemantico(
+                               "Variable '" + i + "' ya ha sido declarada en este scope",
+                               ileft + 1,
+                               iright + 1
+                           );
+                       } else {
+                           TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                           nodo.setCategoria("arreglo");
+                           tabla.agregarNodo(nodo);
+                       }
                    :};
 
 lista_expresiones ::= expresion COMA lista_expresiones
                     | expresion;
 
-asignacion ::= ID ASIGNAR expresion;
+asignacion ::= ID:i ASIGNAR expresion
+               {:
+                   // Validar que la variable esté declarada en un scope accesible
+                   TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+                   if (nodo == null) {
+                       manejadorErrores.agregarErrorSemantico(
+                           "La variable '" + i + "' no ha sido declarada",
+                           ileft + 1,
+                           iright + 1
+                       );
+                   }
+               :};
 
-asignacion_array ::= ID INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expresion FINAL_INDICES ASIGNAR expresion;
+asignacion_array ::= ID:i INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expresion FINAL_INDICES ASIGNAR expresion
+                     {:
+                         // Validar que el arreglo esté declarado en un scope accesible
+                         TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+                         if (nodo == null) {
+                             manejadorErrores.agregarErrorSemantico(
+                                 "El arreglo '" + i + "' no ha sido declarado",
+                                 ileft + 1,
+                                 iright + 1
+                             );
+                         } else if (!nodo.getCategoria().equals("arreglo")) {
+                             manejadorErrores.agregarErrorSemantico(
+                                 "'" + i + "' no es un arreglo",
+                                 ileft + 1,
+                                 iright + 1
+                             );
+                         }
+                     :};
 
-acceso_array ::= ID INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expresion FINAL_INDICES;
+acceso_array ::= ID:i INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expresion FINAL_INDICES
+                 {:
+                     TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+                     if (nodo == null) {
+                         manejadorErrores.agregarErrorSemantico(
+                             "El arreglo '" + i + "' no ha sido declarado",
+                             ileft + 1,
+                             iright + 1
+                         );
+                         RESULT = crearExpr(i.toString(), "error");
+                     } else if (!nodo.getCategoria().equals("arreglo")) {
+                         manejadorErrores.agregarErrorSemantico(
+                             "'" + i + "' no es un arreglo",
+                             ileft + 1,
+                             iright + 1
+                         );
+                         RESULT = crearExpr(i.toString(), "error");
+                     } else {
+                         RESULT = crearExpr(i.toString(), nodo.getTipo());
+                     }
+                 :};
 
 creacion_asignacion ::= tipo:t SEPARADOR ID:i ASIGNAR expresion
                         {:
-                            TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
-                            nodo.setCategoria("variable");
-                            tabla.agregarNodo(nodo);
+                            // Validar que no esté redeclarada en el scope actual
+                            if (tabla.existeEnScopeActual(i.toString())) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "Variable '" + i + "' ya ha sido declarada en este scope",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                            } else {
+                                TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                                nodo.setCategoria("variable");
+                                tabla.agregarNodo(nodo);
+                            }
                         :};
 
 creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES ASIGNAR valores_array
                                {:
-                                   TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
-                                   nodo.setCategoria("arreglo");
-                                   tabla.agregarNodo(nodo);
+                                   // Validar que no esté redeclarada en el scope actual
+                                   if (tabla.existeEnScopeActual(i.toString())) {
+                                       manejadorErrores.agregarErrorSemantico(
+                                           "Variable '" + i + "' ya ha sido declarada en este scope",
+                                           ileft + 1,
+                                           iright + 1
+                                       );
+                                   } else {
+                                       TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
+                                       nodo.setCategoria("arreglo");
+                                       tabla.agregarNodo(nodo);
+                                   }
                                :};
 
 valores_array ::= INICIO_BLOQUE lista_valores FINAL_BLOQUE;
@@ -476,7 +570,7 @@ expresion_potencia ::= expresion_unarios:e
 
 expresion_unarios ::= MASMAS ID:i
                     {:
-                        TablaSimbolos.NodoToken nodo = tabla.buscarSimbolo(i.toString());
+                        TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
 
                         if (nodo == null) {
                             manejadorErrores.agregarErrorSemantico(
@@ -491,7 +585,7 @@ expresion_unarios ::= MASMAS ID:i
                                 RESULT = crearExpr("++" + i.toString(),tipo);
                             } else {
                                 manejadorErrores.agregarErrorSemantico(
-                                    "El operador ++ solo se puede aplicar a int y float",
+                                    "El operador ++ solo se puede aplicar a int y float, se encontró: " + tipo,
                                     ileft + 1,
                                     iright + 1
                                 );
@@ -503,7 +597,7 @@ expresion_unarios ::= MASMAS ID:i
                     {: RESULT = a; :}
                     | MENOSMENOS ID:i
                     {:
-                        TablaSimbolos.NodoToken nodo = tabla.buscarSimbolo(i.toString());
+                        TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
 
                         if (nodo == null) {
                             manejadorErrores.agregarErrorSemantico(
@@ -518,7 +612,7 @@ expresion_unarios ::= MASMAS ID:i
                                 RESULT = crearExpr("--" + i.toString(),tipo);
                             } else {
                                 manejadorErrores.agregarErrorSemantico(
-                                    "El operador -- solo se puede aplicar a int y float",
+                                    "El operador -- solo se puede aplicar a int y float, se encontró: " + tipo,
                                     ileft + 1,
                                     iright + 1
                                 );
@@ -537,7 +631,7 @@ expresion_valores ::= literal:l
                     {: RESULT = l; :}
                     | ID:i
                     {:
-                        TablaSimbolos.NodoToken nodo = tabla.buscarSimbolo(i.toString());
+                        TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
 
                         if (nodo == null) {
                             manejadorErrores.agregarErrorSemantico(
@@ -649,7 +743,18 @@ break_nt ::= BREAK;
 
 return_nt ::= RETURN SEPARADOR expresion;
 
-cin_nt ::= CIN INICIO_PAREN ID FINAL_PAREN;
+cin_nt ::= CIN INICIO_PAREN ID:i FINAL_PAREN
+           {:
+               // Validar que la variable exista en un scope accesible
+               TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+               if (nodo == null) {
+                   manejadorErrores.agregarErrorSemantico(
+                       "La variable '" + i + "' no ha sido declarada",
+                       ileft + 1,
+                       iright + 1
+                   );
+               }
+           :};
 
 cout_nt ::= COUT INICIO_PAREN expresion FINAL_PAREN;
 

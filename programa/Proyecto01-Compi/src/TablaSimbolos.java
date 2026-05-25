@@ -477,6 +477,69 @@ public class TablaSimbolos {
     }
 
     /*
+     * Busca un símbolo en el scope actual Y en todos sus scopes padres (jerarquía)
+     *
+     * Objetivo:
+     * Localizar un identificador considerando la cadena de scopes padres.
+     * Esto permite validar que una variable esté declarada en cualquier scope
+     * accesible, no solo en el actual.
+     *
+     * Entrada:
+     * - nombre: id del símbolo buscado.
+     *
+     * Salida:
+     * - NodoToken si existe en scope actual o algún padre; null si no.
+     *
+     * Restricciones:
+     * - Busca de adentro hacia afuera (scope actual -> padre -> abuelo -> ... -> global).
+     */
+    public NodoToken buscarSimboloEnScopeAccesible(String nombre) {
+        String scopeActual = currentHash;
+        
+        // Buscar en el scope actual y todos sus padres
+        while (scopeActual != null) {
+            ArrayList<NodoToken> scope = tablaSimbolos.get(scopeActual);
+            if (scope != null) {
+                for (NodoToken nodo : scope) {
+                    if (nodo.getId().equals(nombre)) {
+                        return nodo;
+                    }
+                }
+            }
+            
+            // Subir al scope padre
+            if (scopeActual.equals(globalHash)) {
+                break; // Ya estamos en global
+            }
+            scopeActual = scopePadres.get(scopeActual);
+            if (scopeActual == null) {
+                scopeActual = globalHash; // Fallback a global
+            }
+        }
+        
+        return null;
+    }
+
+    /*
+     * Verifica si un símbolo existe SOLO en el scope actual (no en padres)
+     *
+     * Objetivo:
+     * Detectar redeclaraciones de variables en el mismo scope.
+     *
+     * Entrada:
+     * - nombre: id del símbolo a verificar.
+     *
+     * Salida:
+     * - true si existe en el scope actual; false si no.
+     *
+     * Restricciones:
+     * - Solo mira en el scope actual, ignorando padres e hijos.
+     */
+    public boolean existeEnScopeActual(String nombre) {
+        return buscarSimbolo(nombre) != null;
+    }
+
+    /*
      * Busca un símbolo en un scope específico
      *
      * Objetivo:
@@ -502,6 +565,65 @@ public class TablaSimbolos {
             }
         }
         return result;
+    }
+
+    /*
+     * Obtiene el tipo de un símbolo si existe en algún scope accesible
+     *
+     * Objetivo:
+     * Facilitar validaciones de tipado durante análisis semántico.
+     *
+     * Entrada:
+     * - nombre: identificador a consultar.
+     *
+     * Salida:
+     * - String con el tipo ("int", "float", "char", "string", "bool").
+     * - "error" si el símbolo no existe.
+     *
+     * Restricciones:
+     * - Solo busca en scopes accesibles.
+     */
+    public String getTipoSimbolo(String nombre) {
+        NodoToken nodo = buscarSimboloEnScopeAccesible(nombre);
+        if (nodo == null) {
+            return "error";
+        }
+        return nodo.getTipo();
+    }
+
+    /*
+     * Verifica si un tipo es numérico (int o float)
+     *
+     * Objetivo:
+     * Facilitar validaciones de operadores que solo funcionan con números.
+     *
+     * Entrada:
+     * - tipo: cadena con el tipo a verificar.
+     *
+     * Salida:
+     * - true si es "int" o "float".
+     * - false para otros tipos.
+     */
+    public static boolean esNumerico(String tipo) {
+        return tipo != null && (tipo.equals("int") || tipo.equals("float"));
+    }
+
+    /*
+     * Verifica si un tipo es válido en el lenguaje
+     *
+     * Objetivo:
+     * Validar que los tipos usados sean reconocidos.
+     *
+     * Entrada:
+     * - tipo: cadena a verificar.
+     *
+     * Salida:
+     * - true si es un tipo válido.
+     */
+    public static boolean esValido(String tipo) {
+        return tipo != null && (tipo.equals("int") || tipo.equals("float") || 
+                                tipo.equals("char") || tipo.equals("string") || 
+                                tipo.equals("bool"));
     }
 
     /*
