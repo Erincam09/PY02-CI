@@ -808,13 +808,42 @@ siguientes_factores_term ::= MULTI expresion_factor:e siguientes_factores_term
                             {: RESULT = crearExpr("epsilon", "epsilon"); :};
 
 expresion_factor ::= primer_potencia:p siguientes_potencias
-                       {: RESULT = p; :};
+                       {:
+                            String tipoS = getTipoExpr(s.toString());
+
+                            if (tipoS.equals("epsilon")) {
+                                RESULT = p;
+                            } else {
+                                String tipoP = getTipoExpr(p.toString());
+
+                                if (!tipoP.equals(tipoS)) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "No se pueden operar potencias con valores de tipo "
+                                        + tipoP + " y " + tipoS,
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("pot", "error");
+                                } else if (!tipoP.equals("int") && !tipoP.equals("float")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "El operador ^ solo acepta int y float",
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("pot", "error");
+                                } else {
+                                    RESULT = crearExpr("pot", tipoP);
+                                }
+                            }
+                      :};
 
 primer_potencia ::= expresion_potencia:e
                     {: RESULT = e; :};
 
-siguientes_potencias ::= POT expresion_potencia siguientes_potencias
-                       | /* epsilon */;
+siguientes_potencias ::= POT expresion_potencia:e siguientes_potencias
+                        {: RESULT = e; :}
+                       | /* epsilon */
+                        {: RESULT = crearExpr("epsilon", "epsilon"); :};
 
 expresion_potencia ::= expresion_unarios:e
                        {: RESULT = e; :};
