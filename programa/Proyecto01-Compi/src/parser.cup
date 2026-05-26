@@ -368,9 +368,16 @@ creacion ::= tipo:t SEPARADOR ID:i
              :};
 
 creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES
-                   {:
-                       // Validar que no esté redeclarada en el scope actual
-                       if (tabla.existeEnScopeActual(i.toString())) {
+                   {:  
+                       // Validar que el tipo del arreglo sea int o float
+                       if (!t.toString().equals("int") && !t.toString().equals("float")) {
+                           manejadorErrores.agregarErrorSemantico(
+                               "Los arreglos solo pueden ser de tipo int o float, pero se encontró: " + t,
+                               tleft + 1,
+                               tright + 1
+                           );
+                       } else if (tabla.existeEnScopeActual(i.toString())) {
+                           // Validar que no esté redeclarada en el scope actual
                            manejadorErrores.agregarErrorSemantico(
                                "Variable '" + i + "' ya ha sido declarada en este scope",
                                ileft + 1,
@@ -410,8 +417,8 @@ asignacion ::= ID:i ASIGNAR expresion:e
                    }
                :};
 
-asignacion_array ::= ID:i INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expresion FINAL_INDICES ASIGNAR expresion
-                     {:
+asignacion_array ::= ID:i INICIO_INDICES expresion:e1 FINAL_INDICES INICIO_INDICES expresion:e2 FINAL_INDICES ASIGNAR expresion:valor
+                     {:  
                          // Validar que el arreglo esté declarado en un scope accesible
                          TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
                          if (nodo == null) {
@@ -426,11 +433,43 @@ asignacion_array ::= ID:i INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES 
                                  ileft + 1,
                                  iright + 1
                              );
+                         } else {
+                             // Validar que los índices sean int
+                             String tipoE1 = getTipoExpr(e1.toString());
+                             String tipoE2 = getTipoExpr(e2.toString());
+                             
+                             if (!tipoE1.equals("int") && !tipoE1.equals("error")) {
+                                 manejadorErrores.agregarErrorSemantico(
+                                     "El índice del arreglo debe ser int, pero se encontró: " + tipoE1,
+                                     e1left + 1,
+                                     e1right + 1
+                                 );
+                             }
+                             if (!tipoE2.equals("int") && !tipoE2.equals("error")) {
+                                 manejadorErrores.agregarErrorSemantico(
+                                     "El índice del arreglo debe ser int, pero se encontró: " + tipoE2,
+                                     e2left + 1,
+                                     e2right + 1
+                                 );
+                             }
+                             
+                             // Validar que el tipo del valor sea igual al tipo del arreglo
+                             String tipoArreglo = nodo.getTipo();
+                             String tipoValor = getTipoExpr(valor.toString());
+                             
+                             if (!tipoValor.equals("error") && !tipoArreglo.equals(tipoValor)) {
+                                 manejadorErrores.agregarErrorSemantico(
+                                     "No se puede asignar un valor de tipo " + tipoValor +
+                                     " a un arreglo de tipo " + tipoArreglo,
+                                     valorleft + 1,
+                                     valorright + 1
+                                 );
+                             }
                          }
                      :};
 
-acceso_array ::= ID:i INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expresion FINAL_INDICES
-                 {:
+acceso_array ::= ID:i INICIO_INDICES expresion:e1 FINAL_INDICES INICIO_INDICES expresion:e2 FINAL_INDICES
+                 {:  
                      TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
                      if (nodo == null) {
                          manejadorErrores.agregarErrorSemantico(
@@ -447,6 +486,25 @@ acceso_array ::= ID:i INICIO_INDICES expresion FINAL_INDICES INICIO_INDICES expr
                          );
                          RESULT = crearExpr(i.toString(), "error");
                      } else {
+                         // Validar que los índices sean int
+                         String tipoE1 = getTipoExpr(e1.toString());
+                         String tipoE2 = getTipoExpr(e2.toString());
+                         
+                         if (!tipoE1.equals("int") && !tipoE1.equals("error")) {
+                             manejadorErrores.agregarErrorSemantico(
+                                 "El índice del arreglo debe ser int, pero se encontró: " + tipoE1,
+                                 e1left + 1,
+                                 e1right + 1
+                             );
+                         }
+                         if (!tipoE2.equals("int") && !tipoE2.equals("error")) {
+                             manejadorErrores.agregarErrorSemantico(
+                                 "El índice del arreglo debe ser int, pero se encontró: " + tipoE2,
+                                 e2left + 1,
+                                 e2right + 1
+                             );
+                         }
+                         
                          RESULT = crearExpr(i.toString(), nodo.getTipo());
                      }
                  :};
@@ -480,8 +538,15 @@ creacion_asignacion ::= tipo:t SEPARADOR ID:i ASIGNAR expresion:e
 
 creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES ASIGNAR valores_array
                                {:
-                                   // Validar que no esté redeclarada en el scope actual
-                                   if (tabla.existeEnScopeActual(i.toString())) {
+                                   // Validar que el tipo del arreglo sea int o float
+                                   if (!t.toString().equals("int") && !t.toString().equals("float")) {
+                                       manejadorErrores.agregarErrorSemantico(
+                                           "Los arreglos solo pueden ser de tipo int o float, pero se encontró: " + t,
+                                           tleft + 1,
+                                           tright + 1
+                                       );
+                                   } else if (tabla.existeEnScopeActual(i.toString())) {
+                                       // Validar que no esté redeclarada en el scope actual
                                        manejadorErrores.agregarErrorSemantico(
                                            "Variable '" + i + "' ya ha sido declarada en este scope",
                                            ileft + 1,
@@ -502,8 +567,48 @@ lista_valores ::= elemento_valor COMA lista_valores
 elemento_valor ::= expresion
                  | valores_array;
 
-llamada_funcion ::= ID INICIO_PAREN lista_expresiones FINAL_PAREN
-                  | ID INICIO_PAREN FINAL_PAREN;
+llamada_funcion ::= ID:i INICIO_PAREN lista_expresiones FINAL_PAREN
+                  {:
+                      TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
+                      if (nodo == null) {
+                          manejadorErrores.agregarErrorSemantico(
+                              "La función '" + i + "' no ha sido declarada",
+                              ileft + 1,
+                              iright + 1
+                          );
+                          RESULT = crearExpr(i.toString(), "error");
+                      } else if (!nodo.getCategoria().equals("funcion")) {
+                          manejadorErrores.agregarErrorSemantico(
+                              "'" + i + "' no es una función",
+                              ileft + 1,
+                              iright + 1
+                          );
+                          RESULT = crearExpr(i.toString(), "error");
+                      } else {
+                          RESULT = crearExpr(i.toString(), nodo.getTipo());
+                      }
+                  :}
+                  | ID:i INICIO_PAREN FINAL_PAREN
+                  {:
+                      TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
+                      if (nodo == null) {
+                          manejadorErrores.agregarErrorSemantico(
+                              "La función '" + i + "' no ha sido declarada",
+                              ileft + 1,
+                              iright + 1
+                          );
+                          RESULT = crearExpr(i.toString(), "error");
+                      } else if (!nodo.getCategoria().equals("funcion")) {
+                          manejadorErrores.agregarErrorSemantico(
+                              "'" + i + "' no es una función",
+                              ileft + 1,
+                              iright + 1
+                          );
+                          RESULT = crearExpr(i.toString(), "error");
+                      } else {
+                          RESULT = crearExpr(i.toString(), nodo.getTipo());
+                      }
+                  :};
 
 expresion ::= expresion_logica:e
              {: RESULT = e; :}
