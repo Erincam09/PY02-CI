@@ -220,7 +220,7 @@ non terminal tipo;
 non terminal creacion, creacion_array;
 non terminal asignacion, asignacion_array, acceso_array;
 non terminal creacion_asignacion, creacion_asignacion_array;
-non terminal valores_array, lista_valores, elemento_valor;
+non terminal valores_array, lista_filas, fila, lista_valores, elemento_valor;
 
 non terminal expresion, expresion_logica, expresion_conjuncion;
 non terminal expresion_negacion, expresion_relacional;
@@ -605,7 +605,12 @@ creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_
                                    }
                                :};
 
-valores_array ::= INICIO_BLOQUE lista_valores FINAL_BLOQUE;
+valores_array ::= INICIO_BLOQUE lista_filas FINAL_BLOQUE;
+
+lista_filas ::= fila COMA lista_filas
+              | fila;
+
+fila ::= INICIO_BLOQUE lista_valores FINAL_BLOQUE;
 
 lista_valores ::= elemento_valor COMA lista_valores
                 | elemento_valor;
@@ -625,9 +630,7 @@ elemento_valor ::= expresion:e
                          }
                      }
                      RESULT = e;
-                 :}
-                 | valores_array:v
-                 {: RESULT = v; :};
+                 :};
 
 llamada_funcion ::= ID:i INICIO_PAREN lista_expresiones:l FINAL_PAREN
                   {:

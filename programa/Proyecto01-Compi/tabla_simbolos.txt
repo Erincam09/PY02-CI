@@ -11,16 +11,12 @@ Total de símbolos: 0
 
 ----------------------------------------------------------------------------------------------------------------
 SCOPE: main  (padre: global)
-Total de símbolos: 6
+Total de símbolos: 2
 ----------------------------------------------------------------------------------------------------------------
 Id                     Tipo         Categoría       Línea    Columna  Valor           Parámetros
 ----------------------------------------------------------------------------------------------------------------
-a                      int          variable        3        22       -               -
-b                      float        variable        4        28       -               -
-error1                 int          variable        6        27       -               -
-error2                 float        variable        7        33       -               -
-x                      int          variable        9        17       -               -
-permitido              int          variable        10       30       -               -
+x                      string       variable        3        15       -               -
+res                    int          variable        6        23       -               -
 
 ================================================================================================================
 Fin de la tabla de símbolos

@@ -3,10 +3,7 @@
 ======================================================
 Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
-Semántico    7        27       No se permite división entre cero
-Semántico    7        22       No se pueden operar valores de tipo int y error
-Semántico    8        31       No se permite división entre cero
-Semántico    8        24       No se pueden operar valores de tipo float y error
+Semántico    7        19       No se pueden operar valores de tipo int y string
 ------------------------------------------------------
-Total de Errores: 4
+Total de Errores: 1
 ======================================================

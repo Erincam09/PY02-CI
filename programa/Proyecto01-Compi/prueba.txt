@@ -1,11 +1,7 @@
 empty ~ __main__ <| |>
 |:
-    int ~ a <- 10 / 2!
-    float ~ b <- 10.5 / 2.5!
+    int ~ x!
+    x <- "hola"!
 
-    int ~ error1 <- 10 / 0!
-    float ~ error2 <- 10.5 / 0.0!
-
-    int ~ x <- 0!
-    int ~ permitido <- 10 / x!
+    int ~ res <- 1 + x!
 :|
