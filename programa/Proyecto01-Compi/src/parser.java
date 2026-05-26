@@ -5,6 +5,8 @@
 
 import java_cup.runtime.*;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
@@ -1626,10 +1628,19 @@ class CUP$parser$actions {
           case 38: // lista_expresiones ::= expresion COMA lista_expresiones 
             {
               Object RESULT =null;
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
 		int lleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int lright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object l = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		 RESULT = 1 + (Integer)l; 
+		 
+                        
+                        ArrayList<String> listaTipos = (ArrayList<String>)l;
+                        String tipoExpr = getTipoExpr(e.toString());
+                        listaTipos.add(0, tipoExpr);
+                        RESULT = listaTipos;
+                     
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",11, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1638,7 +1649,15 @@ class CUP$parser$actions {
           case 39: // lista_expresiones ::= expresion 
             {
               Object RESULT =null;
-		 RESULT = 1; 
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                        ArrayList<String> listaTipos = new ArrayList<>();
+                        String tipoExpr = getTipoExpr(e.toString());
+                        listaTipos.add(tipoExpr);
+                        RESULT = listaTipos;
+                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",11, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1992,14 +2011,31 @@ class CUP$parser$actions {
                           );
                           RESULT = crearExpr(i.toString(), "error");
                       } else {
-                          int parametrosEsperados = nodo.getParametros().size();
-                          int parametrosRecibidos = (Integer)l;
-                          if (parametrosRecibidos != parametrosEsperados) {
+                          ArrayList<String> tiposRecibidos = (ArrayList<String>)l;
+                          List<TablaSimbolos.Parametro> parametrosEsperados = nodo.getParametros();
+
+                          if(tiposRecibidos.size() != parametrosEsperados.size()) {
                               manejadorErrores.agregarErrorSemantico(
-                                  "La función '" + i + "' espera " + parametrosEsperados + " parámetros, pero se proporcionaron " + parametrosRecibidos,
+                                  "La función '" + i + "' espera " + parametrosEsperados.size() + 
+                                  " parámetros, pero se recibieron " + tiposRecibidos.size(),
                                   ileft + 1,
                                   iright + 1
                               );
+                          } else {
+                              for (int ind = 0; ind < tiposRecibidos.size(); ind++) {
+                                  String tipoRecibido = tiposRecibidos.get(ind);
+                                  String tipoEsperado = parametrosEsperados.get(ind).getTipo();
+
+                                  if (!tipoRecibido.equals("error") && !tipoRecibido.equals(tipoEsperado)) {
+                                      manejadorErrores.agregarErrorSemantico(
+                                          "En el parámetro " + (ind + 1) + " de la función '" + i +
+                                          "' se esperaba un valor de tipo " + tipoEsperado +
+                                          " pero se encontró " + tipoRecibido,
+                                          ileft + 1,
+                                          iright + 1
+                                      );
+                                  }
+                              }
                           }
                           RESULT = crearExpr(i.toString(), nodo.getTipo());
                       }

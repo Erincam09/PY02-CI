@@ -1,14 +1,12 @@
-int ~ suma <| int ~ a, int ~ b |>
-|:
+int ~ suma <| int ~ a, int ~ b |> |:
     return ~ a + b!
 :|
 
-empty ~ __main__ <| |>
-|:
-    int ~ x <- 5!
-    int ~ y <- 10!
+empty ~ __main__ <| |> |:
+    float ~ x <- 5!
+    float ~ y <- 10.5!
 
-    float ~ r <- suma <| x, y |>!
+    int ~ r <- suma <| x, y |>!
     cout <| r |>!
 
     suma <| x |>!         

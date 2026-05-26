@@ -1,5 +1,7 @@
 import java_cup.runtime.*;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * =========================================================
@@ -417,10 +419,21 @@ creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INI
                        }
                    :};
 
-lista_expresiones ::= expresion COMA lista_expresiones:l
-                    {: RESULT = 1 + (Integer)l; :}
-                    | expresion
-                    {: RESULT = 1; :};
+lista_expresiones ::= expresion:e COMA lista_expresiones:l
+                    {: 
+                        
+                        ArrayList<String> listaTipos = (ArrayList<String>)l;
+                        String tipoExpr = getTipoExpr(e.toString());
+                        listaTipos.add(0, tipoExpr);
+                        RESULT = listaTipos;
+                     :}
+                    | expresion:e
+                    {:
+                        ArrayList<String> listaTipos = new ArrayList<>();
+                        String tipoExpr = getTipoExpr(e.toString());
+                        listaTipos.add(tipoExpr);
+                        RESULT = listaTipos;
+                    :};
 
 asignacion ::= ID:i ASIGNAR expresion:e
                {:
@@ -634,14 +647,31 @@ llamada_funcion ::= ID:i INICIO_PAREN lista_expresiones:l FINAL_PAREN
                           );
                           RESULT = crearExpr(i.toString(), "error");
                       } else {
-                          int parametrosEsperados = nodo.getParametros().size();
-                          int parametrosRecibidos = (Integer)l;
-                          if (parametrosRecibidos != parametrosEsperados) {
+                          ArrayList<String> tiposRecibidos = (ArrayList<String>)l;
+                          List<TablaSimbolos.Parametro> parametrosEsperados = nodo.getParametros();
+
+                          if(tiposRecibidos.size() != parametrosEsperados.size()) {
                               manejadorErrores.agregarErrorSemantico(
-                                  "La función '" + i + "' espera " + parametrosEsperados + " parámetros, pero se proporcionaron " + parametrosRecibidos,
+                                  "La función '" + i + "' espera " + parametrosEsperados.size() + 
+                                  " parámetros, pero se recibieron " + tiposRecibidos.size(),
                                   ileft + 1,
                                   iright + 1
                               );
+                          } else {
+                              for (int ind = 0; ind < tiposRecibidos.size(); ind++) {
+                                  String tipoRecibido = tiposRecibidos.get(ind);
+                                  String tipoEsperado = parametrosEsperados.get(ind).getTipo();
+
+                                  if (!tipoRecibido.equals("error") && !tipoRecibido.equals(tipoEsperado)) {
+                                      manejadorErrores.agregarErrorSemantico(
+                                          "En el parámetro " + (ind + 1) + " de la función '" + i +
+                                          "' se esperaba un valor de tipo " + tipoEsperado +
+                                          " pero se encontró " + tipoRecibido,
+                                          ileft + 1,
+                                          iright + 1
+                                      );
+                                  }
+                              }
                           }
                           RESULT = crearExpr(i.toString(), nodo.getTipo());
                       }
