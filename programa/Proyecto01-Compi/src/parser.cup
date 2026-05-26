@@ -1082,7 +1082,24 @@ primer_factor_term ::= expresion_factor:e
 siguientes_factores_term ::= MULTI expresion_factor:e siguientes_factores_term
                             {: RESULT = e; :}
                            | DIV   expresion_factor:e siguientes_factores_term
-                            {: RESULT = e; :}
+                            {:
+                                String valor = getValorExpr(e.toString());
+                                String tipo = getTipoExpr(e.toString());
+
+                                if ((tipo.equals("int") || tipo.equals("float")) && (valor.equals("0") || valor.equals("0.0"))) {
+
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "No se permite división entre cero",
+                                        eleft + 1,
+                                        eright + 1
+                                    );
+
+                                    RESULT = crearExpr("div", "error");
+
+                                } else {
+                                    RESULT = e;
+                                }
+                            :}
                            | MOD   expresion_factor:e siguientes_factores_term
                             {: RESULT = e; :}
                            | /* epsilon */

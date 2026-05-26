@@ -2802,7 +2802,24 @@ class CUP$parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = e; 
+		
+                                String valor = getValorExpr(e.toString());
+                                String tipo = getTipoExpr(e.toString());
+
+                                if ((tipo.equals("int") || tipo.equals("float")) && (valor.equals("0") || valor.equals("0.0"))) {
+
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "No se permite división entre cero",
+                                        eleft + 1,
+                                        eright + 1
+                                    );
+
+                                    RESULT = crearExpr("div", "error");
+
+                                } else {
+                                    RESULT = e;
+                                }
+                            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_factores_term",41, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
