@@ -53,6 +53,8 @@ parser code {:
      */
     private String tipoArregloActual = null;
 
+    private boolean returnEnBloque = false; // Indica si ya se ha encontrado un return en el bloque actual
+
     /*
      * Constructor del parser.
      * Recibe el lexer, crea la tabla de símbolos y obtiene el
@@ -280,15 +282,34 @@ encabezado_funcion ::= tipo:t SEPARADOR ID:i
                                tabla.agregarNodo(nodo);
 
                                tabla.crearNuevoScope(i.toString());
+                               returnEnBloque = false; 
                            }
                        :}
                      ;
 
 funcion ::= encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN bloque
-            {: tabla.salirDelScope(); :}
+            {:
+                if (!returnEnBloque) {
+                    manejadorErrores.agregarErrorSemantico(
+                        "La función debe tener al menos un return",
+                        lastLine,
+                        lastColumn
+                    );
+                }
+                tabla.salirDelScope();
+            :}
 
           | encabezado_funcion INICIO_PAREN FINAL_PAREN bloque
-            {: tabla.salirDelScope(); :}
+            {:
+                if (!returnEnBloque) {
+                    manejadorErrores.agregarErrorSemantico(
+                        "La función debe tener al menos un return",
+                        lastLine,
+                        lastColumn
+                    );
+                }
+                tabla.salirDelScope();
+            :}
 
           | encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN error FINAL_BLOQUE
             {: tabla.salirDelScope(); :}
@@ -396,8 +417,10 @@ creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INI
                        }
                    :};
 
-lista_expresiones ::= expresion COMA lista_expresiones
-                    | expresion;
+lista_expresiones ::= expresion COMA lista_expresiones:l
+                    {: RESULT = 1 + (Integer)l; :}
+                    | expresion
+                    {: RESULT = 1; :};
 
 asignacion ::= ID:i ASIGNAR expresion:e
                {:
@@ -593,7 +616,7 @@ elemento_valor ::= expresion:e
                  | valores_array:v
                  {: RESULT = v; :};
 
-llamada_funcion ::= ID:i INICIO_PAREN lista_expresiones FINAL_PAREN
+llamada_funcion ::= ID:i INICIO_PAREN lista_expresiones:l FINAL_PAREN
                   {:
                       TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
                       if (nodo == null) {
@@ -611,12 +634,31 @@ llamada_funcion ::= ID:i INICIO_PAREN lista_expresiones FINAL_PAREN
                           );
                           RESULT = crearExpr(i.toString(), "error");
                       } else {
+                          int parametrosEsperados = nodo.getParametros().size();
+                          int parametrosRecibidos = (Integer)l;
+                          if (parametrosRecibidos != parametrosEsperados) {
+                              manejadorErrores.agregarErrorSemantico(
+                                  "La función '" + i + "' espera " + parametrosEsperados + " parámetros, pero se proporcionaron " + parametrosRecibidos,
+                                  ileft + 1,
+                                  iright + 1
+                              );
+                          }
                           RESULT = crearExpr(i.toString(), nodo.getTipo());
                       }
                   :}
                   | ID:i INICIO_PAREN FINAL_PAREN
                   {:
                       TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
+                      if (nodo != null && nodo.getCategoria().equals("funcion")) {
+                          if (nodo.getParametros().size() > 0) {
+                              manejadorErrores.agregarErrorSemantico(
+                                  "La función '" + i + "' espera " + nodo.getParametros().size() + " parámetros, pero no se proporcionaron",
+                                  ileft + 1,
+                                  iright + 1
+                              );
+                          }
+                      }
+                      
                       if (nodo == null) {
                           manejadorErrores.agregarErrorSemantico(
                               "La función '" + i + "' no ha sido declarada",
@@ -640,23 +682,101 @@ expresion ::= expresion_logica:e
              {: RESULT = e; :}
            ;
 
-expresion_logica ::= primer_termino_or:p siguientes_terminos_or
-                    {: RESULT = p; :};
+expresion_logica ::= primer_termino_or:p siguientes_terminos_or:s
+                    {:
+                        String tipoS = getTipoExpr(s.toString());
+
+                        if (tipoS.equals("epsilon")) {
+                            RESULT = p;
+                        } else {
+                            String tipoP = getTipoExpr(p.toString());
+
+                            if (!tipoP.equals("bool") && !tipoP.equals("error")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El operador OR solo se puede aplicar a bool, pero se encontró " + tipoP,
+                                    pleft + 1,
+                                    pright + 1
+                                );
+                                RESULT = crearExpr("or", "error");
+                            } else if (tipoS.equals("error")) {
+                                RESULT = crearExpr("or", "error");
+                            } else {
+                                RESULT = crearExpr("or", "bool");
+                            }
+                        }
+                    :};
 
 primer_termino_or ::= expresion_conjuncion:e
                      {: RESULT = e; :};
 
-siguientes_terminos_or ::= OR expresion_conjuncion siguientes_terminos_or
-                         | /* epsilon */;
+siguientes_terminos_or ::= OR expresion_conjuncion:e siguientes_terminos_or:s
+                        {:
+                            String tipoE = getTipoExpr(e.toString());
+                            String tipoS = getTipoExpr(s.toString());
 
-expresion_conjuncion ::= primer_termino_and:p siguientes_terminos_and
-                        {: RESULT = p; :};
+                            if (!tipoE.equals("bool") && !tipoE.equals("error")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El operador OR solo acepta bool, pero se encontró " + tipoE,
+                                    eleft + 1,
+                                    eright + 1
+                                );
+                                RESULT = crearExpr("or", "error");
+                            } else if (tipoS.equals("error")) {
+                                RESULT = crearExpr("or", "error");
+                            } else {
+                                RESULT = crearExpr("or", "bool");
+                            }
+                        :}
+                         | /* epsilon */
+                        {: RESULT = crearExpr("epsilon", "epsilon"); :};
+
+expresion_conjuncion ::= primer_termino_and:p siguientes_terminos_and:s
+                        {:
+                            String tipoS = getTipoExpr(s.toString());
+
+                            if (tipoS.equals("epsilon")) {
+                                RESULT = p;
+                            } else {
+                                String tipoP = getTipoExpr(p.toString());
+
+                                if (!tipoP.equals("bool") && !tipoP.equals("error")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "El operador AND solo acepta bool, pero se encontró " + tipoP,
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("and", "error");
+                                } else if (tipoS.equals("error")) {
+                                    RESULT = crearExpr("and", "error");
+                                } else {
+                                    RESULT = crearExpr("and", "bool");
+                                }
+                            }
+                        :};
 
 primer_termino_and ::= expresion_negacion:e
                       {: RESULT = e; :};
 
-siguientes_terminos_and ::= AND expresion_negacion siguientes_terminos_and
-                          | /* epsilon */;
+siguientes_terminos_and ::= AND expresion_negacion:e siguientes_terminos_and:s
+                           {:
+                                String tipoE = getTipoExpr(e.toString());
+                                String tipoS = getTipoExpr(s.toString());
+
+                                if (!tipoE.equals("bool") && !tipoE.equals("error")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "El operador AND solo acepta bool, pero se encontró " + tipoE,
+                                        eleft + 1,
+                                        eright + 1
+                                    );
+                                    RESULT = crearExpr("and", "error");
+                                } else if (tipoS.equals("error")) {
+                                    RESULT = crearExpr("and", "error");
+                                } else {
+                                    RESULT = crearExpr("and", "bool");
+                                }
+                            :}
+                            | /* epsilon */
+                            {: RESULT = crearExpr("epsilon", "epsilon"); :};
 
 expresion_negacion ::= NOT expresion_negacion:e
                        {:
@@ -1175,6 +1295,23 @@ return_nt ::= RETURN SEPARADOR expresion:e
                           eleft + 1,
                           eright + 1
                       );
+                  } else {
+                      returnEnBloque = true; 
+                      TablaSimbolos.NodoToken funcion = tabla.buscarSimboloEnScope(scopeActual,tabla.getParentScope());
+                      if (funcion != null &&funcion.getCategoria().equals("funcion")) {
+                          String tipoFuncion = funcion.getTipo();
+                          String tipoReturn = getTipoExpr(e.toString());
+
+                          if (!tipoReturn.equals("error") && !tipoFuncion.equals(tipoReturn)) {
+                              manejadorErrores.agregarErrorSemantico(
+                                  "La función '" + funcion.getId() +
+                                  "' debe retornar " + tipoFuncion +
+                                  " pero se encontró " + tipoReturn,
+                                  eleft + 1,
+                                  eright + 1
+                              );
+                          }
+                      }
                   }
               :};
 

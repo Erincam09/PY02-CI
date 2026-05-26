@@ -3,21 +3,9 @@
 ======================================================
 Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
-Semántico    17       6        La función 'funcionNoExiste' no ha sido declarada
-Semántico    20       12       Variable 'x' ya ha sido declarada en este scope
-Semántico    21       12       Variable 'x' ya ha sido declarada en este scope
-Semántico    24       6        La función 'x' no ha sido declarada
-Semántico    30       53       Se esperaba un valor de tipo int pero se encontró float
-Semántico    32       53       Se esperaba un valor de tipo float pero se encontró int
-Semántico    32       56       Se esperaba un valor de tipo float pero se encontró int
-Semántico    32       65       Se esperaba un valor de tipo float pero se encontró int
-Semántico    32       68       Se esperaba un valor de tipo float pero se encontró int
-Semántico    36       16       El índice del arreglo debe ser int, pero se encontró: float
-Semántico    38       32       No se puede asignar un valor de tipo float a un arreglo de tipo int
-Semántico    42       32       El índice del arreglo debe ser int, pero se encontró: float
-Semántico    44       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: string
-Semántico    46       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: bool
-Semántico    48       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: char
+Semántico    12       14       No se puede inicializar la variable 'r' de tipo float con un valor de tipo int
+Semántico    15       6        La función 'suma' espera 2 parámetros, pero se proporcionaron 1
+Semántico    17       6        La función 'suma' espera 2 parámetros, pero se proporcionaron 3
 ------------------------------------------------------
-Total de Errores: 15
+Total de Errores: 3
 ======================================================

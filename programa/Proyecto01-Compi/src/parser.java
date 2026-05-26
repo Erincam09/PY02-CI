@@ -1023,6 +1023,8 @@ public class parser extends java_cup.runtime.lr_parser {
      */
     private String tipoArregloActual = null;
 
+    private boolean returnEnBloque = false; // Indica si ya se ha encontrado un return en el bloque actual
+
     /*
      * Constructor del parser.
      * Recibe el lexer, crea la tabla de símbolos y obtiene el
@@ -1248,6 +1250,7 @@ class CUP$parser$actions {
                                tabla.agregarNodo(nodo);
 
                                tabla.crearNuevoScope(i.toString());
+                               returnEnBloque = false; 
                            }
                        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("encabezado_funcion",3, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -1258,7 +1261,16 @@ class CUP$parser$actions {
           case 8: // funcion ::= encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN bloque 
             {
               Object RESULT =null;
-		 tabla.salirDelScope(); 
+		
+                if (!returnEnBloque) {
+                    manejadorErrores.agregarErrorSemantico(
+                        "La función debe tener al menos un return",
+                        lastLine,
+                        lastColumn
+                    );
+                }
+                tabla.salirDelScope();
+            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("funcion",4, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1267,7 +1279,16 @@ class CUP$parser$actions {
           case 9: // funcion ::= encabezado_funcion INICIO_PAREN FINAL_PAREN bloque 
             {
               Object RESULT =null;
-		 tabla.salirDelScope(); 
+		
+                if (!returnEnBloque) {
+                    manejadorErrores.agregarErrorSemantico(
+                        "La función debe tener al menos un return",
+                        lastLine,
+                        lastColumn
+                    );
+                }
+                tabla.salirDelScope();
+            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("funcion",4, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1605,7 +1626,10 @@ class CUP$parser$actions {
           case 38: // lista_expresiones ::= expresion COMA lista_expresiones 
             {
               Object RESULT =null;
-
+		int lleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int lright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object l = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		 RESULT = 1 + (Integer)l; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",11, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1614,7 +1638,7 @@ class CUP$parser$actions {
           case 39: // lista_expresiones ::= expresion 
             {
               Object RESULT =null;
-
+		 RESULT = 1; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",11, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1948,6 +1972,9 @@ class CUP$parser$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-3)).value;
+		int lleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int lright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object l = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
 		
                       TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
                       if (nodo == null) {
@@ -1965,6 +1992,15 @@ class CUP$parser$actions {
                           );
                           RESULT = crearExpr(i.toString(), "error");
                       } else {
+                          int parametrosEsperados = nodo.getParametros().size();
+                          int parametrosRecibidos = (Integer)l;
+                          if (parametrosRecibidos != parametrosEsperados) {
+                              manejadorErrores.agregarErrorSemantico(
+                                  "La función '" + i + "' espera " + parametrosEsperados + " parámetros, pero se proporcionaron " + parametrosRecibidos,
+                                  ileft + 1,
+                                  iright + 1
+                              );
+                          }
                           RESULT = crearExpr(i.toString(), nodo.getTipo());
                       }
                   
@@ -1981,6 +2017,16 @@ class CUP$parser$actions {
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
 		
                       TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
+                      if (nodo != null && nodo.getCategoria().equals("funcion")) {
+                          if (nodo.getParametros().size() > 0) {
+                              manejadorErrores.agregarErrorSemantico(
+                                  "La función '" + i + "' espera " + nodo.getParametros().size() + " parámetros, pero no se proporcionaron",
+                                  ileft + 1,
+                                  iright + 1
+                              );
+                          }
+                      }
+                      
                       if (nodo == null) {
                           manejadorErrores.agregarErrorSemantico(
                               "La función '" + i + "' no ha sido declarada",
@@ -2022,7 +2068,31 @@ class CUP$parser$actions {
 		int pleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int pright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object p = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = p; 
+		int sleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object s = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                        String tipoS = getTipoExpr(s.toString());
+
+                        if (tipoS.equals("epsilon")) {
+                            RESULT = p;
+                        } else {
+                            String tipoP = getTipoExpr(p.toString());
+
+                            if (!tipoP.equals("bool") && !tipoP.equals("error")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El operador OR solo se puede aplicar a bool, pero se encontró " + tipoP,
+                                    pleft + 1,
+                                    pright + 1
+                                );
+                                RESULT = crearExpr("or", "error");
+                            } else if (tipoS.equals("error")) {
+                                RESULT = crearExpr("or", "error");
+                            } else {
+                                RESULT = crearExpr("or", "bool");
+                            }
+                        }
+                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expresion_logica",24, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2043,7 +2113,29 @@ class CUP$parser$actions {
           case 56: // siguientes_terminos_or ::= OR expresion_conjuncion siguientes_terminos_or 
             {
               Object RESULT =null;
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		int sleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object s = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                            String tipoE = getTipoExpr(e.toString());
+                            String tipoS = getTipoExpr(s.toString());
 
+                            if (!tipoE.equals("bool") && !tipoE.equals("error")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El operador OR solo acepta bool, pero se encontró " + tipoE,
+                                    eleft + 1,
+                                    eright + 1
+                                );
+                                RESULT = crearExpr("or", "error");
+                            } else if (tipoS.equals("error")) {
+                                RESULT = crearExpr("or", "error");
+                            } else {
+                                RESULT = crearExpr("or", "bool");
+                            }
+                        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_or",35, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2052,7 +2144,7 @@ class CUP$parser$actions {
           case 57: // siguientes_terminos_or ::= 
             {
               Object RESULT =null;
-
+		 RESULT = crearExpr("epsilon", "epsilon"); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_or",35, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2064,7 +2156,31 @@ class CUP$parser$actions {
 		int pleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int pright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object p = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = p; 
+		int sleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object s = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                            String tipoS = getTipoExpr(s.toString());
+
+                            if (tipoS.equals("epsilon")) {
+                                RESULT = p;
+                            } else {
+                                String tipoP = getTipoExpr(p.toString());
+
+                                if (!tipoP.equals("bool") && !tipoP.equals("error")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "El operador AND solo acepta bool, pero se encontró " + tipoP,
+                                        pleft + 1,
+                                        pright + 1
+                                    );
+                                    RESULT = crearExpr("and", "error");
+                                } else if (tipoS.equals("error")) {
+                                    RESULT = crearExpr("and", "error");
+                                } else {
+                                    RESULT = crearExpr("and", "bool");
+                                }
+                            }
+                        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expresion_conjuncion",25, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2085,7 +2201,29 @@ class CUP$parser$actions {
           case 60: // siguientes_terminos_and ::= AND expresion_negacion siguientes_terminos_and 
             {
               Object RESULT =null;
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		int sleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object s = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                                String tipoE = getTipoExpr(e.toString());
+                                String tipoS = getTipoExpr(s.toString());
 
+                                if (!tipoE.equals("bool") && !tipoE.equals("error")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "El operador AND solo acepta bool, pero se encontró " + tipoE,
+                                        eleft + 1,
+                                        eright + 1
+                                    );
+                                    RESULT = crearExpr("and", "error");
+                                } else if (tipoS.equals("error")) {
+                                    RESULT = crearExpr("and", "error");
+                                } else {
+                                    RESULT = crearExpr("and", "bool");
+                                }
+                            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_and",37, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2094,7 +2232,7 @@ class CUP$parser$actions {
           case 61: // siguientes_terminos_and ::= 
             {
               Object RESULT =null;
-
+		 RESULT = crearExpr("epsilon", "epsilon"); 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_and",37, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -3189,6 +3327,23 @@ class CUP$parser$actions {
                           eleft + 1,
                           eright + 1
                       );
+                  } else {
+                      returnEnBloque = true; 
+                      TablaSimbolos.NodoToken funcion = tabla.buscarSimboloEnScope(scopeActual,tabla.getParentScope());
+                      if (funcion != null &&funcion.getCategoria().equals("funcion")) {
+                          String tipoFuncion = funcion.getTipo();
+                          String tipoReturn = getTipoExpr(e.toString());
+
+                          if (!tipoReturn.equals("error") && !tipoFuncion.equals(tipoReturn)) {
+                              manejadorErrores.agregarErrorSemantico(
+                                  "La función '" + funcion.getId() +
+                                  "' debe retornar " + tipoFuncion +
+                                  " pero se encontró " + tipoReturn,
+                                  eleft + 1,
+                                  eright + 1
+                              );
+                          }
+                      }
                   }
               
               CUP$parser$result = parser.getSymbolFactory().newSymbol("return_nt",65, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
