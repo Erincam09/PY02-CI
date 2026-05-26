@@ -1,48 +1,46 @@
 ================================================================================================================
                                                 TABLA DE SÍMBOLOS
 ================================================================================================================
-Total de scopes: 2
+Total de scopes: 4
 
 ----------------------------------------------------------------------------------------------------------------
 SCOPE: global  (padre: -)
-Total de símbolos: 0
-----------------------------------------------------------------------------------------------------------------
-  (sin símbolos registrados)
-
-----------------------------------------------------------------------------------------------------------------
-SCOPE: main  (padre: global)
-Total de símbolos: 28
+Total de símbolos: 2
 ----------------------------------------------------------------------------------------------------------------
 Id                     Tipo         Categoría       Línea    Columna  Valor           Parámetros
 ----------------------------------------------------------------------------------------------------------------
-sumaInt                int          variable        5        27       -               -
-restaInt               int          variable        6        29       -               -
-multiInt               int          variable        7        28       -               -
-divInt                 int          variable        8        27       -               -
-modInt                 int          variable        9        27       -               -
-sumaFloat              float        variable        11       35       -               -
-restaFloat             float        variable        12       36       -               -
-multiFloat             float        variable        13       36       -               -
-divFloat               float        variable        14       34       -               -
-modFloat               float        variable        15       34       -               -
-negativoInt            int          variable        17       32       -               -
-negativoFloat          float        variable        18       40       -               -
-error1                 int          variable        22       29       -               -
-error2                 int          variable        23       29       -               -
-error3                 int          variable        24       31       -               -
-error4                 int          variable        25       28       -               -
-error5                 int          variable        26       33       -               -
-x                      int          variable        30       17       -               -
-y                      int          variable        31       17       -               -
-a                      float        variable        33       21       -               -
-b                      float        variable        34       21       -               -
-flag                   bool         variable        36       24       -               -
-texto                  string       variable        37       29       -               -
-ok1                    int          variable        39       23       -               -
-ok2                    float        variable        40       25       -               -
-error6                 int          variable        42       26       -               -
-error7                 int          variable        43       29       -               -
-error8                 int          variable        44       30       -               -
+sumaInt                int          funcion         1        7        -               -
+resta                  float        funcion         6        9        -               -
+
+----------------------------------------------------------------------------------------------------------------
+SCOPE: main  (padre: global)
+Total de símbolos: 7
+----------------------------------------------------------------------------------------------------------------
+Id                     Tipo         Categoría       Línea    Columna  Valor           Parámetros
+----------------------------------------------------------------------------------------------------------------
+x                      int          variable        18       17       -               -
+arrInt                 int          arreglo         25       65       -               -
+arrFloat               float        arreglo         27       77       -               -
+arrErrorTipo           int          arreglo         29       73       -               -
+arrErrorTipo2          float        arreglo         31       74       -               -
+valor                  int          variable        39       42       -               -
+valor2                 int          variable        41       45       -               -
+
+----------------------------------------------------------------------------------------------------------------
+SCOPE: resta  (padre: global)
+Total de símbolos: 1
+----------------------------------------------------------------------------------------------------------------
+Id                     Tipo         Categoría       Línea    Columna  Valor           Parámetros
+----------------------------------------------------------------------------------------------------------------
+resultadox             float        variable        7        30       -               -
+
+----------------------------------------------------------------------------------------------------------------
+SCOPE: sumaInt  (padre: global)
+Total de símbolos: 1
+----------------------------------------------------------------------------------------------------------------
+Id                     Tipo         Categoría       Línea    Columna  Valor           Parámetros
+----------------------------------------------------------------------------------------------------------------
+resultado              int          variable        2        26       -               -
 
 ================================================================================================================
 Fin de la tabla de símbolos

@@ -48,6 +48,12 @@ parser code {:
     private int lastColumn = 1;
 
     /*
+     * Tipo del arreglo actual siendo inicializado.
+     * Se usa para validar que los valores iniciales tengan el tipo correcto.
+     */
+    private String tipoArregloActual = null;
+
+    /*
      * Constructor del parser.
      * Recibe el lexer, crea la tabla de símbolos y obtiene el
      * manejador de errores para poder reportar errores sintácticos.
@@ -536,8 +542,12 @@ creacion_asignacion ::= tipo:t SEPARADOR ID:i ASIGNAR expresion:e
                             }
                         :};
 
-creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES ASIGNAR valores_array
+creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES ASIGNAR
+                               {: tipoArregloActual = t.toString(); :}
+                               valores_array
                                {:
+                                   tipoArregloActual = null;
+                                   
                                    // Validar que el tipo del arreglo sea int o float
                                    if (!t.toString().equals("int") && !t.toString().equals("float")) {
                                        manejadorErrores.agregarErrorSemantico(
@@ -564,8 +574,24 @@ valores_array ::= INICIO_BLOQUE lista_valores FINAL_BLOQUE;
 lista_valores ::= elemento_valor COMA lista_valores
                 | elemento_valor;
 
-elemento_valor ::= expresion
-                 | valores_array;
+elemento_valor ::= expresion:e
+                 {:
+                     if (tipoArregloActual != null) {
+                         String tipoReal = getTipoExpr(e.toString());
+                         
+                         if (!tipoReal.equals("error") && !tipoReal.equals(tipoArregloActual)) {
+                             manejadorErrores.agregarErrorSemantico(
+                                 "Se esperaba un valor de tipo " + tipoArregloActual + 
+                                 " pero se encontró " + tipoReal,
+                                 eleft + 1,
+                                 eright + 1
+                             );
+                         }
+                     }
+                     RESULT = e;
+                 :}
+                 | valores_array:v
+                 {: RESULT = v; :};
 
 llamada_funcion ::= ID:i INICIO_PAREN lista_expresiones FINAL_PAREN
                   {:
@@ -912,7 +938,7 @@ siguientes_factores_term ::= MULTI expresion_factor:e siguientes_factores_term
                            | /* epsilon */
                             {: RESULT = crearExpr("epsilon", "epsilon"); :};
 
-expresion_factor ::= primer_potencia:p siguientes_potencias
+expresion_factor ::= primer_potencia:p siguientes_potencias:s
                        {:
                             String tipoS = getTipoExpr(s.toString());
 

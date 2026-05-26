@@ -1,45 +1,49 @@
+int ~ sumaInt <| |> |:
+    int ~ resultado <- 10!
+    return ~ resultado!
+:|
+
+float ~ resta <| |> |:
+    float ~ resultadox <- 3.5!
+    return ~ resultadox!
+:|
+
 empty ~ __main__ <| |>
 |:
+
+    sumaInt<| |>!
     
-
-    int ~ sumaInt <- 5 + 3!
-    int ~ restaInt <- 10 - 2!
-    int ~ multiInt <- 4 * 3!
-    int ~ divInt <- 20 / 5!
-    int ~ modInt <- 10 % 3!
-
-    float ~ sumaFloat <- 3.5 + 2.1!
-    float ~ restaFloat <- 8.4 - 1.2!
-    float ~ multiFloat <- 2.5 * 4.1!
-    float ~ divFloat <- 9.6 / 2.4!
-    float ~ modFloat <- 8.4 % 2.1!
-
-    int ~ negativoInt <- -5 + 3!
-    float ~ negativoFloat <- -3.5 * 2.6!
-
-  
-
-    int ~ error1 <- 5 + true!
-    int ~ error2 <- 10 - 2.5!
-    int ~ error3 <- "hola" * 3!
-    int ~ error4 <- 'a' / 2!
-    int ~ error5 <- true % false!
-
+    funcionNoExiste<| |>!
     
-
     int ~ x <- 5!
-    int ~ y <- 2!
+    int ~ x <- 5!
+    int ~ x <- 5!
+    
 
-    float ~ a <- 3.5!
-    float ~ b <- 1.5!
+    x<| |>!
+    
+    int ~ arrInt << 2 >> << 2 >> <- |: |: 1, 2 :|, |: 3, 4 :| :|!
+    
+    float ~ arrFloat << 2 >> << 2 >> <- |: |: 1.5, 2.5 :|, |: 3.5, 4.5 :| :|!
+    
+    int ~ arrErrorTipo << 2 >> << 2 >> <- |: |: 1, 2.5 :|, |: 3, 4 :| :|!
+    
+    float ~ arrErrorTipo2 << 2 >> << 2 >> <- |: |: 1, 2 :|, |: 3, 4 :| :|!
 
-    bool ~ flag <- true!
-    string ~ texto <- "hola"!
+    arrInt << 0 >> << 1 >> <- 10!
 
-    int ~ ok1 <- x + y!
-    float ~ ok2 <- a * b!
+    arrInt << 1.5 >> << 0 >> <- 5!
+    
+    arrInt << 0 >> << 0 >> <- 3.5!
+    
+    int ~ valor <- arrInt << 0 >> << 1 >>!
+    
+    int ~ valor2 <- arrInt << 1.5 >> << 0 >>!
+    
+    string ~ arrString << 2 >> << 2 >> <- |: |: "a", "b" :|, |: "c", "d" :| :|!
 
-    int ~ error6 <- x + a!
-    int ~ error7 <- y * flag!
-    int ~ error8 <- texto - x!
+    bool ~ arrBool << 2 >> << 2 >> <- |: |: true, false :|,|: false, true :| :|!
+    
+    char ~ arrChar << 2 >> << 2 >> <- |: |: 'a', 'b' :|, |: 'c', 'd' :| :|!
+    
 :|
