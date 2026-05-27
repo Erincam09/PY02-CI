@@ -3,7 +3,7 @@
 ======================================================
 Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
-Semántico    7        19       No se pueden operar valores de tipo int y string
+Semántico    5        6        El arreglo 'x' no ha sido inicializado
 ------------------------------------------------------
 Total de Errores: 1
 ======================================================

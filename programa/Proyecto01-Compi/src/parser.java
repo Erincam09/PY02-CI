@@ -1031,6 +1031,8 @@ public class parser extends java_cup.runtime.lr_parser {
 
     private boolean returnEnBloque = false; // Indica si ya se ha encontrado un return en el bloque actual
 
+    private boolean asignacionEnExpresion = false; // Indica si se está procesando una asignación dentro de una expresión
+
     /*
      * Constructor del parser.
      * Recibe el lexer, crea la tabla de símbolos y obtiene el
@@ -1358,6 +1360,8 @@ class CUP$parser$actions {
                           t.toString(), i.toString(), ileft + 1, iright + 1
                       );
                       nodo.setCategoria("parametro");
+                      // Los parámetros se consideran siempre inicializados
+                      nodo.setIntentoAsignacion(true);
                       tabla.agregarNodo(nodo);
 
                       // Agregar el parámetro a la función padre
@@ -1696,6 +1700,8 @@ class CUP$parser$actions {
                                iright + 1
                            );
                        }
+                       // Marcar intento de asignación incluso si falló por tipo
+                       nodo.setIntentoAsignacion(true);
                    }
                
               CUP$parser$result = parser.getSymbolFactory().newSymbol("asignacion",15, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -1734,6 +1740,9 @@ class CUP$parser$actions {
                                  iright + 1
                              );
                          } else {
+                             // Marcar intento de asignación al arreglo
+                             nodo.setIntentoAsignacion(true);
+                             
                              // Validar que los índices sean int
                              String tipoE1 = getTipoExpr(e1.toString());
                              String tipoE2 = getTipoExpr(e2.toString());
@@ -1801,6 +1810,15 @@ class CUP$parser$actions {
                          );
                          RESULT = crearExpr(i.toString(), "error");
                      } else {
+                         // Validar que el arreglo ha sido inicializado
+                         if (!nodo.getIntentoAsignacion()) {
+                             manejadorErrores.agregarErrorSemantico(
+                                 "El arreglo '" + i + "' no ha sido inicializado",
+                                 ileft + 1,
+                                 iright + 1
+                             );
+                         }
+                         
                          // Validar que los índices sean int
                          String tipoE1 = getTipoExpr(e1.toString());
                          String tipoE2 = getTipoExpr(e2.toString());
@@ -1851,6 +1869,9 @@ class CUP$parser$actions {
                                 String tipoVariable = t.toString();
                                 String tipoExpr = getTipoExpr(e.toString());
 
+                                TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(tipoVariable, i.toString(), lastLine, lastColumn);
+                                nodo.setCategoria("variable");
+                                
                                 if (!tipoExpr.equals("error") && !tipoVariable.equals(tipoExpr)) {
                                     manejadorErrores.agregarErrorSemantico(
                                         "No se puede inicializar la variable '" + i +
@@ -1860,8 +1881,8 @@ class CUP$parser$actions {
                                         iright + 1
                                     );
                                 }
-                                TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(tipoVariable, i.toString(), lastLine, lastColumn);
-                                nodo.setCategoria("variable");
+                                // Marcar intento de asignación incluso si falló por tipo
+                                nodo.setIntentoAsignacion(true);
                                 tabla.agregarNodo(nodo);
                             }
                         
@@ -1916,6 +1937,8 @@ class CUP$parser$actions {
                                    } else {
                                        TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
                                        nodo.setCategoria("arreglo");
+                                       // Marcar intento de asignación para arreglos inicializados
+                                       nodo.setIntentoAsignacion(true);
                                        tabla.agregarNodo(nodo);
                                    }
                                
@@ -2969,6 +2992,14 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr(i.toString(), "error");
                         } else {
+                            // Validar que la variable ha sido inicializada
+                            if (!nodo.getIntentoAsignacion() && !nodo.getCategoria().equals("parametro")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "La variable '" + i + "' no ha sido inicializada",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                            }
                             String tipo = nodo.getTipo();
                             if (tipo.equals("int") || tipo.equals("float")) {
                                 RESULT = crearExpr("++" + i.toString(),tipo);
@@ -3016,6 +3047,14 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr(i.toString(), "error");
                         } else {
+                            // Validar que la variable ha sido inicializada
+                            if (!nodo.getIntentoAsignacion() && !nodo.getCategoria().equals("parametro")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "La variable '" + i + "' no ha sido inicializada",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                            }
                             String tipo = nodo.getTipo();
                             if (tipo.equals("int") || tipo.equals("float")) {
                                 RESULT = crearExpr("--" + i.toString(),tipo);
@@ -3099,6 +3138,15 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr(i.toString(), "error");
                         } else {
+                            // Validar que la variable ha sido inicializada
+                            // (parámetros se consideran siempre inicializados)
+                            if (!nodo.getIntentoAsignacion() && !nodo.getCategoria().equals("parametro")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "La variable '" + i + "' no ha sido inicializada",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                            }
                             RESULT = crearExpr(i.toString(),nodo.getTipo());
                         }
                     
@@ -3448,6 +3496,8 @@ class CUP$parser$actions {
                            iright + 1
                        );
                    }
+                   // Marcar intento de asignación cuando se usa cin
+                   nodo.setIntentoAsignacion(true);
                }
            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("cin_nt",68, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);

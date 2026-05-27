@@ -1,7 +1,5 @@
 empty ~ __main__ <| |>
 |:
-    int ~ x!
-    x <- "hola"!
-
-    int ~ res <- 1 + x!
+    int ~ x<<2>><<2>>!
+    x<<1>><<2>>!
 :|

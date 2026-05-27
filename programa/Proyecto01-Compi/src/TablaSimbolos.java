@@ -139,6 +139,7 @@ public class TablaSimbolos {
         private int columna;
         private List<Parametro> parametros;
         private String categoria;
+        private boolean intentoAsignacion;
 
         /*
          * Constructor de NodoToken
@@ -164,6 +165,7 @@ public class TablaSimbolos {
             this.valor = null;
             this.parametros = new ArrayList<>();
             this.categoria = "variable";
+            this.intentoAsignacion = false;
         }
 
         /*
@@ -284,6 +286,26 @@ public class TablaSimbolos {
          */
         public void setCategoria(String categoria) {
             this.categoria = categoria;
+        }
+
+        /*
+         * Obtiene si se intentó asignar un valor a esta variable
+         *
+         * Salida:
+         * - boolean: true si se hizo al menos un intento de asignación
+         */
+        public boolean getIntentoAsignacion() {
+            return intentoAsignacion;
+        }
+
+        /*
+         * Marca que se intentó asignar un valor a esta variable
+         *
+         * Entrada:
+         * - intento: true para marcar como intentada
+         */
+        public void setIntentoAsignacion(boolean intento) {
+            this.intentoAsignacion = intento;
         }
 
         /*
