@@ -1034,6 +1034,16 @@ public class parser extends java_cup.runtime.lr_parser {
     private boolean asignacionEnExpresion = false; // Indica si se está procesando una asignación dentro de una expresión
 
     /*
+     * Contadores para validación de dimensiones de arrays bidimensionales.
+     * Se usan para validar que las dimensiones declaradas coincidan con
+     * las dimensiones reales en la inicialización.
+     */
+    private int filasEsperadas = 0;
+    private int columnasEsperadas = 0;
+    private int filasContadas = 0;
+    private int columnasActual = 0;  // Columnas de la fila actual
+
+    /*
      * Constructor del parser.
      * Recibe el lexer, crea la tabla de símbolos y obtiene el
      * manejador de errores para poder reportar errores sintácticos.
@@ -1900,7 +1910,19 @@ class CUP$parser$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-7)).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-7)).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-7)).value;
- tipoArregloActual = t.toString(); 
+		int filasleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)).left;
+		int filasright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)).right;
+		Object filas = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-5)).value;
+		int columnasleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
+		int columnasright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
+		Object columnas = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
+ 
+                                   tipoArregloActual = t.toString();
+                                   filasEsperadas = Integer.parseInt(filas.toString());
+                                   columnasEsperadas = Integer.parseInt(columnas.toString());
+                                   filasContadas = 0;
+                                   // columnasDelaPrimeraFila = 0;
+                               
               CUP$parser$result = parser.getSymbolFactory().newSymbol("NT$1",74, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1917,8 +1939,23 @@ class CUP$parser$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-9)).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-9)).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-9)).value;
+		int filasleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-7)).left;
+		int filasright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-7)).right;
+		Object filas = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-7)).value;
+		int columnasleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)).left;
+		int columnasright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)).right;
+		Object columnas = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-4)).value;
 		
                                    tipoArregloActual = null;
+                                   
+                                   // Validar dimensiones del array
+                                   if (filasContadas != filasEsperadas) {
+                                       manejadorErrores.agregarErrorSemantico(
+                                           "Se esperaban " + filasEsperadas + " filas pero se encontraron " + filasContadas,
+                                           ileft + 1,
+                                           iright + 1
+                                       );
+                                   }
                                    
                                    // Validar que el tipo del arreglo sea int o float
                                    if (!t.toString().equals("int") && !t.toString().equals("float")) {
@@ -1959,7 +1996,7 @@ class CUP$parser$actions {
           case 47: // lista_filas ::= fila COMA lista_filas 
             {
               Object RESULT =null;
-
+		 filasContadas++; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_filas",21, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1968,7 +2005,7 @@ class CUP$parser$actions {
           case 48: // lista_filas ::= fila 
             {
               Object RESULT =null;
-
+		 filasContadas++; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_filas",21, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1977,7 +2014,18 @@ class CUP$parser$actions {
           case 49: // fila ::= INICIO_BLOQUE lista_valores FINAL_BLOQUE 
             {
               Object RESULT =null;
-
+		
+            // Validar que el número de columnas coincida con lo esperado
+            if (columnasActual != columnasEsperadas) {
+                manejadorErrores.agregarErrorSemantico(
+                    "Se esperaban " + columnasEsperadas + " columnas pero se encontraron " + columnasActual,
+                    lastLine,
+                    lastColumn
+                );
+            }
+            
+            columnasActual = 0;
+        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("fila",22, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1986,7 +2034,7 @@ class CUP$parser$actions {
           case 50: // lista_valores ::= elemento_valor COMA lista_valores 
             {
               Object RESULT =null;
-
+		 columnasActual++; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_valores",23, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1995,7 +2043,7 @@ class CUP$parser$actions {
           case 51: // lista_valores ::= elemento_valor 
             {
               Object RESULT =null;
-
+		 columnasActual++; 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_valores",23, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;

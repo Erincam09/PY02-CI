@@ -60,6 +60,16 @@ parser code {:
     private boolean asignacionEnExpresion = false; // Indica si se está procesando una asignación dentro de una expresión
 
     /*
+     * Contadores para validación de dimensiones de arrays bidimensionales.
+     * Se usan para validar que las dimensiones declaradas coincidan con
+     * las dimensiones reales en la inicialización.
+     */
+    private int filasEsperadas = 0;
+    private int columnasEsperadas = 0;
+    private int filasContadas = 0;
+    private int columnasActual = 0;  // Columnas de la fila actual
+
+    /*
      * Constructor del parser.
      * Recibe el lexer, crea la tabla de símbolos y obtiene el
      * manejador de errores para poder reportar errores sintácticos.
@@ -599,11 +609,26 @@ creacion_asignacion ::= tipo:t SEPARADOR ID:i ASIGNAR expresion:e
                             }
                         :};
 
-creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES ASIGNAR
-                               {: tipoArregloActual = t.toString(); :}
+creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO:filas FINAL_INDICES INICIO_INDICES ENTERO:columnas FINAL_INDICES ASIGNAR
+                               {: 
+                                   tipoArregloActual = t.toString();
+                                   filasEsperadas = Integer.parseInt(filas.toString());
+                                   columnasEsperadas = Integer.parseInt(columnas.toString());
+                                   filasContadas = 0;
+                                   // columnasDelaPrimeraFila = 0;
+                               :}
                                valores_array
                                {:
                                    tipoArregloActual = null;
+                                   
+                                   // Validar dimensiones del array
+                                   if (filasContadas != filasEsperadas) {
+                                       manejadorErrores.agregarErrorSemantico(
+                                           "Se esperaban " + filasEsperadas + " filas pero se encontraron " + filasContadas,
+                                           ileft + 1,
+                                           iright + 1
+                                       );
+                                   }
                                    
                                    // Validar que el tipo del arreglo sea int o float
                                    if (!t.toString().equals("int") && !t.toString().equals("float")) {
@@ -631,12 +656,28 @@ creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_
 valores_array ::= INICIO_BLOQUE lista_filas FINAL_BLOQUE;
 
 lista_filas ::= fila COMA lista_filas
-              | fila;
+              {: filasContadas++; :}
+              | fila
+              {: filasContadas++; :};
 
-fila ::= INICIO_BLOQUE lista_valores FINAL_BLOQUE;
+fila ::= INICIO_BLOQUE lista_valores FINAL_BLOQUE
+        {:
+            // Validar que el número de columnas coincida con lo esperado
+            if (columnasActual != columnasEsperadas) {
+                manejadorErrores.agregarErrorSemantico(
+                    "Se esperaban " + columnasEsperadas + " columnas pero se encontraron " + columnasActual,
+                    lastLine,
+                    lastColumn
+                );
+            }
+            
+            columnasActual = 0;
+        :};
 
 lista_valores ::= elemento_valor COMA lista_valores
-                | elemento_valor;
+                {: columnasActual++; :}
+                | elemento_valor
+                {: columnasActual++; :};
 
 elemento_valor ::= expresion:e
                  {:

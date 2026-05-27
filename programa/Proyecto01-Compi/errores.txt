@@ -3,7 +3,26 @@
 ======================================================
 Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
-Semántico    5        6        El arreglo 'x' no ha sido inicializado
+Semántico    7        10       Función 'sumaInt' ya ha sido declarada
+Semántico    8        14       No se puede inicializar la variable 'resultadox' de tipo float con un valor de tipo int
+Semántico    17       6        La función 'funcionNoExiste' no ha sido declarada
+Semántico    20       12       Variable 'x' ya ha sido declarada en este scope
+Semántico    21       12       Variable 'x' ya ha sido declarada en este scope
+Semántico    22       12       Variable 'x' ya ha sido declarada en este scope
+Semántico    24       6        La función 'x' no ha sido declarada
+Semántico    26       54       Se esperaban 2 columnas pero se encontraron 3
+Semántico    26       64       Se esperaban 2 columnas pero se encontraron 1
+Semántico    30       53       Se esperaba un valor de tipo int pero se encontró float
+Semántico    32       53       Se esperaba un valor de tipo float pero se encontró int
+Semántico    32       56       Se esperaba un valor de tipo float pero se encontró int
+Semántico    32       65       Se esperaba un valor de tipo float pero se encontró int
+Semántico    32       68       Se esperaba un valor de tipo float pero se encontró int
+Semántico    36       16       El índice del arreglo debe ser int, pero se encontró: float
+Semántico    38       32       No se puede asignar un valor de tipo float a un arreglo de tipo int
+Semántico    42       32       El índice del arreglo debe ser int, pero se encontró: float
+Semántico    44       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: string
+Semántico    46       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: bool
+Semántico    48       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: char
 ------------------------------------------------------
-Total de Errores: 1
+Total de Errores: 20
 ======================================================
