@@ -1395,25 +1395,94 @@ abrir_scope_switch ::=
     :}
 ;
 
-bloque_switch ::= SWITCH SEPARADOR INICIO_PAREN condicion FINAL_PAREN
-                  abrir_scope_switch
-                  bloque_casos
-                  {: tabla.salirDelScope(); :}
+bloque_switch ::= SWITCH SEPARADOR INICIO_PAREN expresion_aritmetica:e FINAL_PAREN
+                    abrir_scope_switch
+                    bloque_casos:b
+                    {: String tipoE = getTipoExpr(e.toString());
 
-                | SWITCH SEPARADOR INICIO_PAREN error FINAL_PAREN
-                  abrir_scope_switch
-                  bloque_casos
-                  {: tabla.salirDelScope(); :}
-                ;
+                       if (!tipoE.equals("int") && !tipoE.equals("char") && !tipoE.equals("error")) {
+                           manejadorErrores.agregarErrorSemantico(
+                               "La expresión en un switch debe ser int, char o error, pero se encontró " + tipoE,
+                               eleft + 1,
+                               eright + 1
+                           );
+                       }
 
-bloque_casos ::= INICIO_BLOQUE lista_casos FINAL_BLOQUE
-               | INICIO_BLOQUE lista_casos default_case FINAL_BLOQUE;
+                       String tipoB = getTipoExpr(b.toString());
 
-lista_casos ::= caso lista_casos
-              | caso;
+                        if (!tipoB.equals("error") && !tipoB.equals("epsilon") && !tipoB.equals(tipoE)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                    "Los casos en un switch deben ser del mismo tipo que la expresión, pero se encontró " + tipoB,
+                                    bleft + 1,
+                                    bright + 1
+                            );
+                        }
+                        tabla.salirDelScope();
+                    :}
 
-caso ::= CASE SEPARADOR literal DOS_PUNTOS lista_sentencias
-        | CASE SEPARADOR literal DOS_PUNTOS
+                    | SWITCH SEPARADOR INICIO_PAREN error FINAL_PAREN
+                    abrir_scope_switch
+                    bloque_casos
+                    {: tabla.salirDelScope(); :}
+                    ;
+
+bloque_casos ::= INICIO_BLOQUE lista_casos:l FINAL_BLOQUE
+                 {: RESULT = l; :}
+               | INICIO_BLOQUE lista_casos:l default_case FINAL_BLOQUE
+                 {: RESULT = l; :}
+               ;
+
+lista_casos ::= caso:c lista_casos:l
+                {:
+                    String tipoC = getTipoExpr(c.toString());
+                    String tipoL = getTipoExpr(l.toString());
+
+                    if (tipoC.equals("error") || tipoL.equals("error")) {
+                        RESULT = crearExpr("cases", "error");
+                    } else if (tipoL.equals("epsilon")) {
+                        RESULT = c;
+                    } else if (!tipoC.equals(tipoL)) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "Todos los case de un switch deben ser del mismo tipo, pero se encontró "
+                            + tipoC + " y " + tipoL,
+                            cleft + 1,
+                            cright + 1
+                        );
+                        RESULT = crearExpr("cases", "error");
+                    } else {
+                        RESULT = c;
+                    }
+                :}
+              | caso:c
+                {:
+                    RESULT = c;
+                :}
+              ;
+
+caso ::= CASE SEPARADOR literal:l DOS_PUNTOS lista_sentencias
+        {: String tipo = getTipoExpr(l.toString());
+
+           if (!tipo.equals("int") && !tipo.equals("char") && !tipo.equals("error")) {
+               manejadorErrores.agregarErrorSemantico(
+                   "El literal en un caso de switch debe ser int, char o error, pero se encontró " + tipo,
+                   lleft + 1,
+                   lright + 1
+               );
+           }
+           RESULT = crearExpr("case", tipo);
+        :}
+        | CASE SEPARADOR literal:l DOS_PUNTOS
+        {: String tipo = getTipoExpr(l.toString());
+
+           if (!tipo.equals("int") && !tipo.equals("char") && !tipo.equals("error")) {
+               manejadorErrores.agregarErrorSemantico(
+                   "El literal en un caso de switch debe ser int, char o error, pero se encontró " + tipo,
+                   lleft + 1,
+                   lright + 1
+               );
+           }
+           RESULT = crearExpr("case", tipo);
+        :}
         | CASE error DOS_PUNTOS lista_sentencias
         ;
 
@@ -1439,7 +1508,9 @@ return_nt ::= RETURN SEPARADOR expresion:e
                       TablaSimbolos.NodoToken funcion = tabla.buscarSimboloEnScope(scopeActual,tabla.getParentScope());
                       if (funcion != null &&funcion.getCategoria().equals("funcion")) {
                           String tipoFuncion = funcion.getTipo();
+                          System.out.println("Tipo función: " + tipoFuncion);
                           String tipoReturn = getTipoExpr(e.toString());
+                          System.out.println("Tipo return: " + tipoReturn);
 
                           if (!tipoReturn.equals("error") && !tipoFuncion.equals(tipoReturn)) {
                               manejadorErrores.agregarErrorSemantico(
