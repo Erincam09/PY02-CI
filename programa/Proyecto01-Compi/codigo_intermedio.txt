@@ -1,20 +1,30 @@
 main:
+t1 = -5
 data_int a
-t1 = 5
-a = t1
+t2 = t1
+a = t2
 data_int b
-t2 = 3
-b = t2
+t3 = 3
+b = t3
 data_int c
-t3 = b
 t4 = a
-t5 = t3 ^ t4
-t6 = b
-t7 = t5
-t8 = t6 * t7
-t9 = a
-t10 = t8
-t11 = t9 + t10
-t12 = t11
-c = t12
+t5 = 1
+t6 = t4 - t5
+a = t6
+t7 = -4
+t8 = a
+t9 = 1
+t10 = t8 + t9
+a = t10
+t11 = t7
+t12 = t10
+t13 = t11 ^ t12
+t14 = b
+t15 = t13
+t16 = t14 * t15
+t17 = t6
+t18 = t16
+t19 = t17 + t18
+t20 = t19
+c = t20
 main_end:

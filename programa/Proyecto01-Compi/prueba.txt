@@ -1,8 +1,8 @@
 empty ~ __main__ <| |>
 |:
-    int ~ a <- 5!
+    int ~ a <- -5!
     int ~ b <- 3!
     int ~ c!
 
-    c <- a + b * b ^ a!
+    c <- --a + b * -4 ^ ++a!
 :|

@@ -1353,7 +1353,15 @@ expresion_unarios ::= MASMAS ID:i
                             }
                             String tipo = nodo.getTipo();
                             if (tipo.equals("int") || tipo.equals("float")) {
-                                RESULT = crearExpr("++" + i.toString(),tipo);
+                                if (tipo.equals("int") || tipo.equals("float")) {
+                                    String tVar = cod3d.genTemporal(i.toString());
+                                    String tUno = cod3d.genTemporal("1");
+                                    String temp = cod3d.genOperacion(tVar, "+", tUno);
+
+                                    cod3d.genAsignacion(i.toString(), temp);
+
+                                    RESULT = crearExpr(temp, tipo);
+                                }
                             } else {
                                 manejadorErrores.agregarErrorSemantico(
                                     "El operador ++ solo se puede aplicar a int y float, se encontró: " + tipo,
@@ -1363,6 +1371,7 @@ expresion_unarios ::= MASMAS ID:i
                                 RESULT = crearExpr(i.toString(), "error");
                             }
                         }
+                        
                     :}
                     | MASMAS acceso_array:a
                     {: RESULT = a; :}
@@ -1388,7 +1397,13 @@ expresion_unarios ::= MASMAS ID:i
                             }
                             String tipo = nodo.getTipo();
                             if (tipo.equals("int") || tipo.equals("float")) {
-                                RESULT = crearExpr("--" + i.toString(),tipo);
+                                String tVar = cod3d.genTemporal(i.toString());
+                                String tUno = cod3d.genTemporal("1");
+                                String temp = cod3d.genOperacion(tVar, "-", tUno);
+
+                                cod3d.genAsignacion(i.toString(), temp);
+
+                                RESULT = crearExpr(temp, tipo);
                             } else {
                                 manejadorErrores.agregarErrorSemantico(
                                     "El operador -- solo se puede aplicar a int y float, se encontró: " + tipo,
@@ -1402,7 +1417,14 @@ expresion_unarios ::= MASMAS ID:i
                     | MENOSMENOS acceso_array:a
                     {: RESULT = a; :}
                     | RESTA numero:n
-                    {: RESULT = crearExpr("-" + getValorExpr(n.toString()), getTipoExpr(n.toString())); :}
+                    {:
+                        String valor = getValorExpr(n.toString());
+                        String tipo = getTipoExpr(n.toString());
+
+                        String temp = cod3d.genTemporal("-" + valor);
+
+                        RESULT = crearExpr(temp, tipo);
+                    :}
                     | expresion_valores:e
                     {: RESULT = e; :};
 

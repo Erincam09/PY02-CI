@@ -3178,7 +3178,15 @@ class CUP$parser$actions {
                             }
                             String tipo = nodo.getTipo();
                             if (tipo.equals("int") || tipo.equals("float")) {
-                                RESULT = crearExpr("++" + i.toString(),tipo);
+                                if (tipo.equals("int") || tipo.equals("float")) {
+                                    String tVar = cod3d.genTemporal(i.toString());
+                                    String tUno = cod3d.genTemporal("1");
+                                    String temp = cod3d.genOperacion(tVar, "+", tUno);
+
+                                    cod3d.genAsignacion(i.toString(), temp);
+
+                                    RESULT = crearExpr(temp, tipo);
+                                }
                             } else {
                                 manejadorErrores.agregarErrorSemantico(
                                     "El operador ++ solo se puede aplicar a int y float, se encontró: " + tipo,
@@ -3188,6 +3196,7 @@ class CUP$parser$actions {
                                 RESULT = crearExpr(i.toString(), "error");
                             }
                         }
+                        
                     
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expresion_unarios",34, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -3233,7 +3242,13 @@ class CUP$parser$actions {
                             }
                             String tipo = nodo.getTipo();
                             if (tipo.equals("int") || tipo.equals("float")) {
-                                RESULT = crearExpr("--" + i.toString(),tipo);
+                                String tVar = cod3d.genTemporal(i.toString());
+                                String tUno = cod3d.genTemporal("1");
+                                String temp = cod3d.genOperacion(tVar, "-", tUno);
+
+                                cod3d.genAsignacion(i.toString(), temp);
+
+                                RESULT = crearExpr(temp, tipo);
                             } else {
                                 manejadorErrores.agregarErrorSemantico(
                                     "El operador -- solo se puede aplicar a int y float, se encontró: " + tipo,
@@ -3267,7 +3282,14 @@ class CUP$parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		 RESULT = crearExpr("-" + getValorExpr(n.toString()), getTipoExpr(n.toString())); 
+		
+                        String valor = getValorExpr(n.toString());
+                        String tipo = getTipoExpr(n.toString());
+
+                        String temp = cod3d.genTemporal("-" + valor);
+
+                        RESULT = crearExpr(temp, tipo);
+                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expresion_unarios",34, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
