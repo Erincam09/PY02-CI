@@ -1350,7 +1350,6 @@ condicion ::= expresion_logica:e
                           eright + 1
                       );
                   }
-
                   RESULT = e;
               :};
 
@@ -1491,7 +1490,20 @@ default_case ::= DEFAULT SEPARADOR DOS_PUNTOS lista_sentencias
                 | DEFAULT error lista_sentencias
                 ;
 
-break_nt ::= BREAK;
+break_nt ::= BREAK
+             {:
+                 String scopeActual = tabla.getCurrentScope();
+
+                 if (!scopeActual.contains("switch") &&
+                     !scopeActual.contains("dowhile")) {
+
+                     manejadorErrores.agregarErrorSemantico(
+                         "La sentencia break solo puede usarse dentro de un switch o ciclo",
+                         lastLine,
+                         lastColumn
+                     );
+                 }
+             :};
 
 return_nt ::= RETURN SEPARADOR expresion:e
               {:
