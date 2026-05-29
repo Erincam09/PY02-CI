@@ -1018,6 +1018,8 @@ public class parser extends java_cup.runtime.lr_parser {
      */
     ManejadorErrores manejadorErrores;
 
+    Cod3D cod3d;
+    
     /*
      * Contadores utilizados para generar nombres únicos de scopes,
      * por ejemplo if1_main, switch1_main, dowhile1_main, etc.
@@ -1076,6 +1078,7 @@ public class parser extends java_cup.runtime.lr_parser {
         this.lex = lex;
         this.tabla = new TablaSimbolos();
         this.manejadorErrores = lex.getManejadorErrores();
+        this.cod3d = new Cod3D();
     }
 
     /*
@@ -1164,9 +1167,6 @@ public class parser extends java_cup.runtime.lr_parser {
         return expr.substring(expr.lastIndexOf(":") + 1);
     }
 
-    // private boolean esNumerico(String tipo) {
-    //     return tipo.equals("int") || tipo.equals("float");
-    // }
 
 
 /** Cup generated class to encapsulate user supplied action code.*/
@@ -1212,6 +1212,8 @@ class CUP$parser$actions {
             {
               Object RESULT =null;
 		 tabla.escribirArchivo(); 
+                cod3d.escribirArchivo();
+            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("programa",0, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1220,7 +1222,9 @@ class CUP$parser$actions {
           case 2: // programa ::= main 
             {
               Object RESULT =null;
-		 tabla.escribirArchivo(); 
+		 tabla.escribirArchivo();
+                cod3d.escribirArchivo(); 
+             
               CUP$parser$result = parser.getSymbolFactory().newSymbol("programa",0, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1229,7 +1233,10 @@ class CUP$parser$actions {
           case 3: // NT$0 ::= 
             {
               Object RESULT =null;
- tabla.crearNuevoScope("main"); 
+ 
+            tabla.crearNuevoScope("main");
+            cod3d.crearEtiqueta("main"); 
+         
               CUP$parser$result = parser.getSymbolFactory().newSymbol("NT$0",74, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1240,7 +1247,10 @@ class CUP$parser$actions {
               Object RESULT =null;
               // propagate RESULT from NT$0
                 RESULT = (Object) ((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 tabla.salirDelScope(); 
+		 
+            cod3d.crearEtiqueta("main_end"); 
+            tabla.salirDelScope();
+         
               CUP$parser$result = parser.getSymbolFactory().newSymbol("main",1, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-6)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -1668,6 +1678,8 @@ class CUP$parser$actions {
                      TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
                      nodo.setCategoria("variable");
                      tabla.agregarNodo(nodo);
+
+                     cod3d.crearCodigo("data_" + t.toString() + " " + i.toString());
                  }
              
               CUP$parser$result = parser.getSymbolFactory().newSymbol("creacion",13, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -1758,28 +1770,32 @@ class CUP$parser$actions {
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		
-                   TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+                    TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
 
-                   if (nodo == null) {
-                       manejadorErrores.agregarErrorSemantico(
-                           "La variable '" + i + "' no ha sido declarada",
-                           ileft + 1,
-                           iright + 1
-                       );
-                   } else {
-                       String tipoVariable = nodo.getTipo();
-                       String tipoExpr = getTipoExpr(e.toString());
-                       if (!tipoExpr.equals("error") && !tipoVariable.equals(tipoExpr)) {
-                           manejadorErrores.agregarErrorSemantico(
-                               "No se puede asignar un valor de tipo " + tipoExpr +
-                               " a la variable '" + i + "' de tipo " + tipoVariable,
-                               ileft + 1,
-                               iright + 1
-                           );
-                       }
-                       // Marcar intento de asignación incluso si falló por tipo
-                       nodo.setIntentoAsignacion(true);
-                   }
+                    if (nodo == null) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "La variable '" + i + "' no ha sido declarada",
+                            ileft + 1,
+                            iright + 1
+                        );
+                    } else {
+                        String tipoVariable = nodo.getTipo();
+                        String tipoExpr = getTipoExpr(e.toString());
+                        if (!tipoExpr.equals("error") && !tipoVariable.equals(tipoExpr)) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "No se puede asignar un valor de tipo " + tipoExpr +
+                                " a la variable '" + i + "' de tipo " + tipoVariable,
+                                ileft + 1,
+                                iright + 1
+                            );
+                        }
+                        // Marcar intento de asignación incluso si falló por tipo
+                        nodo.setIntentoAsignacion(true);
+                        
+                        String dir = getValorExpr(e.toString());
+                        String temp = cod3d.genTemporal(dir);
+                        cod3d.genAsignacion(i.toString(), temp); 
+                    }
                
               CUP$parser$result = parser.getSymbolFactory().newSymbol("asignacion",15, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -1961,6 +1977,11 @@ class CUP$parser$actions {
                                 // Marcar intento de asignación incluso si falló por tipo
                                 nodo.setIntentoAsignacion(true);
                                 tabla.agregarNodo(nodo);
+                                
+                                String dir = getValorExpr(e.toString());
+                                cod3d.crearCodigo("data_" + tipoVariable + " " + i.toString());
+                                String temp = cod3d.genTemporal(dir);
+                                cod3d.genAsignacion(i.toString(), temp);
                             }
                         
               CUP$parser$result = parser.getSymbolFactory().newSymbol("creacion_asignacion",18, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);

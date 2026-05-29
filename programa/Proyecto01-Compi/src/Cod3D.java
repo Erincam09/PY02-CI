@@ -1,4 +1,6 @@
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.StringBuffer;
 
 public class Cod3D {
@@ -8,6 +10,7 @@ public class Cod3D {
     
     // Contador de temporales (empieza en 1 como en los ejemplos: t1, t2, t3...)
     private int tempActual = 1;
+    private int labelActual = 1; // Para etiquetas de control (if, while, etc.)
     
     /**
      * Genera un nuevo temporal secuencial
@@ -16,6 +19,12 @@ public class Cod3D {
     public String nuevoTemp() {
         String temp = "t" + tempActual;
         tempActual++;
+        return temp;
+    }
+
+    public String genTemporal(String valor) {
+        String temp = nuevoTemp();
+        crearCodigo(temp + " = " + valor);
         return temp;
     }
     
@@ -48,6 +57,7 @@ public class Cod3D {
     public void limpiar() {
         codigo3D = new StringBuffer();
         tempActual = 1;
+        labelActual = 1;
     }
     
     /**
@@ -136,6 +146,50 @@ public class Cod3D {
             default: 
                 System.err.println("Operador no soportado: " + operador);
                 return izquierda;
+        }
+    }
+
+    public String nuevaEtiqueta(String base) {
+        return base + "_" + labelActual++;
+    }
+
+    public void crearEtiqueta(String etiqueta) {
+        crearCodigo(etiqueta + ":");
+    }
+
+    public void genGoto(String etiqueta) {
+        crearCodigo("goto " + etiqueta);
+    }
+
+    public void genIfGoto(String condicion, String etiqueta) {
+        crearCodigo("if " + condicion + " goto " + etiqueta);
+    }
+
+    public String genOperacion(String izquierda, String operador, String derecha) {
+        String temp = nuevoTemp();
+        crearCodigo(temp + " = " + izquierda + " " + operador + " " + derecha);
+        return temp;
+    }
+
+    public void genReturn(String valor) {
+        crearCodigo("return " + valor);
+    }
+
+    public void genPrint(String tipo, String valor) {
+        crearCodigo("print, " + tipo + ", " + valor);
+    }
+
+    public void genRead(String tipo, String variable) {
+        crearCodigo("read, " + tipo + ", " + variable);
+    }
+
+    public void escribirArchivo() {
+        try {
+            FileWriter fw = new FileWriter("codigo_intermedio.txt");
+            fw.write(codigo3D.toString());
+            fw.close();
+        } catch (IOException e) {
+            System.err.println("Error escribiendo código intermedio: " + e.getMessage());
         }
     }
 }

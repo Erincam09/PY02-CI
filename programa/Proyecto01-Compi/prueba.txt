@@ -1,26 +1,8 @@
-int ~ sumaInt <| |> |:
-    bool ~ flag <- true!
-    int ~ resultado <- 10!
-    if ~ <| flag |> |:
-        return ~ resultado!
-    :|
-    
-:|
-
-
 empty ~ __main__ <| |>
 |:
-    int ~ opcion <- 3 !
-    switch ~ <| opcion |> 
-    |:
-        case ~ 1:
-            int ~ x <- 5 !
-        case ~ 2:
-            sumaInt<||>!
-            break!
-        case ~ 3:
-            break!
-        default~:
-    :|
-     
+    int ~ a <- 5!
+    int ~ b <- 3!
+    int ~ c!
+
+    c <- a!
 :|

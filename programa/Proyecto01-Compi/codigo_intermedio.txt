@@ -1,0 +1,11 @@
+main:
+data_int a
+t1 = 5
+a = t1
+data_int b
+t2 = 3
+b = t2
+data_int c
+t3 = a
+c = t3
+main_end:

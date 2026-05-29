@@ -3,8 +3,6 @@
 ======================================================
 Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
-Semántico    46       2        A la funcion le falta un return
-Semántico    48       19       La función debe retornar float pero se encontró int
 ------------------------------------------------------
-Total de Errores: 2
+Total de Errores: 0
 ======================================================
