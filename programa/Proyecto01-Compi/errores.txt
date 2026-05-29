@@ -3,14 +3,8 @@
 ======================================================
 Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
-Semántico    3        14       No se puede inicializar la variable 'resultado' de tipo float con un valor de tipo int
-Semántico    4        15       La función 'sumaInt' debe retornar int pero se encontró float
-Semántico    10       14       No se puede inicializar la variable 'opcion' de tipo float con un valor de tipo int
-Semántico    13       17       El tipo del case ''A'' (char) no es compatible con la expresión del switch (float)
-Semántico    15       17       El tipo del case ''B'' (char) no es compatible con la expresión del switch (float)
-Semántico    17       17       El tipo del case ''A'' (char) no es compatible con la expresión del switch (float)
-Semántico    17       17       Valor de case ''A'' ya ha sido declarado en este switch
-Semántico    11       18       La expresión en un switch debe ser int, char o error, pero se encontró float
+Semántico    46       2        A la funcion le falta un return
+Semántico    48       19       La función debe retornar float pero se encontró int
 ------------------------------------------------------
-Total de Errores: 8
+Total de Errores: 2
 ======================================================

@@ -55,8 +55,6 @@ parser code {:
      */
     private String tipoArregloActual = null;
 
-    private boolean returnEnBloque = false; // Indica si ya se ha encontrado un return en el bloque actual
-
     private boolean asignacionEnExpresion = false; // Indica si se está procesando una asignación dentro de una expresión
 
     private boolean funcionDuplicada = false; // Indica si la función actual es duplicada (scope temporal)
@@ -84,6 +82,8 @@ parser code {:
      * Se usa para validar que cada case sea compatible con el tipo del switch.
      */
     private String tipoSwitchActual = null;
+
+    private String tipoFuncionActual = null; 
 
     /*
      * Constructor del parser.
@@ -267,7 +267,7 @@ non terminal condicion;
 non terminal abrir_scope_if, abrir_scope_else, cerrar_scope;
 non terminal abrir_scope_while, abrir_scope_switch;
 non terminal bloque_if_else, bloque_do_while, bloque_switch;
-non terminal bloque_casos, lista_casos, caso, default_case;
+non terminal bloque_casos, lista_casos, caso, default_case, sentencias_break;
 
 non terminal break_nt, return_nt, cin_nt, cout_nt;
 non terminal literal, numero, bool_lit;
@@ -305,7 +305,7 @@ encabezado_funcion ::= tipo:t SEPARADOR ID:i
                                );
                                // Crear scope temporal para procesar errores dentro de la función
                                tabla.crearNuevoScope("duplicada_" + i.toString());
-                               returnEnBloque = false;
+                               tipoFuncionActual = t.toString();
                            } else {
                                funcionDuplicada = false;
                                tipoFuncionDuplicada = null;
@@ -317,18 +317,18 @@ encabezado_funcion ::= tipo:t SEPARADOR ID:i
                                );
                                nodo.setCategoria("funcion");
                                tabla.agregarNodo(nodo);
+                               tipoFuncionActual = t.toString();
 
                                tabla.crearNuevoScope(i.toString());
-                               returnEnBloque = false; 
                            }
                        :}
                      ;
 
-funcion ::= encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN bloque
+funcion ::= encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN bloque:b
             {:
-                if (!funcionDuplicada && !returnEnBloque) {
+                if (!funcionDuplicada && !getTipoExpr(b.toString()).equals("true")) {
                     manejadorErrores.agregarErrorSemantico(
-                        "La función debe tener al menos un return",
+                        "A la funcion le falta un return",
                         lastLine,
                         lastColumn
                     );
@@ -336,11 +336,11 @@ funcion ::= encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN bloque
                 tabla.salirDelScope();
             :}
 
-          | encabezado_funcion INICIO_PAREN FINAL_PAREN bloque
+          | encabezado_funcion INICIO_PAREN FINAL_PAREN bloque:b
             {:
-                if (!funcionDuplicada && !returnEnBloque) {
+                if (!funcionDuplicada && !getTipoExpr(b.toString()).equals("true")) {
                     manejadorErrores.agregarErrorSemantico(
-                        "La función debe tener al menos un return",
+                        "A la funcion le falta un return",
                         lastLine,
                         lastColumn
                     );
@@ -399,31 +399,57 @@ parametro ::= tipo:t SEPARADOR ID:i
               :}
             ;
 
-bloque ::= INICIO_BLOQUE lista_sentencias FINAL_BLOQUE
+bloque ::= INICIO_BLOQUE lista_sentencias:l FINAL_BLOQUE
+            {: RESULT = l; :}
          | INICIO_BLOQUE FINAL_BLOQUE
+            {: RESULT = crearExpr("return", "false"); :}
          | INICIO_BLOQUE error FINAL_BLOQUE
          ;
 
-lista_sentencias ::= sentencia lista_sentencias
-                   | sentencia
-                   | error FIN_EXPR lista_sentencias
+lista_sentencias ::= sentencia:s lista_sentencias:l
+                    {:
+                        String returnS = getTipoExpr(s.toString());
+                        String returnL = getTipoExpr(l.toString());
+
+                        if (returnS.equals("true") || returnL.equals("true")) {
+                            RESULT = crearExpr("return", "true");
+                        } else {
+                            RESULT = crearExpr("return", "false");
+                        }
+                    :}
+                   | sentencia:s
+                   {: RESULT = s; :}
+                   | error FIN_EXPR lista_sentencias:l
+                   {: RESULT = l; :}
                    | error FIN_EXPR
                    ;
 
 sentencia ::= creacion FIN_EXPR
+            {: RESULT = crearExpr("return", "false"); :}
             | asignacion FIN_EXPR
+            {: RESULT = crearExpr("return", "false"); :}
             | creacion_array FIN_EXPR
+            {: RESULT = crearExpr("return", "false"); :}
             | asignacion_array FIN_EXPR
+            {: RESULT = crearExpr("return", "false"); :}
             | creacion_asignacion FIN_EXPR
+            {: RESULT = crearExpr("return", "false"); :}
             | creacion_asignacion_array FIN_EXPR
-            | return_nt FIN_EXPR
-            | break_nt FIN_EXPR
-            | bloque_if_else
+            {: RESULT = crearExpr("return", "false"); :}
+            | return_nt:r FIN_EXPR
+            {: RESULT = r; :}
+            | bloque_if_else:b
+            {: RESULT = b; :}
             | bloque_do_while
+            {: RESULT = crearExpr("return", "false"); :}
             | bloque_switch
+            {: RESULT = crearExpr("return", "false"); :}
             | expresion FIN_EXPR
+            {: RESULT = crearExpr("return", "false"); :}
             | cin_nt FIN_EXPR
+            {: RESULT = crearExpr("return", "false"); :}
             | cout_nt FIN_EXPR
+            {: RESULT = crearExpr("return", "false"); :}
             ;
 
 creacion ::= tipo:t SEPARADOR ID:i
@@ -470,7 +496,7 @@ lista_expresiones ::= expresion:e COMA lista_expresiones:l
                         
                         ArrayList<String> listaTipos = (ArrayList<String>)l;
                         String tipoExpr = getTipoExpr(e.toString());
-                        listaTipos.add(0, tipoExpr);
+                        listaTipos.add(0, tipoExpr); 
                         RESULT = listaTipos;
                      :}
                     | expresion:e
@@ -1389,15 +1415,26 @@ bloque_if_else ::= IF SEPARADOR INICIO_PAREN condicion FINAL_PAREN
                    abrir_scope_if
                    bloque
                    cerrar_scope
+                   {: RESULT = crearExpr("return", "false"); :}
 
                  | IF SEPARADOR INICIO_PAREN condicion FINAL_PAREN
                    abrir_scope_if
-                   bloque
+                   bloque:blq1
                    cerrar_scope
                    ELSE SEPARADOR
                    abrir_scope_else
-                   bloque
+                   bloque:blq2
                    cerrar_scope
+                   {:
+                        String returnb1 = getTipoExpr(blq1.toString());
+                        String returnb2 = getTipoExpr(blq2.toString());
+
+                        if(returnb1.equals("true") && returnb2.equals("true")){
+                            RESULT = crearExpr("return", "true");
+                        } else {
+                            RESULT = crearExpr("return", "false");
+                        }
+                   :}
 
                  | IF SEPARADOR INICIO_PAREN error FINAL_PAREN
                    abrir_scope_if
@@ -1412,11 +1449,13 @@ abrir_scope_while ::=
 ;
 
 bloque_do_while ::= DO SEPARADOR abrir_scope_while
-                    bloque WHILE SEPARADOR INICIO_PAREN condicion FINAL_PAREN FIN_EXPR
+                    INICIO_BLOQUE sentencias_break FINAL_BLOQUE 
+                    WHILE SEPARADOR INICIO_PAREN condicion FINAL_PAREN FIN_EXPR
                     {: tabla.salirDelScope(); :}
 
                   | DO SEPARADOR abrir_scope_while
-                    bloque WHILE SEPARADOR INICIO_PAREN error FINAL_PAREN FIN_EXPR
+                    INICIO_BLOQUE sentencias_break FINAL_BLOQUE 
+                    WHILE SEPARADOR INICIO_PAREN error FINAL_PAREN FIN_EXPR
                     {: tabla.salirDelScope(); :}
                   ;
 
@@ -1468,7 +1507,11 @@ lista_casos ::= caso:c lista_casos:l
                 :}
               ;
 
-caso ::= CASE SEPARADOR literal:l DOS_PUNTOS lista_sentencias
+sentencias_break ::= lista_sentencias break_nt
+               | break_nt
+               | lista_sentencias
+               ;    
+caso ::= CASE SEPARADOR literal:l DOS_PUNTOS sentencias_break
         {: String tipo = getTipoExpr(l.toString());
             String valor = getValorExpr(l.toString());
         
@@ -1538,31 +1581,17 @@ caso ::= CASE SEPARADOR literal:l DOS_PUNTOS lista_sentencias
         :}
         | CASE error DOS_PUNTOS lista_sentencias
         ;
-
-default_case ::= DEFAULT SEPARADOR DOS_PUNTOS lista_sentencias
+default_case ::= DEFAULT SEPARADOR DOS_PUNTOS sentencias_break
                 | DEFAULT SEPARADOR DOS_PUNTOS
                 | DEFAULT error lista_sentencias
                 ;
 
-break_nt ::= BREAK
-             {:
-                 String scopeActual = tabla.getCurrentScope();
-
-                 if (!scopeActual.contains("switch") &&
-                     !scopeActual.contains("dowhile")) {
-
-                     manejadorErrores.agregarErrorSemantico(
-                         "La sentencia break solo puede usarse dentro de un switch o ciclo",
-                         lastLine,
-                         lastColumn
-                     );
-                 }
-             :};
+break_nt ::= BREAK FIN_EXPR;
 
 return_nt ::= RETURN SEPARADOR expresion:e
-              {:
-                  // Validar que main no tenga return
+               {:
                   String scopeActual = tabla.getCurrentScope();
+
                   if (scopeActual.equals("main")) {
                       manejadorErrores.agregarErrorSemantico(
                           "La función main no puede tener return",
@@ -1570,39 +1599,21 @@ return_nt ::= RETURN SEPARADOR expresion:e
                           eright + 1
                       );
                   } else {
-                      returnEnBloque = true;
-                      
-                      // Si es función duplicada, validar contra el tipo guardado
-                      if (funcionDuplicada && tipoFuncionDuplicada != null) {
-                          String tipoReturn = getTipoExpr(e.toString());
-                          
-                          if (!tipoReturn.equals("error") && !tipoFuncionDuplicada.equals(tipoReturn)) {
-                              manejadorErrores.agregarErrorSemantico(
-                                  "La función debe retornar " + tipoFuncionDuplicada +
-                                  " pero se encontró " + tipoReturn,
-                                  eleft + 1,
-                                  eright + 1
-                              );
-                          }
-                      } else {
-                          // Buscar función en la tabla (para funciones no duplicadas)
-                          TablaSimbolos.NodoToken funcion = tabla.buscarSimboloEnScope(scopeActual,tabla.getParentScope());
-                          if (funcion != null &&funcion.getCategoria().equals("funcion")) {
-                              String tipoFuncion = funcion.getTipo();
-                              String tipoReturn = getTipoExpr(e.toString());
+                      String tipoReturn = getTipoExpr(e.toString());
 
-                              if (!tipoReturn.equals("error") && !tipoFuncion.equals(tipoReturn)) {
-                                  manejadorErrores.agregarErrorSemantico(
-                                      "La función '" + funcion.getId() +
-                                      "' debe retornar " + tipoFuncion +
-                                      " pero se encontró " + tipoReturn,
-                                      eleft + 1,
-                                      eright + 1
-                                  );
-                              }
-                          }
+                      if (tipoFuncionActual != null &&
+                          !tipoReturn.equals("error") &&
+                          !tipoFuncionActual.equals(tipoReturn)) {
+
+                          manejadorErrores.agregarErrorSemantico(
+                              "La función debe retornar " + tipoFuncionActual +
+                              " pero se encontró " + tipoReturn,
+                              eleft + 1,
+                              eright + 1
+                          );
                       }
                   }
+                  RESULT = crearExpr("return", "true");
               :};
 
 cin_nt ::= CIN INICIO_PAREN ID:i FINAL_PAREN
