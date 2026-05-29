@@ -4,5 +4,5 @@ empty ~ __main__ <| |>
     int ~ b <- 3!
     int ~ c!
 
-    c <- a!
+    c <- a + b * b ^ a!
 :|

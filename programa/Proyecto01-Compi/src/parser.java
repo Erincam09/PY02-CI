@@ -2854,7 +2854,17 @@ class CUP$parser$actions {
                                     );
                                     RESULT = crearExpr("arit", "error");
                                 } else {
-                                    RESULT = crearExpr("arit",tipoP);
+                                    String valorS = getValorExpr(s.toString());
+                                    String operador = valorS.substring(0, 1);
+                                    String der = valorS.substring(1);
+
+                                    String izq = getValorExpr(p.toString());
+
+                                    String tIzq = cod3d.genTemporal(izq);
+                                    String tDer = cod3d.genTemporal(der);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                    RESULT = crearExpr(temp, tipoP);
                                 }
                             }
                         
@@ -2881,7 +2891,9 @@ class CUP$parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = e; 
+		 
+                                RESULT = crearExpr("+" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_arit",41, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2893,7 +2905,9 @@ class CUP$parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = e; 
+		 
+                                RESULT = crearExpr("-" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_arit",41, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2941,7 +2955,17 @@ class CUP$parser$actions {
                                     );
                                     RESULT = crearExpr("term", "error");
                                 } else {
-                                    RESULT = crearExpr("term",tipoP);
+                                    String valorS = getValorExpr(s.toString());
+                                    String operador = valorS.substring(0, 1);
+                                    String der = valorS.substring(1);
+
+                                    String izq = getValorExpr(p.toString());
+
+                                    String tIzq = cod3d.genTemporal(izq);
+                                    String tDer = cod3d.genTemporal(der);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                    RESULT = crearExpr(temp, tipoP);
                                 }
                             }
                        
@@ -2968,7 +2992,9 @@ class CUP$parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = e; 
+		 
+                                RESULT = crearExpr("*" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_factores_term",43, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2995,7 +3021,7 @@ class CUP$parser$actions {
                                     RESULT = crearExpr("div", "error");
 
                                 } else {
-                                    RESULT = e;
+                                    RESULT = crearExpr("/" + getValorExpr(e.toString()), getTipoExpr(e.toString()));
                                 }
                             
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_factores_term",43, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -3009,7 +3035,9 @@ class CUP$parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = e; 
+		 
+                                RESULT = crearExpr("%" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_factores_term",43, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -3057,7 +3085,17 @@ class CUP$parser$actions {
                                     );
                                     RESULT = crearExpr("pot", "error");
                                 } else {
-                                    RESULT = crearExpr("pot", tipoP);
+                                    String valorS = getValorExpr(s.toString());
+                                    String operador = valorS.substring(0, 1);
+                                    String der = valorS.substring(1);
+
+                                    String izq = getValorExpr(p.toString());
+
+                                    String tIzq = cod3d.genTemporal(izq);
+                                    String tDer = cod3d.genTemporal(der);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                    RESULT = crearExpr(temp, tipoP);
                                 }
                             }
                       
@@ -3084,7 +3122,9 @@ class CUP$parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
-		 RESULT = e; 
+		 
+                            RESULT = crearExpr("^" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_potencias",45, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;

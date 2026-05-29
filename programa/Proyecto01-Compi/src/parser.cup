@@ -1176,7 +1176,17 @@ expresion_aritmetica ::= primer_termino_arit:p siguientes_terminos_arit:s
                                     );
                                     RESULT = crearExpr("arit", "error");
                                 } else {
-                                    RESULT = crearExpr("arit",tipoP);
+                                    String valorS = getValorExpr(s.toString());
+                                    String operador = valorS.substring(0, 1);
+                                    String der = valorS.substring(1);
+
+                                    String izq = getValorExpr(p.toString());
+
+                                    String tIzq = cod3d.genTemporal(izq);
+                                    String tDer = cod3d.genTemporal(der);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                    RESULT = crearExpr(temp, tipoP);
                                 }
                             }
                         :};
@@ -1185,9 +1195,13 @@ primer_termino_arit ::= expresion_termino:e
                        {: RESULT = e; :};
 
 siguientes_terminos_arit ::= SUMA  expresion_termino:e siguientes_terminos_arit
-                            {: RESULT = e; :}
+                            {: 
+                                RESULT = crearExpr("+" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                            :}
                            | RESTA expresion_termino:e siguientes_terminos_arit
-                            {: RESULT = e; :}
+                            {: 
+                                RESULT = crearExpr("-" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                            :}
                            | /* epsilon */
                            {: RESULT = crearExpr("epsilon", "epsilon"); :};
 
@@ -1216,7 +1230,17 @@ expresion_termino ::= primer_factor_term:p siguientes_factores_term:s
                                     );
                                     RESULT = crearExpr("term", "error");
                                 } else {
-                                    RESULT = crearExpr("term",tipoP);
+                                    String valorS = getValorExpr(s.toString());
+                                    String operador = valorS.substring(0, 1);
+                                    String der = valorS.substring(1);
+
+                                    String izq = getValorExpr(p.toString());
+
+                                    String tIzq = cod3d.genTemporal(izq);
+                                    String tDer = cod3d.genTemporal(der);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                    RESULT = crearExpr(temp, tipoP);
                                 }
                             }
                        :};
@@ -1225,7 +1249,9 @@ primer_factor_term ::= expresion_factor:e
                        {: RESULT = e; :};
 
 siguientes_factores_term ::= MULTI expresion_factor:e siguientes_factores_term
-                            {: RESULT = e; :}
+                            {: 
+                                RESULT = crearExpr("*" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                            :}
                            | DIV   expresion_factor:e siguientes_factores_term
                             {:
                                 String valor = getValorExpr(e.toString());
@@ -1242,11 +1268,13 @@ siguientes_factores_term ::= MULTI expresion_factor:e siguientes_factores_term
                                     RESULT = crearExpr("div", "error");
 
                                 } else {
-                                    RESULT = e;
+                                    RESULT = crearExpr("/" + getValorExpr(e.toString()), getTipoExpr(e.toString()));
                                 }
                             :}
                            | MOD   expresion_factor:e siguientes_factores_term
-                            {: RESULT = e; :}
+                            {: 
+                                RESULT = crearExpr("%" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                            :}
                            | /* epsilon */
                             {: RESULT = crearExpr("epsilon", "epsilon"); :};
 
@@ -1275,7 +1303,17 @@ expresion_factor ::= primer_potencia:p siguientes_potencias:s
                                     );
                                     RESULT = crearExpr("pot", "error");
                                 } else {
-                                    RESULT = crearExpr("pot", tipoP);
+                                    String valorS = getValorExpr(s.toString());
+                                    String operador = valorS.substring(0, 1);
+                                    String der = valorS.substring(1);
+
+                                    String izq = getValorExpr(p.toString());
+
+                                    String tIzq = cod3d.genTemporal(izq);
+                                    String tDer = cod3d.genTemporal(der);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                    RESULT = crearExpr(temp, tipoP);
                                 }
                             }
                       :};
@@ -1284,7 +1322,9 @@ primer_potencia ::= expresion_potencia:e
                     {: RESULT = e; :};
 
 siguientes_potencias ::= POT expresion_potencia:e siguientes_potencias
-                        {: RESULT = e; :}
+                        {: 
+                            RESULT = crearExpr("^" + getValorExpr(e.toString()), getTipoExpr(e.toString())); 
+                        :}
                        | /* epsilon */
                         {: RESULT = crearExpr("epsilon", "epsilon"); :};
 
