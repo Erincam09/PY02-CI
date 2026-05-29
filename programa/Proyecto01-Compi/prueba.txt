@@ -1,8 +1,11 @@
 empty ~ __main__ <| |>
 |:
-    int ~ a <- -5!
+    int ~ a <- 5!
     int ~ b <- 3!
-    int ~ c!
-
-    c <- --a + b * -4 ^ ++a!
+    bool ~ r <- true!
+    r <- equal <| r , equal <| a , b |> |>!
+    r <- less_t <| a , b |>!
+    r <- less_te <| a , b |>!
+    r <- greather_t <| a , b |>!
+    r <- greather_te <| a , b |>!
 :|

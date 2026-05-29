@@ -171,6 +171,18 @@ public class Cod3D {
         return temp;
     }
 
+    public String genNegacion(String valor) {
+        String temp = nuevoTemp();
+        crearCodigo(temp + " = $" + valor);
+        return temp;
+    }
+
+    public String genOpRelacionales(String operador, String izquierda, String derecha) {
+        String temp = nuevoTemp();
+        crearCodigo(temp + " = " + operador + "," + izquierda + "," + derecha);
+        return temp;
+    }
+
     public void genReturn(String valor) {
         crearCodigo("return " + valor);
     }

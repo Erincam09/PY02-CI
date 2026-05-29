@@ -2303,7 +2303,17 @@ class CUP$parser$actions {
                             } else if (tipoS.equals("error")) {
                                 RESULT = crearExpr("or", "error");
                             } else {
-                                RESULT = crearExpr("or", "bool");
+                                String valorS = getValorExpr(s.toString());
+                                String operador = valorS.substring(0, 2);
+                                String der = valorS.substring(2);
+
+                                String izq = getValorExpr(p.toString());
+
+                                String tIzq = cod3d.genTemporal(izq);
+                                String tDer = cod3d.genTemporal(der);
+                                String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                RESULT = crearExpr(temp, "bool");
                             }
                         }
                     
@@ -2347,7 +2357,7 @@ class CUP$parser$actions {
                             } else if (tipoS.equals("error")) {
                                 RESULT = crearExpr("or", "error");
                             } else {
-                                RESULT = crearExpr("or", "bool");
+                                RESULT = crearExpr("||" + getValorExpr(e.toString()), "bool");
                             }
                         
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_or",37, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -2391,7 +2401,17 @@ class CUP$parser$actions {
                                 } else if (tipoS.equals("error")) {
                                     RESULT = crearExpr("and", "error");
                                 } else {
-                                    RESULT = crearExpr("and", "bool");
+                                    String valorS = getValorExpr(s.toString());
+                                    String operador = valorS.substring(0, 2);
+                                    String der = valorS.substring(2);
+
+                                    String izq = getValorExpr(p.toString());
+
+                                    String tIzq = cod3d.genTemporal(izq);
+                                    String tDer = cod3d.genTemporal(der);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                    RESULT = crearExpr(temp, "bool");
                                 }
                             }
                         
@@ -2435,7 +2455,7 @@ class CUP$parser$actions {
                                 } else if (tipoS.equals("error")) {
                                     RESULT = crearExpr("and", "error");
                                 } else {
-                                    RESULT = crearExpr("and", "bool");
+                                    RESULT = crearExpr("&&" + getValorExpr(e.toString()), "bool");
                                 }
                             
               CUP$parser$result = parser.getSymbolFactory().newSymbol("siguientes_terminos_and",39, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -2469,7 +2489,11 @@ class CUP$parser$actions {
                                );
                                RESULT = crearExpr("not", "error");
                            } else {
-                               RESULT = crearExpr("not", "bool");
+                                String valor = getValorExpr(e.toString());
+                                String tValor = cod3d.genTemporal(valor);
+                                String temp = cod3d.genNegacion(tValor);
+
+                                RESULT = crearExpr(temp, "bool");
                            }
                        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expresion_negacion",28, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -2608,7 +2632,15 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr("equal", "error");
                         } else {
-                            RESULT = crearExpr("equal", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("equal", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("equal", "error");
@@ -2642,7 +2674,15 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr("n_equal", "error");
                         } else {
-                            RESULT = crearExpr("n_equal", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("equal", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("n_equal", "error");
@@ -2684,7 +2724,15 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr("less_t", "error");
                         } else {
-                            RESULT = crearExpr("less_t", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("less_t", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("less_t", "error");
@@ -2726,7 +2774,15 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr("less_te", "error");
                         } else {
-                            RESULT = crearExpr("less_te", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("less_te", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("less_te", "error");
@@ -2768,7 +2824,15 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr("greather_t", "error");
                         } else {
-                            RESULT = crearExpr("greather_t", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("greather_t", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("greather_t", "error");
@@ -2810,7 +2874,15 @@ class CUP$parser$actions {
                             );
                             RESULT = crearExpr("greather_te", "error");
                         } else {
-                            RESULT = crearExpr("greather_te", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("greather_te", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("greather_te", "error");

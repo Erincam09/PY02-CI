@@ -876,7 +876,17 @@ expresion_logica ::= primer_termino_or:p siguientes_terminos_or:s
                             } else if (tipoS.equals("error")) {
                                 RESULT = crearExpr("or", "error");
                             } else {
-                                RESULT = crearExpr("or", "bool");
+                                String valorS = getValorExpr(s.toString());
+                                String operador = valorS.substring(0, 2);
+                                String der = valorS.substring(2);
+
+                                String izq = getValorExpr(p.toString());
+
+                                String tIzq = cod3d.genTemporal(izq);
+                                String tDer = cod3d.genTemporal(der);
+                                String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                RESULT = crearExpr(temp, "bool");
                             }
                         }
                     :};
@@ -899,7 +909,7 @@ siguientes_terminos_or ::= OR expresion_conjuncion:e siguientes_terminos_or:s
                             } else if (tipoS.equals("error")) {
                                 RESULT = crearExpr("or", "error");
                             } else {
-                                RESULT = crearExpr("or", "bool");
+                                RESULT = crearExpr("||" + getValorExpr(e.toString()), "bool");
                             }
                         :}
                          | /* epsilon */
@@ -924,7 +934,17 @@ expresion_conjuncion ::= primer_termino_and:p siguientes_terminos_and:s
                                 } else if (tipoS.equals("error")) {
                                     RESULT = crearExpr("and", "error");
                                 } else {
-                                    RESULT = crearExpr("and", "bool");
+                                    String valorS = getValorExpr(s.toString());
+                                    String operador = valorS.substring(0, 2);
+                                    String der = valorS.substring(2);
+
+                                    String izq = getValorExpr(p.toString());
+
+                                    String tIzq = cod3d.genTemporal(izq);
+                                    String tDer = cod3d.genTemporal(der);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+
+                                    RESULT = crearExpr(temp, "bool");
                                 }
                             }
                         :};
@@ -947,7 +967,7 @@ siguientes_terminos_and ::= AND expresion_negacion:e siguientes_terminos_and:s
                                 } else if (tipoS.equals("error")) {
                                     RESULT = crearExpr("and", "error");
                                 } else {
-                                    RESULT = crearExpr("and", "bool");
+                                    RESULT = crearExpr("&&" + getValorExpr(e.toString()), "bool");
                                 }
                             :}
                             | /* epsilon */
@@ -965,7 +985,11 @@ expresion_negacion ::= NOT expresion_negacion:e
                                );
                                RESULT = crearExpr("not", "error");
                            } else {
-                               RESULT = crearExpr("not", "bool");
+                                String valor = getValorExpr(e.toString());
+                                String tValor = cod3d.genTemporal(valor);
+                                String temp = cod3d.genNegacion(tValor);
+
+                                RESULT = crearExpr(temp, "bool");
                            }
                        :}
                      | expresion_relacional:e
@@ -1007,7 +1031,15 @@ equal       ::= EQUAL       INICIO_PAREN expresion_logica:e1 COMA expresion_logi
                             );
                             RESULT = crearExpr("equal", "error");
                         } else {
-                            RESULT = crearExpr("equal", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("equal", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("equal", "error");
@@ -1028,7 +1060,15 @@ n_equal     ::= N_EQUAL     INICIO_PAREN expresion_logica:e1 COMA expresion_logi
                             );
                             RESULT = crearExpr("n_equal", "error");
                         } else {
-                            RESULT = crearExpr("n_equal", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("equal", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("n_equal", "error");
@@ -1057,7 +1097,15 @@ less_t      ::= LESS_T      INICIO_PAREN expresion_aritmetica:e1 COMA expresion_
                             );
                             RESULT = crearExpr("less_t", "error");
                         } else {
-                            RESULT = crearExpr("less_t", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("less_t", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("less_t", "error");
@@ -1086,7 +1134,15 @@ less_te     ::= LESS_TE     INICIO_PAREN expresion_aritmetica:e1 COMA expresion_
                             );
                             RESULT = crearExpr("less_te", "error");
                         } else {
-                            RESULT = crearExpr("less_te", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("less_te", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("less_te", "error");
@@ -1115,7 +1171,15 @@ greather_t  ::= GREATHER_T  INICIO_PAREN expresion_aritmetica:e1 COMA expresion_
                             );
                             RESULT = crearExpr("greather_t", "error");
                         } else {
-                            RESULT = crearExpr("greather_t", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("greather_t", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("greather_t", "error");
@@ -1144,7 +1208,15 @@ greather_te ::= GREATHER_TE INICIO_PAREN expresion_aritmetica:e1 COMA expresion_
                             );
                             RESULT = crearExpr("greather_te", "error");
                         } else {
-                            RESULT = crearExpr("greather_te", "bool");
+                            String izq = getValorExpr(e1.toString());
+                            String der = getValorExpr(e2.toString());
+
+                            String tIzq = cod3d.genTemporal(izq);
+                            String tDer = cod3d.genTemporal(der);
+
+                            String temp = cod3d.genOpRelacionales("greather_te", tIzq, tDer);
+
+                            RESULT = crearExpr(temp, "bool");
                         }
                     } else {
                         RESULT = crearExpr("greather_te", "error");
