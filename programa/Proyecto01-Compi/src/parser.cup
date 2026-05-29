@@ -2,7 +2,6 @@ import java_cup.runtime.*;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
-
 /*
  * =========================================================
  *  ANALIZADOR SINTÁCTICO (CUP)
@@ -36,6 +35,8 @@ parser code {:
      */
     ManejadorErrores manejadorErrores;
 
+    Cod3D cod3d;
+    
     /*
      * Contadores utilizados para generar nombres únicos de scopes,
      * por ejemplo if1_main, switch1_main, dowhile1_main, etc.
@@ -94,6 +95,7 @@ parser code {:
         this.lex = lex;
         this.tabla = new TablaSimbolos();
         this.manejadorErrores = lex.getManejadorErrores();
+        this.cod3d = new Cod3D();
     }
 
     /*
