@@ -1030,6 +1030,10 @@ public class parser extends java_cup.runtime.lr_parser {
 
     private boolean asignacionEnExpresion = false; // Indica si se está procesando una asignación dentro de una expresión
 
+    private boolean funcionDuplicada = false; // Indica si la función actual es duplicada (scope temporal)
+    
+    private String tipoFuncionDuplicada = null; // Guarda el tipo de la función duplicada para validar returns
+
     /*
      * Contadores para validación de dimensiones de arrays bidimensionales.
      * Se usan para validar que las dimensiones declaradas coincidan con
@@ -1249,12 +1253,19 @@ class CUP$parser$actions {
 		
                            // Validar que no exista otra función con el mismo nombre
                            if (tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope()) != null) {
+                               funcionDuplicada = true;
+                               tipoFuncionDuplicada = t.toString();
                                manejadorErrores.agregarErrorSemantico(
                                    "Función '" + i + "' ya ha sido declarada",
                                    ileft + 1,
                                    iright + 1
                                );
+                               // Crear scope temporal para procesar errores dentro de la función
+                               tabla.crearNuevoScope("duplicada_" + i.toString());
+                               returnEnBloque = false;
                            } else {
+                               funcionDuplicada = false;
+                               tipoFuncionDuplicada = null;
                                TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
                                    t.toString(),
                                    i.toString(),
@@ -1277,7 +1288,7 @@ class CUP$parser$actions {
             {
               Object RESULT =null;
 		
-                if (!returnEnBloque) {
+                if (!funcionDuplicada && !returnEnBloque) {
                     manejadorErrores.agregarErrorSemantico(
                         "La función debe tener al menos un return",
                         lastLine,
@@ -1295,7 +1306,7 @@ class CUP$parser$actions {
             {
               Object RESULT =null;
 		
-                if (!returnEnBloque) {
+                if (!funcionDuplicada && !returnEnBloque) {
                     manejadorErrores.agregarErrorSemantico(
                         "La función debe tener al menos un return",
                         lastLine,
@@ -1362,7 +1373,8 @@ class CUP$parser$actions {
                           ileft + 1,
                           iright + 1
                       );
-                  } else {
+                  } else if (!funcionDuplicada) {
+                      // Solo agregar a la tabla si la función no es duplicada
                       TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
                           t.toString(), i.toString(), ileft + 1, iright + 1
                       );
@@ -1381,6 +1393,14 @@ class CUP$parser$actions {
                               new TablaSimbolos.Parametro(t.toString(), i.toString())
                           );
                       }
+                  } else {
+                      // Si es duplicada, crear un nodo temporal solo para validar dentro del scope
+                      TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
+                          t.toString(), i.toString(), ileft + 1, iright + 1
+                      );
+                      nodo.setCategoria("parametro");
+                      nodo.setIntentoAsignacion(true);
+                      tabla.agregarNodo(nodo);
                   }
               
               CUP$parser$result = parser.getSymbolFactory().newSymbol("parametro",6, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -3285,7 +3305,6 @@ class CUP$parser$actions {
                           eright + 1
                       );
                   }
-
                   RESULT = e;
               
               CUP$parser$result = parser.getSymbolFactory().newSymbol("condicion",53, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -3443,21 +3462,16 @@ class CUP$parser$actions {
 
                     if (tipoC.equals("error") || tipoL.equals("error")) {
                         RESULT = crearExpr("cases", "error");
-
                     } else if (tipoL.equals("epsilon")) {
                         RESULT = c;
-
                     } else if (!tipoC.equals(tipoL)) {
-
                         manejadorErrores.agregarErrorSemantico(
                             "Todos los case de un switch deben ser del mismo tipo, pero se encontró "
                             + tipoC + " y " + tipoL,
                             cleft + 1,
                             cright + 1
                         );
-
                         RESULT = crearExpr("cases", "error");
-
                     } else {
                         RESULT = c;
                     }
@@ -3564,7 +3578,19 @@ class CUP$parser$actions {
           case 130: // break_nt ::= BREAK 
             {
               Object RESULT =null;
+		
+                 String scopeActual = tabla.getCurrentScope();
 
+                 if (!scopeActual.contains("switch") &&
+                     !scopeActual.contains("dowhile")) {
+
+                     manejadorErrores.agregarErrorSemantico(
+                         "La sentencia break solo puede usarse dentro de un switch o ciclo",
+                         lastLine,
+                         lastColumn
+                     );
+                 }
+             
               CUP$parser$result = parser.getSymbolFactory().newSymbol("break_nt",66, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -3586,22 +3612,36 @@ class CUP$parser$actions {
                           eright + 1
                       );
                   } else {
-                      returnEnBloque = true; 
-                      TablaSimbolos.NodoToken funcion = tabla.buscarSimboloEnScope(scopeActual,tabla.getParentScope());
-                      if (funcion != null &&funcion.getCategoria().equals("funcion")) {
-                          String tipoFuncion = funcion.getTipo();
-                          System.out.println("Tipo función: " + tipoFuncion);
+                      returnEnBloque = true;
+                      
+                      // Si es función duplicada, validar contra el tipo guardado
+                      if (funcionDuplicada && tipoFuncionDuplicada != null) {
                           String tipoReturn = getTipoExpr(e.toString());
-                          System.out.println("Tipo return: " + tipoReturn);
-
-                          if (!tipoReturn.equals("error") && !tipoFuncion.equals(tipoReturn)) {
+                          
+                          if (!tipoReturn.equals("error") && !tipoFuncionDuplicada.equals(tipoReturn)) {
                               manejadorErrores.agregarErrorSemantico(
-                                  "La función '" + funcion.getId() +
-                                  "' debe retornar " + tipoFuncion +
+                                  "La función debe retornar " + tipoFuncionDuplicada +
                                   " pero se encontró " + tipoReturn,
                                   eleft + 1,
                                   eright + 1
                               );
+                          }
+                      } else {
+                          // Buscar función en la tabla (para funciones no duplicadas)
+                          TablaSimbolos.NodoToken funcion = tabla.buscarSimboloEnScope(scopeActual,tabla.getParentScope());
+                          if (funcion != null &&funcion.getCategoria().equals("funcion")) {
+                              String tipoFuncion = funcion.getTipo();
+                              String tipoReturn = getTipoExpr(e.toString());
+
+                              if (!tipoReturn.equals("error") && !tipoFuncion.equals(tipoReturn)) {
+                                  manejadorErrores.agregarErrorSemantico(
+                                      "La función '" + funcion.getId() +
+                                      "' debe retornar " + tipoFuncion +
+                                      " pero se encontró " + tipoReturn,
+                                      eleft + 1,
+                                      eright + 1
+                                  );
+                              }
                           }
                       }
                   }

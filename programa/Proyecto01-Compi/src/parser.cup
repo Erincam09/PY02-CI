@@ -59,6 +59,10 @@ parser code {:
 
     private boolean asignacionEnExpresion = false; // Indica si se está procesando una asignación dentro de una expresión
 
+    private boolean funcionDuplicada = false; // Indica si la función actual es duplicada (scope temporal)
+    
+    private String tipoFuncionDuplicada = null; // Guarda el tipo de la función duplicada para validar returns
+
     /*
      * Contadores para validación de dimensiones de arrays bidimensionales.
      * Se usan para validar que las dimensiones declaradas coincidan con
@@ -280,12 +284,19 @@ encabezado_funcion ::= tipo:t SEPARADOR ID:i
                        {:
                            // Validar que no exista otra función con el mismo nombre
                            if (tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope()) != null) {
+                               funcionDuplicada = true;
+                               tipoFuncionDuplicada = t.toString();
                                manejadorErrores.agregarErrorSemantico(
                                    "Función '" + i + "' ya ha sido declarada",
                                    ileft + 1,
                                    iright + 1
                                );
+                               // Crear scope temporal para procesar errores dentro de la función
+                               tabla.crearNuevoScope("duplicada_" + i.toString());
+                               returnEnBloque = false;
                            } else {
+                               funcionDuplicada = false;
+                               tipoFuncionDuplicada = null;
                                TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
                                    t.toString(),
                                    i.toString(),
@@ -303,7 +314,7 @@ encabezado_funcion ::= tipo:t SEPARADOR ID:i
 
 funcion ::= encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN bloque
             {:
-                if (!returnEnBloque) {
+                if (!funcionDuplicada && !returnEnBloque) {
                     manejadorErrores.agregarErrorSemantico(
                         "La función debe tener al menos un return",
                         lastLine,
@@ -315,7 +326,7 @@ funcion ::= encabezado_funcion INICIO_PAREN lista_parametros FINAL_PAREN bloque
 
           | encabezado_funcion INICIO_PAREN FINAL_PAREN bloque
             {:
-                if (!returnEnBloque) {
+                if (!funcionDuplicada && !returnEnBloque) {
                     manejadorErrores.agregarErrorSemantico(
                         "La función debe tener al menos un return",
                         lastLine,
@@ -344,7 +355,8 @@ parametro ::= tipo:t SEPARADOR ID:i
                           ileft + 1,
                           iright + 1
                       );
-                  } else {
+                  } else if (!funcionDuplicada) {
+                      // Solo agregar a la tabla si la función no es duplicada
                       TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
                           t.toString(), i.toString(), ileft + 1, iright + 1
                       );
@@ -363,6 +375,14 @@ parametro ::= tipo:t SEPARADOR ID:i
                               new TablaSimbolos.Parametro(t.toString(), i.toString())
                           );
                       }
+                  } else {
+                      // Si es duplicada, crear un nodo temporal solo para validar dentro del scope
+                      TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
+                          t.toString(), i.toString(), ileft + 1, iright + 1
+                      );
+                      nodo.setCategoria("parametro");
+                      nodo.setIntentoAsignacion(true);
+                      tabla.agregarNodo(nodo);
                   }
               :}
             ;
@@ -1516,22 +1536,36 @@ return_nt ::= RETURN SEPARADOR expresion:e
                           eright + 1
                       );
                   } else {
-                      returnEnBloque = true; 
-                      TablaSimbolos.NodoToken funcion = tabla.buscarSimboloEnScope(scopeActual,tabla.getParentScope());
-                      if (funcion != null &&funcion.getCategoria().equals("funcion")) {
-                          String tipoFuncion = funcion.getTipo();
-                          System.out.println("Tipo función: " + tipoFuncion);
+                      returnEnBloque = true;
+                      
+                      // Si es función duplicada, validar contra el tipo guardado
+                      if (funcionDuplicada && tipoFuncionDuplicada != null) {
                           String tipoReturn = getTipoExpr(e.toString());
-                          System.out.println("Tipo return: " + tipoReturn);
-
-                          if (!tipoReturn.equals("error") && !tipoFuncion.equals(tipoReturn)) {
+                          
+                          if (!tipoReturn.equals("error") && !tipoFuncionDuplicada.equals(tipoReturn)) {
                               manejadorErrores.agregarErrorSemantico(
-                                  "La función '" + funcion.getId() +
-                                  "' debe retornar " + tipoFuncion +
+                                  "La función debe retornar " + tipoFuncionDuplicada +
                                   " pero se encontró " + tipoReturn,
                                   eleft + 1,
                                   eright + 1
                               );
+                          }
+                      } else {
+                          // Buscar función en la tabla (para funciones no duplicadas)
+                          TablaSimbolos.NodoToken funcion = tabla.buscarSimboloEnScope(scopeActual,tabla.getParentScope());
+                          if (funcion != null &&funcion.getCategoria().equals("funcion")) {
+                              String tipoFuncion = funcion.getTipo();
+                              String tipoReturn = getTipoExpr(e.toString());
+
+                              if (!tipoReturn.equals("error") && !tipoFuncion.equals(tipoReturn)) {
+                                  manejadorErrores.agregarErrorSemantico(
+                                      "La función '" + funcion.getId() +
+                                      "' debe retornar " + tipoFuncion +
+                                      " pero se encontró " + tipoReturn,
+                                      eleft + 1,
+                                      eright + 1
+                                  );
+                              }
                           }
                       }
                   }
