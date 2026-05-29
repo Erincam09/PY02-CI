@@ -5,26 +5,12 @@ Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
 Semántico    3        14       No se puede inicializar la variable 'resultado' de tipo float con un valor de tipo int
 Semántico    4        15       La función 'sumaInt' debe retornar int pero se encontró float
-Semántico    7        10       Función 'sumaInt' ya ha sido declarada
-Semántico    8        12       No se puede inicializar la variable 'resultadox' de tipo int con un valor de tipo float
-Semántico    9        15       La función debe retornar float pero se encontró int
-Semántico    15       14       No se puede inicializar la variable 'zzz' de tipo float con un valor de tipo int
-Semántico    17       6        La función 'funcionNoExiste' no ha sido declarada
-Semántico    20       12       Variable 'x' ya ha sido declarada en este scope
-Semántico    21       12       Variable 'x' ya ha sido declarada en este scope
-Semántico    22       12       Variable 'x' ya ha sido declarada en este scope
-Semántico    24       6        La función 'x' no ha sido declarada
-Semántico    30       53       Se esperaba un valor de tipo int pero se encontró float
-Semántico    32       53       Se esperaba un valor de tipo float pero se encontró int
-Semántico    32       56       Se esperaba un valor de tipo float pero se encontró int
-Semántico    32       65       Se esperaba un valor de tipo float pero se encontró int
-Semántico    32       68       Se esperaba un valor de tipo float pero se encontró int
-Semántico    36       16       El índice del arreglo debe ser int, pero se encontró: float
-Semántico    38       32       No se puede asignar un valor de tipo float a un arreglo de tipo int
-Semántico    42       32       El índice del arreglo debe ser int, pero se encontró: float
-Semántico    44       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: string
-Semántico    46       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: bool
-Semántico    48       6        Los arreglos solo pueden ser de tipo int o float, pero se encontró: char
+Semántico    10       14       No se puede inicializar la variable 'opcion' de tipo float con un valor de tipo int
+Semántico    13       17       El tipo del case ''A'' (char) no es compatible con la expresión del switch (float)
+Semántico    15       17       El tipo del case ''B'' (char) no es compatible con la expresión del switch (float)
+Semántico    17       17       El tipo del case ''A'' (char) no es compatible con la expresión del switch (float)
+Semántico    17       17       Valor de case ''A'' ya ha sido declarado en este switch
+Semántico    11       18       La expresión en un switch debe ser int, char o error, pero se encontró float
 ------------------------------------------------------
-Total de Errores: 22
+Total de Errores: 8
 ======================================================

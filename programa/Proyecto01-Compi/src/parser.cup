@@ -74,6 +74,18 @@ parser code {:
     private int columnasActual = 0;  // Columnas de la fila actual
 
     /*
+     * ArrayList para rastrear valores de case en el switch actual.
+     * Se usa para detectar valores de case repetidos dentro del mismo switch.
+     */
+    private ArrayList<String> casosActuales = new ArrayList<>();
+
+    /*
+     * Tipo de la expresión del switch actual.
+     * Se usa para validar que cada case sea compatible con el tipo del switch.
+     */
+    private String tipoSwitchActual = null;
+
+    /*
      * Constructor del parser.
      * Recibe el lexer, crea la tabla de símbolos y obtiene el
      * manejador de errores para poder reportar errores sintácticos.
@@ -1411,11 +1423,14 @@ bloque_do_while ::= DO SEPARADOR abrir_scope_while
 abrir_scope_switch ::=
     {:
         tabla.crearNuevoScope(nuevoScope("switch"));
+        casosActuales.clear();
+        tipoSwitchActual = null;
     :}
 ;
 
 bloque_switch ::= SWITCH SEPARADOR INICIO_PAREN expresion_aritmetica:e FINAL_PAREN
                     abrir_scope_switch
+                    {: tipoSwitchActual = getTipoExpr(e.toString()); :}
                     bloque_casos:b
                     {: String tipoE = getTipoExpr(e.toString());
 
@@ -1427,16 +1442,8 @@ bloque_switch ::= SWITCH SEPARADOR INICIO_PAREN expresion_aritmetica:e FINAL_PAR
                            );
                        }
 
-                       String tipoB = getTipoExpr(b.toString());
-
-                        if (!tipoB.equals("error") && !tipoB.equals("epsilon") && !tipoB.equals(tipoE)) {
-                            manejadorErrores.agregarErrorSemantico(
-                                    "Los casos en un switch deben ser del mismo tipo que la expresión, pero se encontró " + tipoB,
-                                    bleft + 1,
-                                    bright + 1
-                            );
-                        }
                         tabla.salirDelScope();
+                        tipoSwitchActual = null;
                     :}
 
                     | SWITCH SEPARADOR INICIO_PAREN error FINAL_PAREN
@@ -1453,24 +1460,7 @@ bloque_casos ::= INICIO_BLOQUE lista_casos:l FINAL_BLOQUE
 
 lista_casos ::= caso:c lista_casos:l
                 {:
-                    String tipoC = getTipoExpr(c.toString());
-                    String tipoL = getTipoExpr(l.toString());
-
-                    if (tipoC.equals("error") || tipoL.equals("error")) {
-                        RESULT = crearExpr("cases", "error");
-                    } else if (tipoL.equals("epsilon")) {
-                        RESULT = c;
-                    } else if (!tipoC.equals(tipoL)) {
-                        manejadorErrores.agregarErrorSemantico(
-                            "Todos los case de un switch deben ser del mismo tipo, pero se encontró "
-                            + tipoC + " y " + tipoL,
-                            cleft + 1,
-                            cright + 1
-                        );
-                        RESULT = crearExpr("cases", "error");
-                    } else {
-                        RESULT = c;
-                    }
+                    RESULT = c;
                 :}
               | caso:c
                 {:
@@ -1480,7 +1470,8 @@ lista_casos ::= caso:c lista_casos:l
 
 caso ::= CASE SEPARADOR literal:l DOS_PUNTOS lista_sentencias
         {: String tipo = getTipoExpr(l.toString());
-
+            String valor = getValorExpr(l.toString());
+        
            if (!tipo.equals("int") && !tipo.equals("char") && !tipo.equals("error")) {
                manejadorErrores.agregarErrorSemantico(
                    "El literal en un caso de switch debe ser int, char o error, pero se encontró " + tipo,
@@ -1488,10 +1479,32 @@ caso ::= CASE SEPARADOR literal:l DOS_PUNTOS lista_sentencias
                    lright + 1
                );
            }
+           
+           // Validar que el tipo del case sea compatible con la expresión del switch
+           if (tipoSwitchActual != null && !tipoSwitchActual.equals("error") && !tipo.equals("error") && !tipo.equals(tipoSwitchActual)) {
+               manejadorErrores.agregarErrorSemantico(
+                   "El tipo del case '" + valor + "' (" + tipo + ") no es compatible con la expresión del switch (" + tipoSwitchActual + ")",
+                   lleft + 1,
+                   lright + 1
+               );
+           }
+           
+           // Validar que no haya valores de case repetidos
+           if (casosActuales.contains(valor)) {
+               manejadorErrores.agregarErrorSemantico(
+                   "Valor de case '" + valor + "' ya ha sido declarado en este switch",
+                   lleft + 1,
+                   lright + 1
+               );
+           } else {
+               casosActuales.add(valor);
+           }
+           
            RESULT = crearExpr("case", tipo);
         :}
         | CASE SEPARADOR literal:l DOS_PUNTOS
         {: String tipo = getTipoExpr(l.toString());
+            String valor = getValorExpr(l.toString());
 
            if (!tipo.equals("int") && !tipo.equals("char") && !tipo.equals("error")) {
                manejadorErrores.agregarErrorSemantico(
@@ -1500,6 +1513,27 @@ caso ::= CASE SEPARADOR literal:l DOS_PUNTOS lista_sentencias
                    lright + 1
                );
            }
+           
+           // Validar que el tipo del case sea compatible con la expresión del switch
+           if (tipoSwitchActual != null && !tipoSwitchActual.equals("error") && !tipo.equals("error") && !tipo.equals(tipoSwitchActual)) {
+               manejadorErrores.agregarErrorSemantico(
+                   "El tipo del case '" + valor + "' (" + tipo + ") no es compatible con la expresión del switch (" + tipoSwitchActual + ")",
+                   lleft + 1,
+                   lright + 1
+               );
+           }
+           
+           // Validar que no haya valores de case repetidos
+           if (casosActuales.contains(valor)) {
+               manejadorErrores.agregarErrorSemantico(
+                   "Valor de case '" + valor + "' ya ha sido declarado en este switch",
+                   lleft + 1,
+                   lright + 1
+               );
+           } else {
+               casosActuales.add(valor);
+           }
+           
            RESULT = crearExpr("case", tipo);
         :}
         | CASE error DOS_PUNTOS lista_sentencias
