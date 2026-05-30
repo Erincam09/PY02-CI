@@ -11,6 +11,10 @@ public class Cod3D {
     // Contador de temporales (empieza en 1 como en los ejemplos: t1, t2, t3...)
     private int tempActual = 1;
     private int labelActual = 1; // Para etiquetas de control (if, while, etc.)
+
+    // contadores estructuras de control
+
+    private int contIf = 0;
     
     /**
      * Genera un nuevo temporal secuencial
@@ -116,7 +120,6 @@ public class Cod3D {
         return nombre;
     }
     
-    
     /**
      * Genera código para asignación
      * Ejemplo: a = t1
@@ -128,41 +131,12 @@ public class Cod3D {
     
     // ============ MÉTODOS PARA MÚLTIPLES OPERACIONES ============
     
-    /**
-     * Para expresiones con múltiples operaciones
-     * Retorna el temporal final que contiene el resultado
-     * 
-     * Ejemplo: para 2 + 3 * 4
-     * t1 = 3 * 4
-     * t2 = 2 + t1
-     * retorna "t2"
-     */
-    public String generarExpbin(String operador, String izquierda, String derecha) {
-        switch(operador) {
-            case "+": return genSuma(izquierda, derecha);
-            case "-": return genResta(izquierda, derecha);
-            case "*": return genMultiplicacion(izquierda, derecha);
-            case "/": return genDivision(izquierda, derecha);
-            default: 
-                System.err.println("Operador no soportado: " + operador);
-                return izquierda;
-        }
-    }
-
     public String nuevaEtiqueta(String base) {
         return base + "_" + labelActual++;
     }
 
     public void crearEtiqueta(String etiqueta) {
         crearCodigo(etiqueta + ":");
-    }
-
-    public void genGoto(String etiqueta) {
-        crearCodigo("goto " + etiqueta);
-    }
-
-    public void genIfGoto(String condicion, String etiqueta) {
-        crearCodigo("if " + condicion + " goto " + etiqueta);
     }
 
     public String genOperacion(String izquierda, String operador, String derecha) {
@@ -194,6 +168,38 @@ public class Cod3D {
     public void genRead(String tipo, String variable) {
         crearCodigo("read, " + tipo + ", " + variable);
     }
+
+    // ============ MÉTODOS PARA ESTRUCTURAS DE CONTROL ============
+
+    public String nuevoIf() {
+        return "if_" + ++contIf;
+    }
+
+    public String nuevoElse() {
+        return "else_" + contIf;
+    }
+
+    public void genIf(String condicion, String etiqueta) {
+        crearCodigo("if " + condicion + " goto " + etiqueta);
+    }
+
+    public void genGoto(String etiqueta) {
+        crearCodigo("goto " + etiqueta);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void escribirArchivo() {
         try {
