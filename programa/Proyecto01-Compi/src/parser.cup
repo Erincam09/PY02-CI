@@ -87,12 +87,14 @@ parser code {:
     private String tipoSwitchActual = null;
     private String tipoFuncionActual = null; 
 
-
     /*
         *Para estructuras de control
         *Atributos a llamar de la clase
         */
     private String etiquetaIfPendiente = "";
+    private String etiquetaSwitchActual = "";
+    private String valorSwitchActual = "";
+    private String banderaSwitchActual = "";
 
     /*
      * Constructor del parser.
@@ -287,9 +289,9 @@ non terminal comparacion, equal, n_equal, less_t, less_te, greather_t, greather_
 non terminal condicion;
 non terminal abrir_scope_if, abrir_scope_else;
 non terminal if_inicio, else_inicio, if_else_opc;
-non terminal abrir_scope_while, abrir_scope_switch;
+non terminal abrir_scope_while, do_inicio, condicion_do, abrir_scope_switch;
 non terminal bloque_if_else, bloque_do_while, bloque_switch;
-non terminal bloque_casos, lista_casos, caso, default_case, sentencias_break;
+non terminal bloque_casos, lista_casos, caso, case_inicio, default_case, default_inicio, sentencias_break;
 
 non terminal break_nt, return_nt, cin_nt, cout_nt;
 non terminal literal, numero, bool_lit;
@@ -472,10 +474,10 @@ sentencia ::= creacion FIN_EXPR
             {: RESULT = r; :}
             | bloque_if_else:b
             {: RESULT = b; :}
-            | bloque_do_while
-            {: RESULT = crearExpr("return", "false"); :}
-            | bloque_switch
-            {: RESULT = crearExpr("return", "false"); :}
+            | bloque_do_while:b
+            {: RESULT = b; :}
+            | bloque_switch:b
+            {: RESULT = b; :}
             | expresion FIN_EXPR
             {: RESULT = crearExpr("return", "false"); :}
             | cin_nt FIN_EXPR
@@ -1663,15 +1665,40 @@ abrir_scope_while ::=
     :}
 ;
 
-bloque_do_while ::= DO SEPARADOR abrir_scope_while
-                    INICIO_BLOQUE sentencias_break FINAL_BLOQUE 
-                    WHILE SEPARADOR INICIO_PAREN condicion FINAL_PAREN FIN_EXPR
-                    {: tabla.salirDelScope(); :}
+do_inicio ::= DO SEPARADOR abrir_scope_while
+              {:
+                  String doTemp = cod3d.nuevoDo();
+                  String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + doTemp;
+                  cod3d.crearEtiqueta(etiqueta);
+                  RESULT = etiqueta;
+              :}
+            ;   
 
-                  | DO SEPARADOR abrir_scope_while
-                    INICIO_BLOQUE sentencias_break FINAL_BLOQUE 
-                    WHILE SEPARADOR INICIO_PAREN error FINAL_PAREN FIN_EXPR
-                    {: tabla.salirDelScope(); :}
+condicion_do ::= condicion:c
+                {: RESULT = c; :}
+                | error
+                {: RESULT = crearExpr("error", "error"); :};
+
+bloque_do_while ::= do_inicio:eti
+                    INICIO_BLOQUE sentencias_break:s FINAL_BLOQUE
+                    WHILE SEPARADOR INICIO_PAREN
+                    {:
+                        String etiqueta = eti.toString();
+                        cod3d.crearEtiqueta(etiqueta + "_while");
+                    :}
+                    condicion_do:c
+                    FINAL_PAREN FIN_EXPR
+                    {:
+                        String etiqueta = eti.toString();
+                        String tipoCondicion = getTipoExpr(c.toString());
+                        String valorCondicion = getValorExpr(c.toString());
+                        if (!tipoCondicion.equals("error")) {
+                            cod3d.genIf(valorCondicion, etiqueta);
+                        }
+                        cod3d.crearEtiqueta(etiqueta + "_end");
+                        tabla.salirDelScope();
+                        RESULT = crearExpr("return", "false");
+                    :}
                   ;
 
 abrir_scope_switch ::=
@@ -1679,32 +1706,55 @@ abrir_scope_switch ::=
         tabla.crearNuevoScope(nuevoScope("switch"));
         casosActuales.clear();
         tipoSwitchActual = null;
+        int numSwitch = cod3d.nuevoSwitch();
+        etiquetaSwitchActual = obtenerNombreFuncion(tabla.getCurrentScope()) + "_switch_" + numSwitch;
+        banderaSwitchActual = "fsw" + numSwitch;
+        cod3d.reiniciarCases();
+        cod3d.crearEtiqueta(etiquetaSwitchActual);
+        cod3d.crearCodigo(banderaSwitchActual + " = 1");
     :}
 ;
 
-bloque_switch ::= SWITCH SEPARADOR INICIO_PAREN expresion_aritmetica:e FINAL_PAREN
-                    abrir_scope_switch
-                    {: tipoSwitchActual = getTipoExpr(e.toString()); :}
-                    bloque_casos:b
-                    {: String tipoE = getTipoExpr(e.toString());
+bloque_switch ::= SWITCH SEPARADOR abrir_scope_switch
+                  INICIO_PAREN expresion_aritmetica:e FINAL_PAREN
+                  {:
+                      tipoSwitchActual = getTipoExpr(e.toString());
+                      String tipoE = getTipoExpr(e.toString());
 
-                       if (!tipoE.equals("int") && !tipoE.equals("char") && !tipoE.equals("error")) {
-                           manejadorErrores.agregarErrorSemantico(
-                               "La expresión en un switch debe ser int, char o error, pero se encontró " + tipoE,
-                               eleft + 1,
-                               eright + 1
-                           );
-                       }
+                      if (!tipoE.equals("int") && !tipoE.equals("char") && !tipoE.equals("error")) {
+                          manejadorErrores.agregarErrorSemantico(
+                              "La expresión en un switch debe ser int o char, pero se encontró " + tipoE,
+                              eleft + 1,
+                              eright + 1
+                          );
+                      }
+                      String valorE = getValorExpr(e.toString());
+                      valorSwitchActual = cod3d.genTemporal(valorE);
+                  :}
+                  bloque_casos:b
+                  {:
+                      cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
+                      tabla.salirDelScope();
+                      tipoSwitchActual = null;
+                      etiquetaSwitchActual = "";
+                      valorSwitchActual = "";
+                      banderaSwitchActual = "";
+                      RESULT = crearExpr("return", "false");
+                  :}
 
-                        tabla.salirDelScope();
-                        tipoSwitchActual = null;
-                    :}
-
-                    | SWITCH SEPARADOR INICIO_PAREN error FINAL_PAREN
-                    abrir_scope_switch
-                    bloque_casos
-                    {: tabla.salirDelScope(); :}
-                    ;
+                | SWITCH SEPARADOR abrir_scope_switch
+                  INICIO_PAREN error FINAL_PAREN
+                  bloque_casos
+                  {:
+                      cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
+                      tabla.salirDelScope();
+                      tipoSwitchActual = null;
+                      etiquetaSwitchActual = "";
+                      valorSwitchActual = "";
+                      banderaSwitchActual = "";
+                      RESULT = crearExpr("return", "false");
+                  :}
+                ;
 
 bloque_casos ::= INICIO_BLOQUE lista_casos:l FINAL_BLOQUE
                  {: RESULT = l; :}
@@ -1722,86 +1772,102 @@ lista_casos ::= caso:c lista_casos:l
                 :}
               ;
 
-sentencias_break ::= lista_sentencias break_nt
-               | break_nt
-               | lista_sentencias
-               ;    
-caso ::= CASE SEPARADOR literal:l DOS_PUNTOS sentencias_break
-        {: String tipo = getTipoExpr(l.toString());
-            String valor = getValorExpr(l.toString());
-        
-           if (!tipo.equals("int") && !tipo.equals("char") && !tipo.equals("error")) {
-               manejadorErrores.agregarErrorSemantico(
-                   "El literal en un caso de switch debe ser int, char o error, pero se encontró " + tipo,
-                   lleft + 1,
-                   lright + 1
-               );
-           }
-           
-           // Validar que el tipo del case sea compatible con la expresión del switch
-           if (tipoSwitchActual != null && !tipoSwitchActual.equals("error") && !tipo.equals("error") && !tipo.equals(tipoSwitchActual)) {
-               manejadorErrores.agregarErrorSemantico(
-                   "El tipo del case '" + valor + "' (" + tipo + ") no es compatible con la expresión del switch (" + tipoSwitchActual + ")",
-                   lleft + 1,
-                   lright + 1
-               );
-           }
-           
-           // Validar que no haya valores de case repetidos
-           if (casosActuales.contains(valor)) {
-               manejadorErrores.agregarErrorSemantico(
-                   "Valor de case '" + valor + "' ya ha sido declarado en este switch",
-                   lleft + 1,
-                   lright + 1
-               );
-           } else {
-               casosActuales.add(valor);
-           }
-           
-           RESULT = crearExpr("case", tipo);
-        :}
-        | CASE SEPARADOR literal:l DOS_PUNTOS
-        {: String tipo = getTipoExpr(l.toString());
-            String valor = getValorExpr(l.toString());
+sentencias_break ::= lista_sentencias:l break_nt:b
+                     {: RESULT = l; :}
+                   | break_nt:b
+                     {: RESULT = b; :}
+                   | lista_sentencias:l
+                     {: RESULT = l; :}
+                   ;
 
-           if (!tipo.equals("int") && !tipo.equals("char") && !tipo.equals("error")) {
-               manejadorErrores.agregarErrorSemantico(
-                   "El literal en un caso de switch debe ser int, char o error, pero se encontró " + tipo,
-                   lleft + 1,
-                   lright + 1
-               );
-           }
-           
-           // Validar que el tipo del case sea compatible con la expresión del switch
-           if (tipoSwitchActual != null && !tipoSwitchActual.equals("error") && !tipo.equals("error") && !tipo.equals(tipoSwitchActual)) {
-               manejadorErrores.agregarErrorSemantico(
-                   "El tipo del case '" + valor + "' (" + tipo + ") no es compatible con la expresión del switch (" + tipoSwitchActual + ")",
-                   lleft + 1,
-                   lright + 1
-               );
-           }
-           
-           // Validar que no haya valores de case repetidos
-           if (casosActuales.contains(valor)) {
-               manejadorErrores.agregarErrorSemantico(
-                   "Valor de case '" + valor + "' ya ha sido declarado en este switch",
-                   lleft + 1,
-                   lright + 1
-               );
-           } else {
-               casosActuales.add(valor);
-           }
-           
-           RESULT = crearExpr("case", tipo);
-        :}
-        | CASE error DOS_PUNTOS lista_sentencias
-        ;
-default_case ::= DEFAULT SEPARADOR DOS_PUNTOS sentencias_break
-                | DEFAULT SEPARADOR DOS_PUNTOS
-                | DEFAULT error lista_sentencias
-                ;
+case_inicio ::= CASE SEPARADOR literal:l DOS_PUNTOS
+                {:
+                    String tipo = getTipoExpr(l.toString());
+                    String valor = getValorExpr(l.toString());
 
-break_nt ::= BREAK FIN_EXPR;
+                    if (!tipo.equals("int") && !tipo.equals("char") && !tipo.equals("error")) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "El literal en un caso de switch debe ser int o char, pero se encontró " + tipo,
+                            lleft + 1,
+                            lright + 1
+                        );
+                    }
+                    if (tipoSwitchActual != null &&
+                        !tipoSwitchActual.equals("error") && !tipo.equals("error") && !tipo.equals(tipoSwitchActual)) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "El tipo del case '" + valor + "' (" + tipo +
+                            ") no es compatible con la expresión del switch (" + tipoSwitchActual + ")",
+                            lleft + 1,
+                            lright + 1
+                        );
+                    }
+                    if (casosActuales.contains(valor)) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "Valor de case '" + valor + "' ya ha sido declarado en este switch",
+                            lleft + 1,
+                            lright + 1
+                        );
+                    } else {
+                        casosActuales.add(valor);
+                    }
+                    String etiquetaCase = cod3d.nuevoCase(etiquetaSwitchActual);
+                    cod3d.crearEtiqueta(etiquetaCase);
+                    String tBandera = cod3d.genTemporal(banderaSwitchActual);
+                    String tCero1 = cod3d.genTemporal("0");
+                    String tBanderaEsCero = cod3d.genOperacion(tBandera, "==", tCero1);
+                    cod3d.genIf(tBanderaEsCero, etiquetaCase + "_bloque");
+                    String tLiteral = cod3d.genTemporal(valor);
+                    String tComparacion = cod3d.genOperacion(valorSwitchActual, "==", tLiteral);
+                    cod3d.genIf(tComparacion, etiquetaCase + "_bloque");
+                    cod3d.genGoto(etiquetaCase + "_end");
+                    cod3d.crearEtiqueta(etiquetaCase + "_bloque");
+                    String tCero2 = cod3d.genTemporal("0");
+                    cod3d.genAsignacion(banderaSwitchActual, tCero2);
+                    RESULT = crearExpr(etiquetaCase, tipo);
+                :}
+              ;
+
+caso ::= case_inicio:c sentencias_break
+         {:
+             String etiquetaCase = getValorExpr(c.toString());
+             cod3d.crearEtiqueta(etiquetaCase + "_end");
+             RESULT = c;
+         :}
+       | case_inicio:c
+         {:
+             String etiquetaCase = getValorExpr(c.toString());
+             cod3d.crearEtiqueta(etiquetaCase + "_end");
+             RESULT = c;
+         :}
+       | CASE error DOS_PUNTOS lista_sentencias
+         {:
+             RESULT = crearExpr("case", "error");
+         :}
+       ;
+
+default_inicio ::= DEFAULT SEPARADOR DOS_PUNTOS
+                   {:
+                       cod3d.crearEtiqueta(etiquetaSwitchActual + "_default");
+                       RESULT = crearExpr(etiquetaSwitchActual + "_default", "default");
+                   :}
+                 ;
+
+default_case ::= default_inicio sentencias_break
+                 {: RESULT = crearExpr("default", "default"); :}
+
+               | default_inicio
+                 {: RESULT = crearExpr("default", "default"); :}
+
+               | DEFAULT error lista_sentencias
+                 {: RESULT = crearExpr("default", "error"); :}
+               ;
+
+break_nt ::= BREAK FIN_EXPR
+             {:
+                 cod3d.genGoto(etiquetaSwitchActual + "_end");
+                 RESULT = crearExpr("break", "false");
+             :}
+           ;
 
 return_nt ::= RETURN SEPARADOR expresion:e
                {:

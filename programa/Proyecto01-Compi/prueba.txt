@@ -1,11 +1,18 @@
 empty ~ __main__ <| |>
 |:
-    int ~ a <- 5!
-    if ~ <| equal <|a,15|> |> 
+    int ~ opcion <- 2!
+    int ~ x <- 0!
+
+    switch ~ <| opcion |>
     |:
-        a <- 20!
-    :|
-    else ~ |:
-        a <- 15!
+        case ~ 1:
+            x <- 10!
+
+        case ~ 2:
+            x <- 20!
+            break!
+
+        default~:
+            x <- 99!
     :|
 :|

@@ -15,6 +15,9 @@ public class Cod3D {
     // contadores estructuras de control
 
     private int contIf = 0;
+    private int contDo = 1;
+    private int contSwitch = 1;
+    private int contCaso = 1;
     
     /**
      * Genera un nuevo temporal secuencial
@@ -62,6 +65,10 @@ public class Cod3D {
         codigo3D = new StringBuffer();
         tempActual = 1;
         labelActual = 1;
+        contIf = 0;
+        contDo = 1;
+        contSwitch = 1;
+        contCaso = 1;
     }
     
     /**
@@ -185,6 +192,24 @@ public class Cod3D {
 
     public void genGoto(String etiqueta) {
         crearCodigo("goto " + etiqueta);
+    }
+
+    public String nuevoDo() {
+        return "do_" + contDo++;
+    }
+
+    public int nuevoSwitch() {
+        return contSwitch++;
+    }
+
+    public void reiniciarCases() {
+        contCaso = 1;
+    }
+
+    public String nuevoCase(String etiquetaSwitch) {
+        String etiqueta = etiquetaSwitch + "_case_" + contCaso;
+        contCaso++;
+        return etiqueta;
     }
 
 
