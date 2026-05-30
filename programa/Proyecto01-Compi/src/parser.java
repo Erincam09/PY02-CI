@@ -3786,14 +3786,10 @@ class CUP$parser$actions {
         tabla.crearNuevoScope(nuevoScope("switch"));
         casosActuales.clear();
         tipoSwitchActual = null;
-
         int numSwitch = cod3d.nuevoSwitch();
-
         etiquetaSwitchActual = obtenerNombreFuncion(tabla.getCurrentScope()) + "_switch_" + numSwitch;
         banderaSwitchActual = "fsw" + numSwitch;
-
         cod3d.reiniciarCases();
-
         cod3d.crearEtiqueta(etiquetaSwitchActual);
         cod3d.crearCodigo(banderaSwitchActual + " = 1");
     
@@ -3819,7 +3815,6 @@ class CUP$parser$actions {
                               eright + 1
                           );
                       }
-
                       String valorE = getValorExpr(e.toString());
                       valorSwitchActual = cod3d.genTemporal(valorE);
                   
@@ -3841,14 +3836,11 @@ class CUP$parser$actions {
 		Object b = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		
                       cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
-
                       tabla.salirDelScope();
-
                       tipoSwitchActual = null;
                       etiquetaSwitchActual = "";
                       valorSwitchActual = "";
                       banderaSwitchActual = "";
-
                       RESULT = crearExpr("return", "false");
                   
               CUP$parser$result = parser.getSymbolFactory().newSymbol("bloque_switch",65, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-7)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -3861,14 +3853,11 @@ class CUP$parser$actions {
               Object RESULT =null;
 		
                       cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
-
                       tabla.salirDelScope();
-
                       tipoSwitchActual = null;
                       etiquetaSwitchActual = "";
                       valorSwitchActual = "";
                       banderaSwitchActual = "";
-
                       RESULT = crearExpr("return", "false");
                   
               CUP$parser$result = parser.getSymbolFactory().newSymbol("bloque_switch",65, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-6)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -3987,12 +3976,8 @@ class CUP$parser$actions {
                             lright + 1
                         );
                     }
-
                     if (tipoSwitchActual != null &&
-                        !tipoSwitchActual.equals("error") &&
-                        !tipo.equals("error") &&
-                        !tipo.equals(tipoSwitchActual)) {
-
+                        !tipoSwitchActual.equals("error") && !tipo.equals("error") && !tipo.equals(tipoSwitchActual)) {
                         manejadorErrores.agregarErrorSemantico(
                             "El tipo del case '" + valor + "' (" + tipo +
                             ") no es compatible con la expresión del switch (" + tipoSwitchActual + ")",
@@ -4000,7 +3985,6 @@ class CUP$parser$actions {
                             lright + 1
                         );
                     }
-
                     if (casosActuales.contains(valor)) {
                         manejadorErrores.agregarErrorSemantico(
                             "Valor de case '" + valor + "' ya ha sido declarado en este switch",
@@ -4010,28 +3994,19 @@ class CUP$parser$actions {
                     } else {
                         casosActuales.add(valor);
                     }
-
                     String etiquetaCase = cod3d.nuevoCase(etiquetaSwitchActual);
-
                     cod3d.crearEtiqueta(etiquetaCase);
-
                     String tBandera = cod3d.genTemporal(banderaSwitchActual);
                     String tCero1 = cod3d.genTemporal("0");
                     String tBanderaEsCero = cod3d.genOperacion(tBandera, "==", tCero1);
-
                     cod3d.genIf(tBanderaEsCero, etiquetaCase + "_bloque");
-
                     String tLiteral = cod3d.genTemporal(valor);
                     String tComparacion = cod3d.genOperacion(valorSwitchActual, "==", tLiteral);
-
                     cod3d.genIf(tComparacion, etiquetaCase + "_bloque");
                     cod3d.genGoto(etiquetaCase + "_end");
-
                     cod3d.crearEtiqueta(etiquetaCase + "_bloque");
-
                     String tCero2 = cod3d.genTemporal("0");
                     cod3d.genAsignacion(banderaSwitchActual, tCero2);
-
                     RESULT = crearExpr(etiquetaCase, tipo);
                 
               CUP$parser$result = parser.getSymbolFactory().newSymbol("case_inicio",69, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -4177,27 +4152,30 @@ class CUP$parser$actions {
 		int iright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
 		
-               TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+                TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
 
-               if (nodo == null) {
-                   manejadorErrores.agregarErrorSemantico(
-                       "La variable '" + i + "' no ha sido declarada",
-                       ileft + 1,
-                       iright + 1
-                   );
-               } else {
-                   String tipo = nodo.getTipo();
-                   if (!tipo.equals("int") && !tipo.equals("float")) {
-                       manejadorErrores.agregarErrorSemantico(
-                           "cin solo puede leer variables int o float, pero '" +
-                           i + "' es de tipo " + tipo,
-                           ileft + 1,
-                           iright + 1
-                       );
-                   }
-                   // Marcar intento de asignación cuando se usa cin
-                   nodo.setIntentoAsignacion(true);
-               }
+                if (nodo == null) {
+                    manejadorErrores.agregarErrorSemantico(
+                        "La variable '" + i + "' no ha sido declarada",
+                        ileft + 1,
+                        iright + 1
+                    );
+                } else {
+                    String tipo = nodo.getTipo();
+                    if (!tipo.equals("int") && !tipo.equals("float")) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "cin solo puede leer variables int o float, pero '" +
+                            i + "' es de tipo " + tipo,
+                            ileft + 1,
+                            iright + 1
+                        );
+                    }
+                    // Marcar intento de asignación cuando se usa cin
+                    nodo.setIntentoAsignacion(true);
+                    String temp = cod3d.genTemporal(i.toString());
+                    cod3d.genRead(tipo, temp);
+                    RESULT = crearExpr("cin", tipo);
+                } 
            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("cin_nt",75, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -4207,7 +4185,22 @@ class CUP$parser$actions {
           case 144: // cout_nt ::= COUT INICIO_PAREN expresion FINAL_PAREN 
             {
               Object RESULT =null;
+		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		
+                String tipo = getTipoExpr(e.toString());
 
+                if (tipo.equals("error")) {
+                    // Si la expresión tiene error, no generar código para cout
+                    RESULT = crearExpr("cout", "error");
+                } else {
+                    String valor = getValorExpr(e.toString());
+                    String temp = cod3d.genTemporal(valor);
+                    cod3d.genPrint(tipo, temp);
+                    RESULT = crearExpr("cout", tipo);
+                }
+            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("cout_nt",76, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;

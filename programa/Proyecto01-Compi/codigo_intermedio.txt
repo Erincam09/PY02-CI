@@ -3,44 +3,6 @@ data_int opcion
 t1 = 2
 opcion = t1
 data_int x
-t2 = 0
-x = t2
-main_switch_1:
-fsw1 = 1
-t3 = opcion
-main_switch_1_case_1:
-t4 = fsw1
-t5 = 0
-t6 = t4 == t5
-if t6 goto main_switch_1_case_1_bloque
-t7 = 1
-t8 = t3 == t7
-if t8 goto main_switch_1_case_1_bloque
-goto main_switch_1_case_1_end
-main_switch_1_case_1_bloque:
-t9 = 0
-fsw1 = t9
-t10 = 10
-x = t10
-main_switch_1_case_1_end:
-main_switch_1_case_2:
-t11 = fsw1
-t12 = 0
-t13 = t11 == t12
-if t13 goto main_switch_1_case_2_bloque
-t14 = 2
-t15 = t3 == t14
-if t15 goto main_switch_1_case_2_bloque
-goto main_switch_1_case_2_end
-main_switch_1_case_2_bloque:
-t16 = 0
-fsw1 = t16
-t17 = 20
-x = t17
-goto main_switch_1_end
-main_switch_1_case_2_end:
-main_switch_1_default:
-t18 = 99
-x = t18
-main_switch_1_end:
+t2 = x
+cout, int, t2
 main_end:

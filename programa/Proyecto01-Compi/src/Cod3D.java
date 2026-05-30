@@ -169,11 +169,11 @@ public class Cod3D {
     }
 
     public void genPrint(String tipo, String valor) {
-        crearCodigo("print, " + tipo + ", " + valor);
+        crearCodigo("cout, " + tipo + ", " + valor);
     }
 
     public void genRead(String tipo, String variable) {
-        crearCodigo("read, " + tipo + ", " + variable);
+        crearCodigo("cin, " + tipo + ", " + variable);
     }
 
     // ============ MÉTODOS PARA ESTRUCTURAS DE CONTROL ============
@@ -211,6 +211,10 @@ public class Cod3D {
         contCaso++;
         return etiqueta;
     }
+
+
+    // ================ MÉTODOS PARA CIN (READ) Y COUT (PRINT) ================
+
 
 
 

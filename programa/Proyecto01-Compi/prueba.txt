@@ -1,18 +1,6 @@
 empty ~ __main__ <| |>
 |:
     int ~ opcion <- 2!
-    int ~ x <- 0!
-
-    switch ~ <| opcion |>
-    |:
-        case ~ 1:
-            x <- 10!
-
-        case ~ 2:
-            x <- 20!
-            break!
-
-        default~:
-            x <- 99!
-    :|
+    int ~ x!
+    cout <| x |>!
 :|

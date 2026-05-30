@@ -1899,30 +1899,46 @@ return_nt ::= RETURN SEPARADOR expresion:e
 
 cin_nt ::= CIN INICIO_PAREN ID:i FINAL_PAREN
            {:
-               TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+                TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
 
-               if (nodo == null) {
-                   manejadorErrores.agregarErrorSemantico(
-                       "La variable '" + i + "' no ha sido declarada",
-                       ileft + 1,
-                       iright + 1
-                   );
-               } else {
-                   String tipo = nodo.getTipo();
-                   if (!tipo.equals("int") && !tipo.equals("float")) {
-                       manejadorErrores.agregarErrorSemantico(
-                           "cin solo puede leer variables int o float, pero '" +
-                           i + "' es de tipo " + tipo,
-                           ileft + 1,
-                           iright + 1
-                       );
-                   }
-                   // Marcar intento de asignación cuando se usa cin
-                   nodo.setIntentoAsignacion(true);
-               }
+                if (nodo == null) {
+                    manejadorErrores.agregarErrorSemantico(
+                        "La variable '" + i + "' no ha sido declarada",
+                        ileft + 1,
+                        iright + 1
+                    );
+                } else {
+                    String tipo = nodo.getTipo();
+                    if (!tipo.equals("int") && !tipo.equals("float")) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "cin solo puede leer variables int o float, pero '" +
+                            i + "' es de tipo " + tipo,
+                            ileft + 1,
+                            iright + 1
+                        );
+                    }
+                    // Marcar intento de asignación cuando se usa cin
+                    nodo.setIntentoAsignacion(true);
+                    String temp = cod3d.genTemporal(i.toString());
+                    cod3d.genRead(tipo, temp);
+                    RESULT = crearExpr("cin", tipo);
+                } 
            :};
 
-cout_nt ::= COUT INICIO_PAREN expresion FINAL_PAREN;
+cout_nt ::= COUT INICIO_PAREN expresion:e FINAL_PAREN
+            {:
+                String tipo = getTipoExpr(e.toString());
+
+                if (tipo.equals("error")) {
+                    // Si la expresión tiene error, no generar código para cout
+                    RESULT = crearExpr("cout", "error");
+                } else {
+                    String valor = getValorExpr(e.toString());
+                    String temp = cod3d.genTemporal(valor);
+                    cod3d.genPrint(tipo, temp);
+                    RESULT = crearExpr("cout", tipo);
+                }
+            :};
 
 literal ::= numero:n
             {: RESULT = n; :}
