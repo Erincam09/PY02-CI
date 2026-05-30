@@ -92,13 +92,7 @@ parser code {:
         *Para estructuras de control
         *Atributos a llamar de la clase
         */
-    
-    private String ifActual3D = "";
-    private String elseActual3D = "";
-
-
-
-
+    private String etiquetaIfPendiente = "";
 
     /*
      * Constructor del parser.
@@ -291,8 +285,8 @@ non terminal primer_potencia, siguientes_potencias;
 
 non terminal comparacion, equal, n_equal, less_t, less_te, greather_t, greather_te;
 non terminal condicion;
-non terminal abrir_scope_if, abrir_scope_else, abrir_bloque_else;
-non terminal if_inicio, if_else_opc;
+non terminal abrir_scope_if, abrir_scope_else;
+non terminal if_inicio, else_inicio, if_else_opc;
 non terminal abrir_scope_while, abrir_scope_switch;
 non terminal bloque_if_else, bloque_do_while, bloque_switch;
 non terminal bloque_casos, lista_casos, caso, default_case, sentencias_break;
@@ -1590,64 +1584,35 @@ condicion ::= expresion_logica:e
 
 if_inicio ::= IF SEPARADOR INICIO_PAREN condicion:c FINAL_PAREN abrir_scope_if
               {:
-                  ifActual3D = cod3d.nuevoIf();
-
+                  String ifTemp = cod3d.nuevoIf();
                   String condi = getValorExpr(c.toString());
-                  String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + ifActual3D;
-
+                  String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + ifTemp;
                   cod3d.crearEtiqueta(etiqueta);
                   cod3d.genIf(condi, etiqueta + "_bloque");
                   cod3d.genGoto(etiqueta + "_bloque_end");
                   cod3d.crearEtiqueta(etiqueta + "_bloque");
+                  RESULT = etiqueta;
               :}
             ;
 
-abrir_bloque_else ::= 
-    {:
-        String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + ifActual3D;
-        cod3d.crearEtiqueta(etiqueta + "_bloque_end");
-
-        elseActual3D = cod3d.nuevoElse();
-        String etiquetaElse = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + elseActual3D;
-
-        cod3d.crearEtiqueta(etiquetaElse);
-    :} ;
-
-if_else_opc ::= ELSE SEPARADOR abrir_scope_else abrir_bloque_else bloque:blq2
-             {:
-                 tabla.salirDelScope();
-                 RESULT = blq2;
-             :}
-           | /* epsilon */
-             {:
-                 RESULT = crearExpr("epsilon", "epsilon");
-             :}
-           ;
-           
-
-bloque_if_else ::= if_inicio bloque:blq1
+bloque_if_else ::= if_inicio:eti bloque:blq1
                    {:
                        tabla.salirDelScope();
+                       String etiqueta = eti.toString();
+                       cod3d.genGoto(etiqueta + "_end");
+                       cod3d.crearEtiqueta(etiqueta + "_bloque_end");
+                       etiquetaIfPendiente = etiqueta;
                    :}
                    if_else_opc:ri
                    {:
-                       String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" +ifAcifActual3D;
-                        String tipoElse = getTipoExpr(ri.toString());
+                       String tipoElse = getTipoExpr(ri.toString());
 
-                        if (tipoElse.equals("epsilon")) {
-                           cod3d.genGoto(etiqueta + "_end");
-                           cod3d.crearEtiqueta(etiqueta + "_bloque_end");
-                           cod3d.crearEtiqueta(etiqueta + "_end");
-                       } else {
-                           String etiquetaElse = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + elseActual3D;
-                           cod3d.crearEtiqueta(etiquetaElse + "_end");
-                           cod3d.crearEtiqueta(etiqueta + "_end");
-                       }
                        if (tipoElse.equals("epsilon")) {
                            RESULT = crearExpr("return", "false");
                        } else {
                            String returnb1 = getTipoExpr(blq1.toString());
                            String returnb2 = getTipoExpr(ri.toString());
+
                            if (returnb1.equals("true") && returnb2.equals("true")) {
                                RESULT = crearExpr("return", "true");
                            } else {
@@ -1661,8 +1626,36 @@ bloque_if_else ::= if_inicio bloque:blq1
                    bloque
                    {:
                        tabla.salirDelScope();
+                       RESULT = crearExpr("return", "false");
                    :}
                  ;
+
+else_inicio ::= ELSE SEPARADOR abrir_scope_else
+                {:
+                    String etiqueta = etiquetaIfPendiente;
+                    String etiquetaElse = etiqueta.replace("_if_", "_else_");
+                    cod3d.crearEtiqueta(etiquetaElse);
+                    RESULT = etiqueta;
+                :}
+              ;
+
+if_else_opc ::= else_inicio:eti bloque:blq2
+                {:
+                    tabla.salirDelScope();
+                    String etiqueta = eti.toString();
+                    String etiquetaElse = etiqueta.replace("_if_", "_else_");
+                    cod3d.crearEtiqueta(etiquetaElse + "_end");
+                    cod3d.crearEtiqueta(etiqueta + "_end");
+                    RESULT = blq2;
+                :}
+
+              | /* epsilon */
+                {:
+                    String etiqueta = etiquetaIfPendiente;
+                    cod3d.crearEtiqueta(etiqueta + "_end");
+                    RESULT = crearExpr("epsilon", "epsilon");
+                :}
+              ;
 
 abrir_scope_while ::=
     {:

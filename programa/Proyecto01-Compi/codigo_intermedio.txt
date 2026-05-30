@@ -3,43 +3,19 @@ data_int a
 t1 = 5
 a = t1
 t2 = a
-t3 = 5
+t3 = 15
 t4 = equal,t2,t3
 main_if_1:
 if t4 goto main_if_1_bloque
 goto main_if_1_bloque_end
 main_if_1_bloque:
-t5 = a
-t6 = 10
-t7 = equal,t5,t6
-main_if_2:
-if t7 goto main_if_2_bloque
-goto main_if_2_bloque_end
-main_if_2_bloque:
-t8 = 15
-a = t8
-main_if_2_bloque_end:
-main_else_2:
-t9 = 20
-a = t9
-main_else_2_end:
-main_if_2_end:
-goto main_if_2_end
-main_if_2_bloque_end:
-main_if_2_end:
-t10 = a
-t11 = 15
-t12 = equal,t10,t11
-main_if_3:
-if t12 goto main_if_3_bloque
-goto main_if_3_bloque_end
-main_if_3_bloque:
-t13 = 20
-a = t13
-main_if_3_bloque_end:
-main_else_3:
-t14 = 15
-a = t14
-main_else_3_end:
-main_if_3_end:
+t5 = 20
+a = t5
+goto main_if_1_end
+main_if_1_bloque_end:
+main_else_1:
+t6 = 15
+a = t6
+main_else_1_end:
+main_if_1_end:
 main_end:

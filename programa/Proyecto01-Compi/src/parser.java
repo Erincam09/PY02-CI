@@ -65,9 +65,9 @@ public class parser extends java_cup.runtime.lr_parser {
     "\000\002\044\004\000\002\044\004\000\002\044\004\000" +
     "\002\044\003\000\002\045\003\000\002\045\003\000\002" +
     "\045\003\000\002\045\003\000\002\045\005\000\002\070" +
-    "\002\000\002\071\002\000\002\067\003\000\002\073\010" +
-    "\000\002\072\002\000\002\074\007\000\002\074\002\000" +
-    "\002\120\002\000\002\077\006\000\002\077\011\000\002" +
+    "\002\000\002\071\002\000\002\067\003\000\002\072\010" +
+    "\000\002\120\002\000\002\077\006\000\002\077\011\000" +
+    "\002\073\005\000\002\074\004\000\002\074\002\000\002" +
     "\075\002\000\002\100\016\000\002\100\016\000\002\076" +
     "\002\000\002\121\002\000\002\101\012\000\002\101\011" +
     "\000\002\102\005\000\002\102\006\000\002\103\004\000" +
@@ -325,12 +325,12 @@ public class parser extends java_cup.runtime.lr_parser {
     "\110\050\071\054\075\055\141\057\123\066\053\001\002" +
     "\000\004\051\251\001\002\000\004\051\246\001\002\000" +
     "\004\051\uff95\001\002\000\004\052\uff97\001\002\000\004" +
-    "\052\032\001\002\000\112\003\uff8e\004\uff8e\006\uff8e\010" +
-    "\uff8e\011\uff8e\012\uff8e\013\uff8e\014\uff8e\015\uff8e\016\uff8e" +
-    "\021\uff8e\022\uff8e\023\uff8e\024\uff8e\025\uff8e\026\uff8e\027" +
-    "\uff8e\030\uff8e\031\uff8e\032\uff8e\033\uff8e\034\uff8e\035\uff8e" +
-    "\036\uff8e\037\uff8e\040\uff8e\041\uff8e\042\uff8e\043\uff8e\044" +
-    "\uff8e\050\uff8e\053\uff8e\054\uff8e\055\uff8e\057\uff8e\066\uff8e" +
+    "\052\032\001\002\000\112\003\uff91\004\uff91\006\uff91\010" +
+    "\uff91\011\uff91\012\uff91\013\uff91\014\uff91\015\uff91\016\uff91" +
+    "\021\uff91\022\uff91\023\uff91\024\uff91\025\uff91\026\uff91\027" +
+    "\uff91\030\uff91\031\uff91\032\uff91\033\uff91\034\uff91\035\uff91" +
+    "\036\uff91\037\uff91\040\uff91\041\uff91\042\uff91\043\uff91\044" +
+    "\uff91\050\uff91\053\uff91\054\uff91\055\uff91\057\uff91\066\uff91" +
     "\001\002\000\004\052\uff97\001\002\000\004\052\uff94\001" +
     "\002\000\034\026\070\027\052\036\171\037\067\040\132" +
     "\041\126\042\131\043\134\044\110\050\071\054\075\055" +
@@ -543,32 +543,32 @@ public class parser extends java_cup.runtime.lr_parser {
     "\131\043\134\044\110\050\071\054\075\055\141\057\123" +
     "\001\002\000\004\051\u011b\001\002\000\020\047\uffb3\051" +
     "\uffb3\053\uffb3\064\uffb3\065\uffb3\070\uffb3\071\uffb3\001\002" +
-    "\000\114\003\uff90\004\uff90\005\uff90\006\uff90\010\uff90\011" +
-    "\uff90\012\uff90\013\uff90\014\uff90\015\uff90\016\uff90\021\uff90" +
-    "\022\uff90\023\uff90\024\uff90\025\uff90\026\uff90\027\uff90\030" +
-    "\uff90\031\uff90\032\uff90\033\uff90\034\uff90\035\uff90\036\uff90" +
-    "\037\uff90\040\uff90\041\uff90\042\uff90\043\uff90\044\uff90\050" +
-    "\uff90\053\uff90\054\uff90\055\uff90\057\uff90\066\uff90\001\002" +
-    "\000\114\003\uff91\004\uff91\005\u011e\006\uff91\010\uff91\011" +
-    "\uff91\012\uff91\013\uff91\014\uff91\015\uff91\016\uff91\021\uff91" +
-    "\022\uff91\023\uff91\024\uff91\025\uff91\026\uff91\027\uff91\030" +
-    "\uff91\031\uff91\032\uff91\033\uff91\034\uff91\035\uff91\036\uff91" +
-    "\037\uff91\040\uff91\041\uff91\042\uff91\043\uff91\044\uff91\050" +
-    "\uff91\053\uff91\054\uff91\055\uff91\057\uff91\066\uff91\001\002" +
-    "\000\004\067\u0120\001\002\000\112\003\uff8f\004\uff8f\006" +
-    "\uff8f\010\uff8f\011\uff8f\012\uff8f\013\uff8f\014\uff8f\015\uff8f" +
-    "\016\uff8f\021\uff8f\022\uff8f\023\uff8f\024\uff8f\025\uff8f\026" +
-    "\uff8f\027\uff8f\030\uff8f\031\uff8f\032\uff8f\033\uff8f\034\uff8f" +
-    "\035\uff8f\036\uff8f\037\uff8f\040\uff8f\041\uff8f\042\uff8f\043" +
-    "\uff8f\044\uff8f\050\uff8f\053\uff8f\054\uff8f\055\uff8f\057\uff8f" +
-    "\066\uff8f\001\002\000\004\052\uff96\001\002\000\004\052" +
-    "\uff93\001\002\000\004\052\032\001\002\000\112\003\uff92" +
-    "\004\uff92\006\uff92\010\uff92\011\uff92\012\uff92\013\uff92\014" +
-    "\uff92\015\uff92\016\uff92\021\uff92\022\uff92\023\uff92\024\uff92" +
-    "\025\uff92\026\uff92\027\uff92\030\uff92\031\uff92\032\uff92\033" +
-    "\uff92\034\uff92\035\uff92\036\uff92\037\uff92\040\uff92\041\uff92" +
-    "\042\uff92\043\uff92\044\uff92\050\uff92\053\uff92\054\uff92\055" +
-    "\uff92\057\uff92\066\uff92\001\002\000\004\051\u0125\001\002" +
+    "\000\114\003\uff93\004\uff93\005\uff93\006\uff93\010\uff93\011" +
+    "\uff93\012\uff93\013\uff93\014\uff93\015\uff93\016\uff93\021\uff93" +
+    "\022\uff93\023\uff93\024\uff93\025\uff93\026\uff93\027\uff93\030" +
+    "\uff93\031\uff93\032\uff93\033\uff93\034\uff93\035\uff93\036\uff93" +
+    "\037\uff93\040\uff93\041\uff93\042\uff93\043\uff93\044\uff93\050" +
+    "\uff93\053\uff93\054\uff93\055\uff93\057\uff93\066\uff93\001\002" +
+    "\000\114\003\uff8e\004\uff8e\005\u011e\006\uff8e\010\uff8e\011" +
+    "\uff8e\012\uff8e\013\uff8e\014\uff8e\015\uff8e\016\uff8e\021\uff8e" +
+    "\022\uff8e\023\uff8e\024\uff8e\025\uff8e\026\uff8e\027\uff8e\030" +
+    "\uff8e\031\uff8e\032\uff8e\033\uff8e\034\uff8e\035\uff8e\036\uff8e" +
+    "\037\uff8e\040\uff8e\041\uff8e\042\uff8e\043\uff8e\044\uff8e\050" +
+    "\uff8e\053\uff8e\054\uff8e\055\uff8e\057\uff8e\066\uff8e\001\002" +
+    "\000\004\067\u0122\001\002\000\004\052\032\001\002\000" +
+    "\112\003\uff92\004\uff92\006\uff92\010\uff92\011\uff92\012\uff92" +
+    "\013\uff92\014\uff92\015\uff92\016\uff92\021\uff92\022\uff92\023" +
+    "\uff92\024\uff92\025\uff92\026\uff92\027\uff92\030\uff92\031\uff92" +
+    "\032\uff92\033\uff92\034\uff92\035\uff92\036\uff92\037\uff92\040" +
+    "\uff92\041\uff92\042\uff92\043\uff92\044\uff92\050\uff92\053\uff92" +
+    "\054\uff92\055\uff92\057\uff92\066\uff92\001\002\000\112\003" +
+    "\uff8f\004\uff8f\006\uff8f\010\uff8f\011\uff8f\012\uff8f\013\uff8f" +
+    "\014\uff8f\015\uff8f\016\uff8f\021\uff8f\022\uff8f\023\uff8f\024" +
+    "\uff8f\025\uff8f\026\uff8f\027\uff8f\030\uff8f\031\uff8f\032\uff8f" +
+    "\033\uff8f\034\uff8f\035\uff8f\036\uff8f\037\uff8f\040\uff8f\041" +
+    "\uff8f\042\uff8f\043\uff8f\044\uff8f\050\uff8f\053\uff8f\054\uff8f" +
+    "\055\uff8f\057\uff8f\066\uff8f\001\002\000\004\052\uff96\001" +
+    "\002\000\004\052\uff90\001\002\000\004\051\u0125\001\002" +
     "\000\034\047\uff98\051\uff98\053\uff98\056\uff98\057\uff98\060" +
     "\uff98\061\uff98\062\uff98\063\uff98\064\uff98\065\uff98\070\uff98" +
     "\071\uff98\001\002\000\112\003\uffea\004\uffea\006\uffea\010" +
@@ -660,7 +660,7 @@ public class parser extends java_cup.runtime.lr_parser {
     "\036\061\037\132\040\101\041\054\042\046\043\053\044" +
     "\112\045\113\046\126\050\106\052\123\054\075\056\136" +
     "\060\036\061\135\062\042\063\044\064\064\065\047\066" +
-    "\114\073\071\077\055\100\105\101\134\110\035\111\040" +
+    "\114\072\071\077\055\100\105\101\134\110\035\111\040" +
     "\112\043\113\137\114\115\115\056\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
@@ -690,7 +690,7 @@ public class parser extends java_cup.runtime.lr_parser {
     "\036\061\037\132\040\101\041\054\042\046\043\053\044" +
     "\112\045\113\046\126\050\106\052\123\054\075\056\136" +
     "\060\036\061\135\062\042\063\044\064\064\065\047\066" +
-    "\114\073\071\077\055\100\105\101\134\110\035\111\040" +
+    "\114\072\071\077\055\100\105\101\134\110\035\111\040" +
     "\112\043\113\137\114\115\115\056\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
@@ -799,7 +799,7 @@ public class parser extends java_cup.runtime.lr_parser {
     "\142\025\121\033\045\034\033\035\065\036\061\037\132" +
     "\040\101\041\054\042\046\043\053\044\112\045\113\046" +
     "\126\050\106\052\123\054\075\056\136\060\036\061\135" +
-    "\062\042\063\044\064\064\065\047\066\114\073\071\077" +
+    "\062\042\063\044\064\064\065\047\066\114\072\071\077" +
     "\055\100\105\101\134\110\035\111\040\112\043\113\137" +
     "\114\115\115\056\001\001\000\002\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
@@ -819,7 +819,7 @@ public class parser extends java_cup.runtime.lr_parser {
     "\060\024\142\025\121\033\045\034\033\035\065\036\061" +
     "\037\132\040\101\041\054\042\046\043\053\044\112\045" +
     "\113\046\126\050\106\052\123\054\075\056\136\060\036" +
-    "\061\135\062\042\063\044\064\064\065\047\066\114\073" +
+    "\061\135\062\042\063\044\064\064\065\047\066\114\072" +
     "\071\077\055\100\105\101\134\106\316\107\313\110\035" +
     "\111\040\112\043\113\137\114\115\115\056\001\001\000" +
     "\002\001\001\000\002\001\001\000\004\107\331\001\001" +
@@ -845,14 +845,14 @@ public class parser extends java_cup.runtime.lr_parser {
     "\065\036\061\037\132\040\101\041\054\042\046\043\053" +
     "\044\112\045\113\046\126\050\106\052\123\054\075\056" +
     "\136\060\036\061\135\062\042\063\044\064\064\065\047" +
-    "\066\114\073\071\077\055\100\105\101\134\106\353\107" +
+    "\066\114\072\071\077\055\100\105\101\134\106\353\107" +
     "\313\110\035\111\040\112\043\113\137\114\115\115\056" +
     "\001\001\000\002\001\001\000\132\012\355\013\111\014" +
     "\050\016\141\017\037\020\057\021\063\022\103\023\060" +
     "\024\142\025\121\033\045\034\033\035\065\036\061\037" +
     "\132\040\101\041\054\042\046\043\053\044\112\045\113" +
     "\046\126\050\106\052\123\054\075\056\136\060\036\061" +
-    "\135\062\042\063\044\064\064\065\047\066\114\073\071" +
+    "\135\062\042\063\044\064\064\065\047\066\114\072\071" +
     "\077\055\100\105\101\134\110\035\111\040\112\043\113" +
     "\137\114\115\115\056\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
@@ -861,7 +861,7 @@ public class parser extends java_cup.runtime.lr_parser {
     "\142\025\121\033\045\034\033\035\065\036\061\037\132" +
     "\040\101\041\054\042\046\043\053\044\112\045\113\046" +
     "\126\050\106\052\123\054\075\056\136\060\036\061\135" +
-    "\062\042\063\044\064\064\065\047\066\114\073\071\077" +
+    "\062\042\063\044\064\064\065\047\066\114\072\071\077" +
     "\055\100\105\101\134\110\035\111\040\112\043\113\137" +
     "\114\115\115\056\001\001\000\002\001\001\000\136\012" +
     "\315\013\111\014\050\016\141\017\037\020\057\021\063" +
@@ -869,7 +869,7 @@ public class parser extends java_cup.runtime.lr_parser {
     "\065\036\061\037\132\040\101\041\054\042\046\043\053" +
     "\044\112\045\113\046\126\050\106\052\123\054\075\056" +
     "\136\060\036\061\135\062\042\063\044\064\064\065\047" +
-    "\066\114\073\071\077\055\100\105\101\134\106\366\107" +
+    "\066\114\072\071\077\055\100\105\101\134\106\366\107" +
     "\313\110\035\111\040\112\043\113\137\114\115\115\056" +
     "\001\001\000\002\001\001\000\002\001\001\000\004\076" +
     "\371\001\001\000\004\102\372\001\001\000\002\001\001" +
@@ -909,9 +909,9 @@ public class parser extends java_cup.runtime.lr_parser {
     "\001\000\036\014\050\023\060\040\u0119\041\054\042\046" +
     "\043\053\044\112\045\113\052\123\054\075\056\136\113" +
     "\137\114\115\115\056\001\001\000\002\001\001\000\002" +
-    "\001\001\000\004\120\u011c\001\001\000\004\074\u011e\001" +
-    "\001\000\002\001\001\000\002\001\001\000\004\071\u0120" +
-    "\001\001\000\004\072\u0121\001\001\000\004\011\u0122\001" +
+    "\001\001\000\004\120\u011c\001\001\000\006\073\u011e\074" +
+    "\u011f\001\001\000\002\001\001\000\004\011\u0120\001\001" +
+    "\000\002\001\001\000\002\001\001\000\004\071\u0122\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
     "\000\002\001\001\000\070\014\050\023\060\034\u0127\035" +
     "\065\036\061\037\132\040\101\041\054\042\046\043\053" +
@@ -1076,6 +1076,7 @@ public class parser extends java_cup.runtime.lr_parser {
     
     private String ifActual3D = "";
     private String elseActual3D = "";
+    private String etiquetaIfPendiente = "";
 
 
 
@@ -3539,83 +3540,55 @@ class CUP$parser$actions {
 		int cright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
 		Object c = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
 		
-                  ifActual3D = cod3d.nuevoIf();
+                  String ifTemp = cod3d.nuevoIf();
 
                   String condi = getValorExpr(c.toString());
-                  String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + ifActual3D;
+                  String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + ifTemp;
 
                   cod3d.crearEtiqueta(etiqueta);
                   cod3d.genIf(condi, etiqueta + "_bloque");
                   cod3d.genGoto(etiqueta + "_bloque_end");
                   cod3d.crearEtiqueta(etiqueta + "_bloque");
+
+                  RESULT = etiqueta;
               
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("if_inicio",57, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("if_inicio",56, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 110: // abrir_bloque_else ::= 
+          case 110: // NT$2 ::= 
             {
               Object RESULT =null;
-		
-        String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + ifActual3D;
-        cod3d.crearEtiqueta(etiqueta + "_bloque_end");
-
-        elseActual3D = cod3d.nuevoElse();
-        String etiquetaElse = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + elseActual3D;
-
-        cod3d.crearEtiqueta(etiquetaElse);
-    
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("abrir_bloque_else",56, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
-            }
-          return CUP$parser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 111: // if_else_opc ::= ELSE SEPARADOR abrir_scope_else abrir_bloque_else bloque 
-            {
-              Object RESULT =null;
-		int blq2left = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
-		int blq2right = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
-		Object blq2 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		
-                 tabla.salirDelScope();
-                 RESULT = blq2;
-             
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("if_else_opc",58, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
-            }
-          return CUP$parser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 112: // if_else_opc ::= 
-            {
-              Object RESULT =null;
-		
-                 RESULT = crearExpr("epsilon", "epsilon");
-             
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("if_else_opc",58, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
-            }
-          return CUP$parser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 113: // NT$2 ::= 
-            {
-              Object RESULT =null;
+		int etileft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int etiright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object eti = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
 		int blq1left = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int blq1right = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object blq1 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 
                        tabla.salirDelScope();
+
+                       String etiqueta = eti.toString();
+
+                       cod3d.genGoto(etiqueta + "_end");
+                       cod3d.crearEtiqueta(etiqueta + "_bloque_end");
+
+                       etiquetaIfPendiente = etiqueta;
                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("NT$2",78, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 114: // bloque_if_else ::= if_inicio bloque NT$2 if_else_opc 
+          case 111: // bloque_if_else ::= if_inicio bloque NT$2 if_else_opc 
             {
               Object RESULT =null;
               // propagate RESULT from NT$2
                 RESULT = (Object) ((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		int etileft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).left;
+		int etiright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).right;
+		Object eti = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-3)).value;
 		int blq1left = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
 		int blq1right = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
 		Object blq1 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
@@ -3623,62 +3596,18 @@ class CUP$parser$actions {
 		int riright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object ri = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		
-                       String etiqueta =
-                           obtenerNombreFuncion(tabla.getCurrentScope()) +
-                           "_" +
-                           ifActual3D;
-
-                       String tipoElse =
-                           getTipoExpr(ri.toString());
+                       String tipoElse = getTipoExpr(ri.toString());
 
                        if (tipoElse.equals("epsilon")) {
-
-                           cod3d.genGoto(etiqueta + "_end");
-
-                           cod3d.crearEtiqueta(
-                               etiqueta + "_bloque_end"
-                           );
-
-                           cod3d.crearEtiqueta(
-                               etiqueta + "_end"
-                           );
-
+                           RESULT = crearExpr("return", "false");
                        } else {
+                           String returnb1 = getTipoExpr(blq1.toString());
+                           String returnb2 = getTipoExpr(ri.toString());
 
-                           String etiquetaElse = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + elseActual3D;
-
-                           cod3d.crearEtiqueta(
-                               etiquetaElse + "_end"
-                           );
-
-                           cod3d.crearEtiqueta(
-                               etiqueta + "_end"
-                           );
-                       }
-
-                       if (tipoElse.equals("epsilon")) {
-
-                           RESULT =
-                               crearExpr("return", "false");
-
-                       } else {
-
-                           String returnb1 =
-                               getTipoExpr(blq1.toString());
-
-                           String returnb2 =
-                               getTipoExpr(ri.toString());
-
-                           if (returnb1.equals("true")
-                                   && returnb2.equals("true")) {
-
-                               RESULT =
-                                   crearExpr("return", "true");
-
+                           if (returnb1.equals("true") && returnb2.equals("true")) {
+                               RESULT = crearExpr("return", "true");
                            } else {
-
-                               RESULT =
-                                   crearExpr("return", "false");
+                               RESULT = crearExpr("return", "false");
                            }
                        }
                    
@@ -3687,13 +3616,70 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 115: // bloque_if_else ::= IF SEPARADOR INICIO_PAREN error FINAL_PAREN abrir_scope_if bloque 
+          case 112: // bloque_if_else ::= IF SEPARADOR INICIO_PAREN error FINAL_PAREN abrir_scope_if bloque 
             {
               Object RESULT =null;
 		
                        tabla.salirDelScope();
+                       RESULT = crearExpr("return", "false");
                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("bloque_if_else",61, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-6)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 113: // else_inicio ::= ELSE SEPARADOR abrir_scope_else 
+            {
+              Object RESULT =null;
+		
+                    String etiqueta = etiquetaIfPendiente;
+                    String etiquetaElse = etiqueta.replace("_if_", "_else_");
+
+                    cod3d.crearEtiqueta(etiquetaElse);
+
+                    RESULT = etiqueta;
+                
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("else_inicio",57, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 114: // if_else_opc ::= else_inicio bloque 
+            {
+              Object RESULT =null;
+		int etileft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int etiright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object eti = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		int blq2left = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int blq2right = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object blq2 = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		
+                    tabla.salirDelScope();
+
+                    String etiqueta = eti.toString();
+                    String etiquetaElse = etiqueta.replace("_if_", "_else_");
+
+                    cod3d.crearEtiqueta(etiquetaElse + "_end");
+                    cod3d.crearEtiqueta(etiqueta + "_end");
+
+                    RESULT = blq2;
+                
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("if_else_opc",58, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 115: // if_else_opc ::= 
+            {
+              Object RESULT =null;
+		
+                    String etiqueta = etiquetaIfPendiente;
+
+                    cod3d.crearEtiqueta(etiqueta + "_end");
+
+                    RESULT = crearExpr("epsilon", "epsilon");
+                
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("if_else_opc",58, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
 
