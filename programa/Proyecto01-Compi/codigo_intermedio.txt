@@ -1,59 +1,19 @@
 _NuevaFunc:
-param_1_int_y
-t1 = 2
-return t1
+param_1_float_y
+f1 = y
+return f1
 _NuevaFunc_end:
-_testFunc:
-param_1_int_y
-f1 = 1.1
-f2 = 2.1
-f3 = f1 + f2
-data_int x
-t2 = f3
-x = t2
-t3 = 2
-return t3
-_testFunc_end:
 main:
-data_int id
-t4 = 3/2
-id = t4
-t5 = id
-t6 = 42
-t7 = t5 ^ t6
-data_int id2
-t8 = t7
-id2 = t8
-t9 = 2
-t10 = id
-t11 = greather_te,t9,t10
-data_bool z
-t12 = t11
-z = t12
-t13 = z
-t14 = true
-t15 = equal,t13,t14
-data_bool y
-t16 = t15
-y = t16
-data_int_array miArr 3,1
-t17 = 4
-miArr 1,0 = t17
-data_int_array miArr2 4,2
-t18 = id
-param_inv_1_int_t18
-t19 = call NuevaFunc,1
-data_int e4
-t20 = t19
-e4 = t20
-t21 = miArr2 0,1
-t22 = 4
-t23 = e4
-t24 = t22 * t23
-t25 = t21
-t26 = t24
-t27 = t25 + t26
-data_int e5
-t28 = t27
-e5 = t28
+f2 = 4.5
+f3 = 4.5
+f4 = f2 / f3
+data_float y
+f5 = f4
+y = f5
+f6 = y
+param_inv_1_float_f6
+f7 = call NuevaFunc,1
+data_float x
+f8 = f7
+x = f8
 main_end:

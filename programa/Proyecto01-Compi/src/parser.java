@@ -1862,7 +1862,14 @@ class CUP$parser$actions {
                             ileft + 1,
                             iright + 1
                         );
+                    } else if (!nodo.getCategoria().equals("variable") && !nodo.getCategoria().equals("parametro")) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "'" + i + "' no es una variable ni un parámetro",
+                            ileft + 1,
+                            iright + 1
+                        );
                     } else {
+
                         String tipoVariable = nodo.getTipo();
                         String tipoExpr = getTipoExpr(e.toString());
                         if (!tipoExpr.equals("error") && !tipoVariable.equals(tipoExpr)) {
