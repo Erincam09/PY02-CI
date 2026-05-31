@@ -1858,7 +1858,7 @@ class CUP$parser$actions {
                         nodo.setIntentoAsignacion(true);
                         
                         String dir = getValorExpr(e.toString());
-                        String temp = cod3d.genTemporal(dir);
+                        String temp = cod3d.genTemporal(dir, tipoVariable);
                         cod3d.genAsignacion(i.toString(), temp); 
                     }
                
@@ -1942,7 +1942,7 @@ class CUP$parser$actions {
                                         String columna = getValorExpr(e2.toString());
                                         String valorexpr = getValorExpr(valor.toString());
 
-                                        String tValor = cod3d.genTemporal(valorexpr);
+                                        String tValor = cod3d.genTemporal(valorexpr, tipoArreglo);
 
                                         cod3d.genAsignacionArray(i.toString(), fila, columna, tValor);
                                     }
@@ -2015,7 +2015,7 @@ class CUP$parser$actions {
                             //String temp = cod3d.nuevoTemp();
                             String fila = getValorExpr(e1.toString());
                             String columna = getValorExpr(e2.toString());
-                            String tAcceso = cod3d.genAccesoArray(i.toString(), fila, columna);
+                            String tAcceso = cod3d.genAccesoArray(i.toString(), fila, columna, nodo.getTipo());
                             RESULT = crearExpr(tAcceso, nodo.getTipo());
                      }
                  
@@ -2065,7 +2065,7 @@ class CUP$parser$actions {
                                 
                                 String dir = getValorExpr(e.toString());
                                 cod3d.crearCodigo("data_" + tipoVariable + " " + i.toString());
-                                String temp = cod3d.genTemporal(dir);
+                                String temp = cod3d.genTemporal(dir, tipoVariable);
                                 cod3d.genAsignacion(i.toString(), temp);
                             }
                         
@@ -2175,7 +2175,7 @@ class CUP$parser$actions {
                                            String exprValor = valoresInicialesArray.get(pos);
 
                                            String valor = getValorExpr(exprValor);
-                                           String temp = cod3d.genTemporal(valor);
+                                           String temp = cod3d.genTemporal(valor, t.toString());
 
                                            int fila1 = pos / columnasEsperadas;
                                            int columna2 = pos % columnasEsperadas;
@@ -2352,11 +2352,11 @@ class CUP$parser$actions {
                                 for (int ind = 0; ind < expresionesRecibidas.size(); ind++) {
                                     String exprRecibida = expresionesRecibidas.get(ind);
                                     String valorRecibido = getValorExpr(exprRecibida);
-                                    String tempParam = cod3d.genTemporal(valorRecibido);
                                     String tipoRecibido = getTipoExpr(exprRecibida);
+                                    String tempParam = cod3d.genTemporal(valorRecibido, tipoRecibido);
                                     cod3d.genParametroInv(ind + 1,tipoRecibido,tempParam);
                                 }
-                                String tempCall = cod3d.genLlamada(i.toString(),expresionesRecibidas.size());
+                                String tempCall = cod3d.genLlamada(i.toString(),expresionesRecibidas.size(), nodo.getTipo());
                                 RESULT = crearExpr(tempCall, nodo.getTipo());
                             } else {
                                 RESULT = crearExpr(i.toString(), "error");
@@ -2401,7 +2401,7 @@ class CUP$parser$actions {
                               );
                               RESULT = crearExpr(i.toString(), "error");
                           } else {
-                              String tempCall = cod3d.genLlamada(i.toString(), 0);
+                              String tempCall = cod3d.genLlamada(i.toString(), 0, nodo.getTipo());
                               RESULT = crearExpr(tempCall, nodo.getTipo());
                           }
                       }
@@ -2782,8 +2782,8 @@ class CUP$parser$actions {
                             String izq = getValorExpr(e1.toString());
                             String der = getValorExpr(e2.toString());
 
-                            String tIzq = cod3d.genTemporal(izq);
-                            String tDer = cod3d.genTemporal(der);
+                            String tIzq = cod3d.genTemporal(izq, tipo1);
+                            String tDer = cod3d.genTemporal(der, tipo1);
 
                             String temp = cod3d.genOpRelacionales("equal", tIzq, tDer);
 
@@ -2824,8 +2824,8 @@ class CUP$parser$actions {
                             String izq = getValorExpr(e1.toString());
                             String der = getValorExpr(e2.toString());
 
-                            String tIzq = cod3d.genTemporal(izq);
-                            String tDer = cod3d.genTemporal(der);
+                            String tIzq = cod3d.genTemporal(izq, tipo1);
+                            String tDer = cod3d.genTemporal(der, tipo1);
 
                             String temp = cod3d.genOpRelacionales("n_equal", tIzq, tDer);
 
@@ -2874,8 +2874,8 @@ class CUP$parser$actions {
                             String izq = getValorExpr(e1.toString());
                             String der = getValorExpr(e2.toString());
 
-                            String tIzq = cod3d.genTemporal(izq);
-                            String tDer = cod3d.genTemporal(der);
+                            String tIzq = cod3d.genTemporal(izq, tipo1);
+                            String tDer = cod3d.genTemporal(der, tipo1);
 
                             String temp = cod3d.genOpRelacionales("less_t", tIzq, tDer);
 
@@ -2924,8 +2924,8 @@ class CUP$parser$actions {
                             String izq = getValorExpr(e1.toString());
                             String der = getValorExpr(e2.toString());
 
-                            String tIzq = cod3d.genTemporal(izq);
-                            String tDer = cod3d.genTemporal(der);
+                            String tIzq = cod3d.genTemporal(izq, tipo1);
+                            String tDer = cod3d.genTemporal(der, tipo1);
 
                             String temp = cod3d.genOpRelacionales("less_te", tIzq, tDer);
 
@@ -2974,8 +2974,8 @@ class CUP$parser$actions {
                             String izq = getValorExpr(e1.toString());
                             String der = getValorExpr(e2.toString());
 
-                            String tIzq = cod3d.genTemporal(izq);
-                            String tDer = cod3d.genTemporal(der);
+                            String tIzq = cod3d.genTemporal(izq, tipo1);
+                            String tDer = cod3d.genTemporal(der, tipo1);
 
                             String temp = cod3d.genOpRelacionales("greather_t", tIzq, tDer);
 
@@ -3024,8 +3024,8 @@ class CUP$parser$actions {
                             String izq = getValorExpr(e1.toString());
                             String der = getValorExpr(e2.toString());
 
-                            String tIzq = cod3d.genTemporal(izq);
-                            String tDer = cod3d.genTemporal(der);
+                            String tIzq = cod3d.genTemporal(izq, tipo1);
+                            String tDer = cod3d.genTemporal(der, tipo1);
 
                             String temp = cod3d.genOpRelacionales("greather_te", tIzq, tDer);
 
@@ -3079,9 +3079,9 @@ class CUP$parser$actions {
 
                                     String izq = getValorExpr(p.toString());
 
-                                    String tIzq = cod3d.genTemporal(izq);
-                                    String tDer = cod3d.genTemporal(der);
-                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+                                    String tIzq = cod3d.genTemporal(izq, tipoP);
+                                    String tDer = cod3d.genTemporal(der, tipoP);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer, tipoP);
 
                                     RESULT = crearExpr(temp, tipoP);
                                 }
@@ -3180,9 +3180,9 @@ class CUP$parser$actions {
 
                                     String izq = getValorExpr(p.toString());
 
-                                    String tIzq = cod3d.genTemporal(izq);
-                                    String tDer = cod3d.genTemporal(der);
-                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+                                    String tIzq = cod3d.genTemporal(izq, tipoP);
+                                    String tDer = cod3d.genTemporal(der, tipoP);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer, tipoP);
 
                                     RESULT = crearExpr(temp, tipoP);
                                 }
@@ -3310,9 +3310,9 @@ class CUP$parser$actions {
 
                                     String izq = getValorExpr(p.toString());
 
-                                    String tIzq = cod3d.genTemporal(izq);
-                                    String tDer = cod3d.genTemporal(der);
-                                    String temp = cod3d.genOperacion(tIzq, operador, tDer);
+                                    String tIzq = cod3d.genTemporal(izq, tipoP);
+                                    String tDer = cod3d.genTemporal(der, tipoP);
+                                    String temp = cod3d.genOperacion(tIzq, operador, tDer, tipoP);
 
                                     RESULT = crearExpr(temp, tipoP);
                                 }
@@ -3398,9 +3398,9 @@ class CUP$parser$actions {
                             String tipo = nodo.getTipo();
                             if (tipo.equals("int") || tipo.equals("float")) {
                                 if (tipo.equals("int") || tipo.equals("float")) {
-                                    String tVar = cod3d.genTemporal(i.toString());
-                                    String tUno = cod3d.genTemporal("1");
-                                    String temp = cod3d.genOperacion(tVar, "+", tUno);
+                                    String tVar = cod3d.genTemporal(i.toString(), tipo);
+                                    String tUno = cod3d.genTemporal("1", tipo);
+                                    String temp = cod3d.genOperacion(tVar, "+", tUno, tipo);
 
                                     cod3d.genAsignacion(i.toString(), temp);
 
@@ -3461,9 +3461,9 @@ class CUP$parser$actions {
                             }
                             String tipo = nodo.getTipo();
                             if (tipo.equals("int") || tipo.equals("float")) {
-                                String tVar = cod3d.genTemporal(i.toString());
-                                String tUno = cod3d.genTemporal("1");
-                                String temp = cod3d.genOperacion(tVar, "-", tUno);
+                                String tVar = cod3d.genTemporal(i.toString(), tipo);
+                                String tUno = cod3d.genTemporal("1", tipo);
+                                String temp = cod3d.genOperacion(tVar, "-", tUno, tipo);
 
                                 cod3d.genAsignacion(i.toString(), temp);
 
@@ -3505,7 +3505,7 @@ class CUP$parser$actions {
                         String valor = getValorExpr(n.toString());
                         String tipo = getTipoExpr(n.toString());
 
-                        String temp = cod3d.genTemporal("-" + valor);
+                        String temp = cod3d.genTemporal("-" + valor, tipo);
 
                         RESULT = crearExpr(temp, tipo);
                     
@@ -3932,7 +3932,7 @@ class CUP$parser$actions {
                             );
                         }
                         String valorE = getValorExpr(e.toString());
-                        valorSwitchActual = cod3d.genTemporal(valorE);
+                        valorSwitchActual = cod3d.genTemporal(valorE, tipoE);
                     
               CUP$parser$result = parser.getSymbolFactory().newSymbol("NT$4",84, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -4126,7 +4126,7 @@ class CUP$parser$actions {
                     String tCero1 = cod3d.genTemporal("0");
                     String tBanderaEsCero = cod3d.genOperacion(tBandera, "==", tCero1);
                     cod3d.genIf(tBanderaEsCero, etiquetaCase + "_bloque");
-                    String tLiteral = cod3d.genTemporal(valor);
+                    String tLiteral = cod3d.genTemporal(valor, tipo);
                     String tComparacion = cod3d.genOperacion(valorSwitchActual, "==", tLiteral);
                     cod3d.genIf(tComparacion, etiquetaCase + "_bloque");
                     cod3d.genGoto(etiquetaCase + "_end");
@@ -4270,7 +4270,7 @@ class CUP$parser$actions {
                     }
                     if (!tipoReturn.equals("error")) {
                             String valorReturn = getValorExpr(e.toString());
-                            String tempReturn = cod3d.genTemporal(valorReturn);
+                            String tempReturn = cod3d.genTemporal(valorReturn, tipoReturn);
                             cod3d.genReturn(tempReturn);
                     }
                 }
@@ -4308,7 +4308,7 @@ class CUP$parser$actions {
                     }
                     // Marcar intento de asignación cuando se usa cin
                     nodo.setIntentoAsignacion(true);
-                    String temp = cod3d.genTemporal(i.toString());
+                    String temp = cod3d.genTemporal(i.toString(), tipo);
                     cod3d.genRead(tipo, temp);
                     RESULT = crearExpr("cin", tipo);
                 } 
@@ -4332,7 +4332,7 @@ class CUP$parser$actions {
                     RESULT = crearExpr("cout", "error");
                 } else {
                     String valor = getValorExpr(e.toString());
-                    String temp = cod3d.genTemporal(valor);
+                    String temp = cod3d.genTemporal(valor, tipo);
                     cod3d.genPrint(tipo, temp);
                     RESULT = crearExpr("cout", tipo);
                 }

@@ -1,17 +1,130 @@
+_sumar:
+param_1_int_a
+param_2_int_b
+t1 = a
+t2 = b
+t3 = t1 + t2
+data_int r
+t4 = t3
+r = t4
+t5 = r
+return t5
+_sumar_end:
+_calcularPrecio:
+param_1_float_base
+param_2_float_impuesto
+f1 = base
+f2 = impuesto
+f3 = f1 + f2
+data_float total
+f4 = f3
+total = f4
+f5 = total
+return f5
+_calcularPrecio_end:
 main:
 data_int i
-t1 = 0
-i = t1
-main_do_1:
-t2 = i
-t3 = 1
-t4 = t2 + t3
-i = t4
-goto main_do_1_end
-main_do_1_while:
-t5 = i
-t6 = 5
-t7 = less_t,t5,t6
-if t7 goto main_do_1
-main_do_1_end:
+t6 = 0
+i = t6
+data_int limite
+t7 = 3
+limite = t7
+data_int opcion
+t8 = 2
+opcion = t8
+data_int resultado
+t9 = 0
+resultado = t9
+data_float precio
+f6 = 10.5
+precio = f6
+data_float impuesto
+f7 = 2.5
+impuesto = f7
+data_float total
+f8 = 0.0
+total = f8
+t10 = i
+param_inv_1_int_t10
+t11 = limite
+param_inv_2_int_t11
+t12 = call sumar,2
+t13 = t12
+resultado = t13
+f9 = precio
+param_inv_1_float_f9
+f10 = impuesto
+param_inv_2_float_f10
+f11 = call calcularPrecio,2
+f12 = f11
+total = f12
+t14 = resultado
+t15 = 2
+t16 = greather_t,t14,t15
+main_if_1:
+if t16 goto main_if_1_bloque
+goto main_if_1_bloque_end
+main_if_1_bloque:
+t17 = resultado
+t18 = 1
+t19 = t17 + t18
+t20 = t19
+resultado = t20
+goto main_if_1_end
+main_if_1_bloque_end:
+main_else_1:
+t21 = resultado
+t22 = 1
+t23 = t21 - t22
+t24 = t23
+resultado = t24
+main_else_1_end:
+main_if_1_end:
+main_switch_1:
+fsw1 = 1
+t25 = resultado
+main_switch_1_case_1:
+t26 = fsw1
+t27 = 0
+t28 = t26 == t27
+if t28 goto main_switch_1_case_1_bloque
+t29 = 21
+t30 = t25 == t29
+if t30 goto main_switch_1_case_1_bloque
+goto main_switch_1_case_1_end
+main_switch_1_case_1_bloque:
+t31 = 0
+fsw1 = t31
+f13 = total
+f14 = 1.5
+f15 = f13 + f14
+f16 = f15
+total = f16
+goto main_switch_1_end
+main_switch_1_case_1_end:
+main_switch_1_case_2:
+t32 = fsw1
+t33 = 0
+t34 = t32 == t33
+if t34 goto main_switch_1_case_2_bloque
+t35 = 22
+t36 = t25 == t35
+if t36 goto main_switch_1_case_2_bloque
+goto main_switch_1_case_2_end
+main_switch_1_case_2_bloque:
+t37 = 0
+fsw1 = t37
+f17 = total
+f18 = 2.5
+f19 = f17 + f18
+f20 = f19
+total = f20
+main_switch_1_case_2_end:
+main_switch_1_default:
+f21 = total
+f22 = 0.5
+f23 = f21 + f22
+f24 = f23
+total = f24
+main_switch_1_end:
 main_end:

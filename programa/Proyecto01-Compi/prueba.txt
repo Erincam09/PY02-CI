@@ -1,6 +1,48 @@
+int ~ sumar <| int ~ a, int ~ b |>
+|:
+    int ~ r <- a + b!
+    return ~ r!
+:|
+
+float ~ calcularPrecio <| float ~ base, float ~ impuesto |>
+|:
+    float ~ total <- base + impuesto!
+    return ~ total!
+:|
+
 empty ~ __main__ <| |>
 |:
     int ~ i <- 0!
+    int ~ limite <- 3!
+    int ~ opcion <- 2!
+    int ~ resultado <- 0!
 
-    break!
+    float ~ precio <- 10.5!
+    float ~ impuesto <- 2.5!
+    float ~ total <- 0.0!
+
+    resultado <- sumar <| i, limite |>!
+    total <- calcularPrecio <| precio, impuesto |>!
+
+    if ~ <| greather_t <| resultado, 2 |> |>
+    |:
+        resultado <- resultado + 1!
+    :|
+    else ~
+    |:
+        resultado <- resultado - 1!
+    :|
+
+    switch ~ <| resultado |>
+    |:
+        case ~ 21:
+            total <- total + 1.5!
+            break!
+
+        case ~ 22:
+            total <- total + 2.5!
+
+        default~:
+            total <- total + 0.5!
+    :|
 :|

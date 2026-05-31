@@ -9,7 +9,8 @@ public class Cod3D {
     public StringBuffer codigo3D = new StringBuffer();
     
     // Contador de temporales (empieza en 1 como en los ejemplos: t1, t2, t3...)
-    private int tempActual = 1;
+    private int temptActual = 1;
+    private int tempfActual = 1;
     private int labelActual = 1; // Para etiquetas de control (if, while, etc.)
 
     // contadores estructuras de control
@@ -23,18 +24,42 @@ public class Cod3D {
     
     /**
      * Genera un nuevo temporal secuencial
-     * Ejemplo: t1, t2, t3...
+     * Ejemplo: t1, t2, t3... o f1, f2, f3...
+     * Si tipo es "", devuelve solo el número
      */
-    public String nuevoTemp() {
-        String temp = "t" + tempActual;
-        tempActual++;
+    public String nuevoTemp(String tipo) {
+        String var, temp;
+        if (tipo.equals("int")) {
+            var = "t";
+            temp = var + temptActual;
+            temptActual++;
+        } else if (tipo.equals("float")) {
+            var = "f";
+            temp = var + tempfActual;
+            tempfActual++;
+        } else {
+            var = "t";  // Por defecto usamos "t" para otros tipos
+            temp = var + temptActual;
+            temptActual++;
+        }
         return temp;
     }
 
-    public String genTemporal(String valor) {
-        String temp = nuevoTemp();
+    /**
+     * Versión con tipo específico
+     */
+    public String genTemporal(String valor, String tipo) {
+        String temp = nuevoTemp(tipo);
         crearCodigo(temp + " = " + valor);
         return temp;
+    }
+
+    /**
+     * Versión sobrecargada sin tipo (para bool y otros tipos)
+     * Genera temporales sin prefijo de tipo
+     */
+    public String genTemporal(String valor) {
+        return genTemporal(valor, "");
     }
     
     /**
@@ -43,14 +68,6 @@ public class Cod3D {
      */
     public void crearCodigo(String linea) {
         codigo3D.append(linea).append("\n");
-    }
-    
-    /**
-     * Emite una línea con salto de línea explícito al inicio
-     * Como en los ejemplos que usan "\\n" al principio
-     */
-    public void emitirLinea(String linea) {
-        codigo3D.append("\n").append(linea);
     }
     
     /**
@@ -65,69 +82,14 @@ public class Cod3D {
      */
     public void limpiar() {
         codigo3D = new StringBuffer();
-        tempActual = 1;
+        temptActual = 1;
+        tempfActual = 1;
         labelActual = 1;
         contIf = 0;
         contDo = 1;
         contSwitch = 1;
         contCaso = 1;
         contParam = 1;
-    }
-    
-    /**
-     * Genera código para suma
-     * Ejemplo: t1 = a + b
-     */
-    public String genSuma(String izquierda, String derecha) {
-        String temp = nuevoTemp();
-        crearCodigo(temp + " = " + izquierda + " + " + derecha);
-        return temp;
-    }
-    
-    /**
-     * Genera código para resta
-     * Ejemplo: t2 = a - b
-     */
-    public String genResta(String izquierda, String derecha) {
-        String temp = nuevoTemp();
-        crearCodigo(temp + " = " + izquierda + " - " + derecha);
-        return temp;
-    }
-    
-    /**
-     * Genera código para multiplicación
-     * Ejemplo: t3 = a * b
-     */
-    public String genMultiplicacion(String izquierda, String derecha) {
-        String temp = nuevoTemp();
-        crearCodigo(temp + " = " + izquierda + " * " + derecha);
-        return temp;
-    }
-    
-    /**
-     * Genera código para división
-     * Ejemplo: t4 = a / b
-     */
-    public String genDivision(String izquierda, String derecha) {
-        String temp = nuevoTemp();
-        crearCodigo(temp + " = " + izquierda + " / " + derecha);
-        return temp;
-    }
-    
-    /**
-     * Para literales enteros - devuelve el valor directamente
-     * Como en: RESULT = intL.toString();
-     */
-    public String genLiteralEntero(String valor) {
-        return valor;
-    }
-    
-    /**
-     * Para identificadores/variables - devuelve el nombre
-     * Como en: RESULT = idVar.toString();
-     */
-    public String generarVariable(String nombre) {
-        return nombre;
     }
     
     /**
@@ -149,24 +111,45 @@ public class Cod3D {
         crearCodigo(etiqueta + ":");
     }
 
-    public String genOperacion(String izquierda, String operador, String derecha) {
-        String temp = nuevoTemp();
+    public String genOperacion(String izquierda, String operador, String derecha, String tipo) {
+        String temp = nuevoTemp(tipo);
         crearCodigo(temp + " = " + izquierda + " " + operador + " " + derecha);
         return temp;
     }
 
-    public String genNegacion(String valor) {
-        String temp = nuevoTemp();
+    /**
+     * Versión sobrecargada sin tipo para operaciones booleanas
+     */
+    public String genOperacion(String izquierda, String operador, String derecha) {
+        return genOperacion(izquierda, operador, derecha, "");
+    }
+
+    public String genNegacion(String valor, String tipo) {
+        String temp = nuevoTemp(tipo);
         crearCodigo(temp + " = $" + valor);
         return temp;
     }
 
-    public String genOpRelacionales(String operador, String izquierda, String derecha) {
-        String temp = nuevoTemp();
+    /**
+     * Versión sobrecargada sin tipo para negación booleana
+     */
+    public String genNegacion(String valor) {
+        return genNegacion(valor, "");
+    }
+
+    public String genOpRelacionales(String operador, String izquierda, String derecha, String tipo) {
+        String temp = nuevoTemp(tipo);
         crearCodigo(temp + " = " + operador + "," + izquierda + "," + derecha);
         return temp;
     }
 
+    /**
+     * Versión sobrecargada sin tipo para operaciones relacionales
+     */
+    public String genOpRelacionales(String operador, String izquierda, String derecha) {
+        return genOpRelacionales(operador, izquierda, derecha, "");
+    }
+    
     public void genReturn(String valor) {
         crearCodigo("return " + valor);
     }
@@ -176,10 +159,6 @@ public class Cod3D {
 
     public String nuevoIf() {
         return "if_" + ++contIf;
-    }
-
-    public String nuevoElse() {
-        return "else_" + contIf;
     }
 
     public void genIf(String condicion, String etiqueta) {
@@ -223,8 +202,8 @@ public class Cod3D {
         crearCodigo("param_inv_" + numero + "_" + tipo + "_" + valor);
     }
 
-    public String genLlamada(String funcion, int numParams) {
-        String temp = nuevoTemp();
+    public String genLlamada(String funcion, int numParams, String tipo) {
+        String temp = nuevoTemp(tipo);
         crearCodigo(temp + " = call " + funcion + "," + numParams);
         return temp;
     }
@@ -244,17 +223,12 @@ public class Cod3D {
         crearCodigo("data_" + tipo + "_array " + nombre + " " + filas + "," + columnas);
     }
 
-    /* public void genTempsArray(String nombre, String fila, String columna, String temp) {
-        crearCodigo(nombre + " " + fila + "," + columna + " = " + temp);
-    }
-    */
-
     public void genAsignacionArray(String nombre, String fila, String columna, String valor) {
         crearCodigo(nombre + " " + fila + "," + columna + " = " + valor);
     }
 
-    public String genAccesoArray(String nombre, String fila, String columna) {
-        String temp = nuevoTemp();
+    public String genAccesoArray(String nombre, String fila, String columna, String tipo) {
+        String temp = nuevoTemp(tipo);
         crearCodigo(temp + " = " + nombre + " " + fila + "," + columna);
         return temp;
     }
