@@ -3,6 +3,13 @@
 ======================================================
 Tipo         Línea    Columna  Mensaje
 ------------------------------------------------------
+Semántico    7        24       La variable 'a' no ha sido declarada
+Semántico    7        22       No se pueden operar valores de tipo string y error
+Semántico    7        6        No se puede inicializar la variable 'x' de tipo int con un valor de tipo float
+Semántico    8        8        La variable 'www' no ha sido declarada
+Semántico    15       6        No se puede asignar un valor de tipo float a la variable 'id' de tipo int
+Sintáctico   22       5        Token inesperado: INICIO_BLOQUE
+Semántico    31       14       El arreglo 'miArr2' no ha sido inicializado
 ------------------------------------------------------
-Total de Errores: 0
+Total de Errores: 7
 ======================================================

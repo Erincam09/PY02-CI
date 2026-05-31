@@ -454,9 +454,14 @@ parametro ::= tipo:t SEPARADOR ID:i
 
 bloque ::= INICIO_BLOQUE lista_sentencias:l FINAL_BLOQUE
             {: RESULT = l; :}
+         | INICIO_BLOQUE lista_sentencias return_nt:r FINAL_BLOQUE
+            {: RESULT = r; :}
+         | INICIO_BLOQUE return_nt:r FINAL_BLOQUE
+            {: RESULT = r; :}
          | INICIO_BLOQUE FINAL_BLOQUE
             {: RESULT = crearExpr("return", "false"); :}
          | INICIO_BLOQUE error FINAL_BLOQUE
+            {: RESULT = crearExpr("return", "false"); :}
          ;
 
 lista_sentencias ::= sentencia:s lista_sentencias:l
@@ -489,8 +494,6 @@ sentencia ::= creacion FIN_EXPR
             {: RESULT = crearExpr("return", "false"); :}
             | creacion_asignacion_array FIN_EXPR
             {: RESULT = crearExpr("return", "false"); :}
-            | return_nt:r FIN_EXPR
-            {: RESULT = r; :}
             | bloque_if_else:b
             {: RESULT = b; :}
             | bloque_do_while:b
@@ -1988,7 +1991,7 @@ break_nt ::= BREAK FIN_EXPR
              :}
            ;
 
-return_nt ::= RETURN SEPARADOR expresion:e
+return_nt ::= RETURN SEPARADOR expresion:e FIN_EXPR
             {:
                 String scopeActual = tabla.getCurrentScope();
 
