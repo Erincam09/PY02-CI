@@ -96,6 +96,7 @@ parser code {:
     private String valorSwitchActual = "";
     private String banderaSwitchActual = "";
     private String etiquetaFuncionActual = "";
+    private String etiquetaBreakActual = "";
 
     private ArrayList<String> valoresInicialesArray = new ArrayList<>();
 
@@ -1768,8 +1769,10 @@ do_inicio ::= DO SEPARADOR abrir_scope_while
               {:
                   String doTemp = cod3d.nuevoDo();
                   String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + doTemp;
+                  String breakAnterior = etiquetaBreakActual;
+                  etiquetaBreakActual = etiqueta + "_end";
                   cod3d.crearEtiqueta(etiqueta);
-                  RESULT = etiqueta;
+                  RESULT = crearExpr(etiqueta, breakAnterior);
               :}
             ;   
 
@@ -1782,19 +1785,21 @@ bloque_do_while ::= do_inicio:eti
                     INICIO_BLOQUE sentencias_break:s FINAL_BLOQUE
                     WHILE SEPARADOR INICIO_PAREN
                     {:
-                        String etiqueta = eti.toString();
+                        String etiqueta = getValorExpr(eti.toString());
                         cod3d.crearEtiqueta(etiqueta + "_while");
                     :}
                     condicion_do:c
                     FINAL_PAREN FIN_EXPR
                     {:
-                        String etiqueta = eti.toString();
+                        String etiqueta = getValorExpr(eti.toString());
+                        String breakAnterior = getTipoExpr(eti.toString());
                         String tipoCondicion = getTipoExpr(c.toString());
                         String valorCondicion = getValorExpr(c.toString());
                         if (!tipoCondicion.equals("error")) {
                             cod3d.genIf(valorCondicion, etiqueta);
                         }
                         cod3d.crearEtiqueta(etiqueta + "_end");
+                        etiquetaBreakActual = breakAnterior;
                         tabla.salirDelScope();
                         RESULT = crearExpr("return", "false");
                     :}
@@ -1808,52 +1813,59 @@ abrir_scope_switch ::=
         int numSwitch = cod3d.nuevoSwitch();
         etiquetaSwitchActual = obtenerNombreFuncion(tabla.getCurrentScope()) + "_switch_" + numSwitch;
         banderaSwitchActual = "fsw" + numSwitch;
+        String breakAnterior = etiquetaBreakActual;
+        etiquetaBreakActual = etiquetaSwitchActual + "_end";
         cod3d.reiniciarCases();
         cod3d.crearEtiqueta(etiquetaSwitchActual);
         cod3d.crearCodigo(banderaSwitchActual + " = 1");
+        RESULT = crearExpr(etiquetaSwitchActual, breakAnterior);
     :}
 ;
 
-bloque_switch ::= SWITCH SEPARADOR abrir_scope_switch
+bloque_switch ::= SWITCH SEPARADOR abrir_scope_switch:sw
                   INICIO_PAREN expresion_aritmetica:e FINAL_PAREN
-                  {:
-                      tipoSwitchActual = getTipoExpr(e.toString());
-                      String tipoE = getTipoExpr(e.toString());
+                    {:
+                        tipoSwitchActual = getTipoExpr(e.toString());
+                        String tipoE = getTipoExpr(e.toString());
 
-                      if (!tipoE.equals("int") && !tipoE.equals("char") && !tipoE.equals("error")) {
-                          manejadorErrores.agregarErrorSemantico(
-                              "La expresión en un switch debe ser int o char, pero se encontró " + tipoE,
-                              eleft + 1,
-                              eright + 1
-                          );
-                      }
-                      String valorE = getValorExpr(e.toString());
-                      valorSwitchActual = cod3d.genTemporal(valorE);
-                  :}
+                        if (!tipoE.equals("int") && !tipoE.equals("char") && !tipoE.equals("error")) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "La expresión en un switch debe ser int o char, pero se encontró " + tipoE,
+                                eleft + 1,
+                                eright + 1
+                            );
+                        }
+                        String valorE = getValorExpr(e.toString());
+                        valorSwitchActual = cod3d.genTemporal(valorE);
+                    :}
                   bloque_casos:b
-                  {:
-                      cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
-                      tabla.salirDelScope();
-                      tipoSwitchActual = null;
-                      etiquetaSwitchActual = "";
-                      valorSwitchActual = "";
-                      banderaSwitchActual = "";
-                      RESULT = crearExpr("return", "false");
-                  :}
+                    {:
+                        cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
+                        String breakAnterior = getTipoExpr(sw.toString());
+                        etiquetaBreakActual = breakAnterior;
+                        tabla.salirDelScope();
+                        tipoSwitchActual = null;
+                        etiquetaSwitchActual = "";
+                        valorSwitchActual = "";
+                        banderaSwitchActual = "";
+                        RESULT = crearExpr("return", "false");
+                    :}
 
-                | SWITCH SEPARADOR abrir_scope_switch
+                | SWITCH SEPARADOR abrir_scope_switch:sw
                   INICIO_PAREN error FINAL_PAREN
                   bloque_casos
-                  {:
-                      cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
-                      tabla.salirDelScope();
-                      tipoSwitchActual = null;
-                      etiquetaSwitchActual = "";
-                      valorSwitchActual = "";
-                      banderaSwitchActual = "";
-                      RESULT = crearExpr("return", "false");
-                  :}
-                ;
+                    {:
+                        cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
+                        String breakAnterior = getTipoExpr(sw.toString());
+                        etiquetaBreakActual = breakAnterior;
+                        tabla.salirDelScope();
+                        tipoSwitchActual = null;
+                        etiquetaSwitchActual = "";
+                        valorSwitchActual = "";
+                        banderaSwitchActual = "";
+                        RESULT = crearExpr("return", "false");
+                    :}
+                    ;
 
 bloque_casos ::= INICIO_BLOQUE lista_casos:l FINAL_BLOQUE
                  {: RESULT = l; :}
@@ -1963,7 +1975,15 @@ default_case ::= default_inicio sentencias_break
 
 break_nt ::= BREAK FIN_EXPR
              {:
-                 cod3d.genGoto(etiquetaSwitchActual + "_end");
+                 if (etiquetaBreakActual == null || etiquetaBreakActual.equals("")) {
+                     manejadorErrores.agregarErrorSemantico(
+                         "El break solo puede usarse dentro de un switch o do while",
+                         lastLine,
+                         lastColumn
+                     );
+                 } else {
+                     cod3d.genGoto(etiquetaBreakActual);
+                 }
                  RESULT = crearExpr("break", "false");
              :}
            ;

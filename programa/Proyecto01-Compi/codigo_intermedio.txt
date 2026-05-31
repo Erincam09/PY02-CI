@@ -1,17 +1,17 @@
 main:
-data_matriz_array int 2,2
-t1 = 1
-matriz 0,0 = t1
-t2 = 2
-matriz 0,1 = t2
-t3 = 3
-matriz 1,0 = t3
-t4 = 4
-matriz 1,1 = t4
-t5 = matriz 0,1
-data_int x
-t6 = t5
-x = t6
-t7 = x
-matriz 1,0 = t7
+data_int i
+t1 = 0
+i = t1
+main_do_1:
+t2 = i
+t3 = 1
+t4 = t2 + t3
+i = t4
+goto main_do_1_end
+main_do_1_while:
+t5 = i
+t6 = 5
+t7 = less_t,t5,t6
+if t7 goto main_do_1
+main_do_1_end:
 main_end:

@@ -1,11 +1,6 @@
 empty ~ __main__ <| |>
 |:
-    int ~ matriz <<2>><<2>> <- |:
-        |: 1, 2 :|,
-        |: 3, 4 :|
-    :|!
+    int ~ i <- 0!
 
-    int ~ x <- matriz <<0>><<1>>!
-
-    matriz <<1>><<0>> <- x!
+    break!
 :|

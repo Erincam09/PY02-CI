@@ -1090,6 +1090,7 @@ public class parser extends java_cup.runtime.lr_parser {
     private String valorSwitchActual = "";
     private String banderaSwitchActual = "";
     private String etiquetaFuncionActual = "";
+    private String etiquetaBreakActual = "";
 
     private ArrayList<String> valoresInicialesArray = new ArrayList<>();
 
@@ -3807,8 +3808,10 @@ class CUP$parser$actions {
 		
                   String doTemp = cod3d.nuevoDo();
                   String etiqueta = obtenerNombreFuncion(tabla.getCurrentScope()) + "_" + doTemp;
+                  String breakAnterior = etiquetaBreakActual;
+                  etiquetaBreakActual = etiqueta + "_end";
                   cod3d.crearEtiqueta(etiqueta);
-                  RESULT = etiqueta;
+                  RESULT = crearExpr(etiqueta, breakAnterior);
               
               CUP$parser$result = parser.getSymbolFactory().newSymbol("do_inicio",60, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -3846,7 +3849,7 @@ class CUP$parser$actions {
 		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)).right;
 		Object s = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-4)).value;
 
-                        String etiqueta = eti.toString();
+                        String etiqueta = getValorExpr(eti.toString());
                         cod3d.crearEtiqueta(etiqueta + "_while");
                     
               CUP$parser$result = parser.getSymbolFactory().newSymbol("NT$3",83, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -3869,13 +3872,15 @@ class CUP$parser$actions {
 		int cright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
 		Object c = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
 		
-                        String etiqueta = eti.toString();
+                        String etiqueta = getValorExpr(eti.toString());
+                        String breakAnterior = getTipoExpr(eti.toString());
                         String tipoCondicion = getTipoExpr(c.toString());
                         String valorCondicion = getValorExpr(c.toString());
                         if (!tipoCondicion.equals("error")) {
                             cod3d.genIf(valorCondicion, etiqueta);
                         }
                         cod3d.crearEtiqueta(etiqueta + "_end");
+                        etiquetaBreakActual = breakAnterior;
                         tabla.salirDelScope();
                         RESULT = crearExpr("return", "false");
                     
@@ -3894,9 +3899,12 @@ class CUP$parser$actions {
         int numSwitch = cod3d.nuevoSwitch();
         etiquetaSwitchActual = obtenerNombreFuncion(tabla.getCurrentScope()) + "_switch_" + numSwitch;
         banderaSwitchActual = "fsw" + numSwitch;
+        String breakAnterior = etiquetaBreakActual;
+        etiquetaBreakActual = etiquetaSwitchActual + "_end";
         cod3d.reiniciarCases();
         cod3d.crearEtiqueta(etiquetaSwitchActual);
         cod3d.crearCodigo(banderaSwitchActual + " = 1");
+        RESULT = crearExpr(etiquetaSwitchActual, breakAnterior);
     
               CUP$parser$result = parser.getSymbolFactory().newSymbol("abrir_scope_switch",62, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -3906,23 +3914,26 @@ class CUP$parser$actions {
           case 123: // NT$4 ::= 
             {
               Object RESULT =null;
+		int swleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).left;
+		int swright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).right;
+		Object sw = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-3)).value;
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
 
-                      tipoSwitchActual = getTipoExpr(e.toString());
-                      String tipoE = getTipoExpr(e.toString());
+                        tipoSwitchActual = getTipoExpr(e.toString());
+                        String tipoE = getTipoExpr(e.toString());
 
-                      if (!tipoE.equals("int") && !tipoE.equals("char") && !tipoE.equals("error")) {
-                          manejadorErrores.agregarErrorSemantico(
-                              "La expresión en un switch debe ser int o char, pero se encontró " + tipoE,
-                              eleft + 1,
-                              eright + 1
-                          );
-                      }
-                      String valorE = getValorExpr(e.toString());
-                      valorSwitchActual = cod3d.genTemporal(valorE);
-                  
+                        if (!tipoE.equals("int") && !tipoE.equals("char") && !tipoE.equals("error")) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "La expresión en un switch debe ser int o char, pero se encontró " + tipoE,
+                                eleft + 1,
+                                eright + 1
+                            );
+                        }
+                        String valorE = getValorExpr(e.toString());
+                        valorSwitchActual = cod3d.genTemporal(valorE);
+                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("NT$4",84, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -3933,6 +3944,9 @@ class CUP$parser$actions {
               Object RESULT =null;
               // propagate RESULT from NT$4
                 RESULT = (Object) ((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		int swleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)).left;
+		int swright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)).right;
+		Object sw = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-5)).value;
 		int eleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-3)).value;
@@ -3940,14 +3954,16 @@ class CUP$parser$actions {
 		int bright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object b = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		
-                      cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
-                      tabla.salirDelScope();
-                      tipoSwitchActual = null;
-                      etiquetaSwitchActual = "";
-                      valorSwitchActual = "";
-                      banderaSwitchActual = "";
-                      RESULT = crearExpr("return", "false");
-                  
+                        cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
+                        String breakAnterior = getTipoExpr(sw.toString());
+                        etiquetaBreakActual = breakAnterior;
+                        tabla.salirDelScope();
+                        tipoSwitchActual = null;
+                        etiquetaSwitchActual = "";
+                        valorSwitchActual = "";
+                        banderaSwitchActual = "";
+                        RESULT = crearExpr("return", "false");
+                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("bloque_switch",65, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-7)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -3956,15 +3972,20 @@ class CUP$parser$actions {
           case 125: // bloque_switch ::= SWITCH SEPARADOR abrir_scope_switch INICIO_PAREN error FINAL_PAREN bloque_casos 
             {
               Object RESULT =null;
+		int swleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)).left;
+		int swright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)).right;
+		Object sw = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-4)).value;
 		
-                      cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
-                      tabla.salirDelScope();
-                      tipoSwitchActual = null;
-                      etiquetaSwitchActual = "";
-                      valorSwitchActual = "";
-                      banderaSwitchActual = "";
-                      RESULT = crearExpr("return", "false");
-                  
+                        cod3d.crearEtiqueta(etiquetaSwitchActual + "_end");
+                        String breakAnterior = getTipoExpr(sw.toString());
+                        etiquetaBreakActual = breakAnterior;
+                        tabla.salirDelScope();
+                        tipoSwitchActual = null;
+                        etiquetaSwitchActual = "";
+                        valorSwitchActual = "";
+                        banderaSwitchActual = "";
+                        RESULT = crearExpr("return", "false");
+                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("bloque_switch",65, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-6)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -4205,7 +4226,15 @@ class CUP$parser$actions {
             {
               Object RESULT =null;
 		
-                 cod3d.genGoto(etiquetaSwitchActual + "_end");
+                 if (etiquetaBreakActual == null || etiquetaBreakActual.equals("")) {
+                     manejadorErrores.agregarErrorSemantico(
+                         "El break solo puede usarse dentro de un switch o do while",
+                         lastLine,
+                         lastColumn
+                     );
+                 } else {
+                     cod3d.genGoto(etiquetaBreakActual);
+                 }
                  RESULT = crearExpr("break", "false");
              
               CUP$parser$result = parser.getSymbolFactory().newSymbol("break_nt",73, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
