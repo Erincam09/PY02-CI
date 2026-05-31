@@ -97,6 +97,8 @@ parser code {:
     private String banderaSwitchActual = "";
     private String etiquetaFuncionActual = "";
 
+    private ArrayList<String> valoresInicialesArray = new ArrayList<>();
+
     /*
      * Constructor del parser.
      * Recibe el lexer, crea la tabla de símbolos y obtiene el
@@ -520,7 +522,7 @@ creacion ::= tipo:t SEPARADOR ID:i
                  }
              :};
 
-creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INICIO_INDICES ENTERO FINAL_INDICES
+creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO:filas FINAL_INDICES INICIO_INDICES ENTERO:columnas FINAL_INDICES
                    {:  
                        // Validar que el tipo del arreglo sea int o float
                        if (!t.toString().equals("int") && !t.toString().equals("float")) {
@@ -540,6 +542,7 @@ creacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO FINAL_INDICES INI
                            TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
                            nodo.setCategoria("arreglo");
                            tabla.agregarNodo(nodo);
+                           cod3d.genDeclaracionArray(i.toString(), t.toString(), filas.toString(), columnas.toString());
                        }
                    :};
 
@@ -589,105 +592,125 @@ asignacion ::= ID:i ASIGNAR expresion:e
 
 asignacion_array ::= ID:i INICIO_INDICES expresion:e1 FINAL_INDICES INICIO_INDICES expresion:e2 FINAL_INDICES ASIGNAR expresion:valor
                      {:  
-                         // Validar que el arreglo esté declarado en un scope accesible
-                         TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
-                         if (nodo == null) {
-                             manejadorErrores.agregarErrorSemantico(
-                                 "El arreglo '" + i + "' no ha sido declarado",
-                                 ileft + 1,
-                                 iright + 1
-                             );
-                         } else if (!nodo.getCategoria().equals("arreglo")) {
-                             manejadorErrores.agregarErrorSemantico(
-                                 "'" + i + "' no es un arreglo",
-                                 ileft + 1,
-                                 iright + 1
-                             );
-                         } else {
-                             // Marcar intento de asignación al arreglo
-                             nodo.setIntentoAsignacion(true);
-                             
-                             // Validar que los índices sean int
-                             String tipoE1 = getTipoExpr(e1.toString());
-                             String tipoE2 = getTipoExpr(e2.toString());
-                             
-                             if (!tipoE1.equals("int") && !tipoE1.equals("error")) {
-                                 manejadorErrores.agregarErrorSemantico(
-                                     "El índice del arreglo debe ser int, pero se encontró: " + tipoE1,
-                                     e1left + 1,
-                                     e1right + 1
-                                 );
-                             }
-                             if (!tipoE2.equals("int") && !tipoE2.equals("error")) {
-                                 manejadorErrores.agregarErrorSemantico(
-                                     "El índice del arreglo debe ser int, pero se encontró: " + tipoE2,
-                                     e2left + 1,
-                                     e2right + 1
-                                 );
-                             }
-                             
-                             // Validar que el tipo del valor sea igual al tipo del arreglo
-                             String tipoArreglo = nodo.getTipo();
-                             String tipoValor = getTipoExpr(valor.toString());
-                             
-                             if (!tipoValor.equals("error") && !tipoArreglo.equals(tipoValor)) {
-                                 manejadorErrores.agregarErrorSemantico(
-                                     "No se puede asignar un valor de tipo " + tipoValor +
-                                     " a un arreglo de tipo " + tipoArreglo,
-                                     valorleft + 1,
-                                     valorright + 1
-                                 );
-                             }
-                         }
+                            // Validar que el arreglo esté declarado en un scope accesible
+                            TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+                            if (nodo == null) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El arreglo '" + i + "' no ha sido declarado",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                            } else if (!nodo.getCategoria().equals("arreglo")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "'" + i + "' no es un arreglo",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                            } else {
+                                // Marcar intento de asignación al arreglo
+                                nodo.setIntentoAsignacion(true);
+                                
+                                // Validar que los índices sean int
+                                String tipoE1 = getTipoExpr(e1.toString());
+                                String tipoE2 = getTipoExpr(e2.toString());
+                                
+                                if (!tipoE1.equals("int") && !tipoE1.equals("error")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "El índice del arreglo debe ser int, pero se encontró: " + tipoE1,
+                                        e1left + 1,
+                                        e1right + 1
+                                    );
+                                }
+                                if (!tipoE2.equals("int") && !tipoE2.equals("error")) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "El índice del arreglo debe ser int, pero se encontró: " + tipoE2,
+                                        e2left + 1,
+                                        e2right + 1
+                                    );
+                                }
+                                
+                                // Validar que el tipo del valor sea igual al tipo del arreglo
+                                String tipoArreglo = nodo.getTipo();
+                                String tipoValor = getTipoExpr(valor.toString());
+                                
+                                if (!tipoValor.equals("error") && !tipoArreglo.equals(tipoValor)) {
+                                    manejadorErrores.agregarErrorSemantico(
+                                        "No se puede asignar un valor de tipo " + tipoValor +
+                                        " a un arreglo de tipo " + tipoArreglo,
+                                        valorleft + 1,
+                                        valorright + 1
+                                    );
+                                }
+                            
+                                if ( !tipoValor.equals("error") && tipoArreglo.equals(tipoValor) && 
+                                        !tipoE1.equals("error") && !tipoE2.equals("error") && 
+                                        tipoE1.equals("int") && tipoE2.equals("int")
+                                    ) {
+                                        // Generar código para asignar al arreglo
+                                        String fila = getValorExpr(e1.toString());
+                                        String columna = getValorExpr(e2.toString());
+                                        String valorexpr = getValorExpr(valor.toString());
+
+                                        String tValor = cod3d.genTemporal(valorexpr);
+
+                                        cod3d.genAsignacionArray(i.toString(), fila, columna, tValor);
+                                    }
+                            }
                      :};
 
 acceso_array ::= ID:i INICIO_INDICES expresion:e1 FINAL_INDICES INICIO_INDICES expresion:e2 FINAL_INDICES
                  {:  
-                     TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
-                     if (nodo == null) {
-                         manejadorErrores.agregarErrorSemantico(
-                             "El arreglo '" + i + "' no ha sido declarado",
-                             ileft + 1,
-                             iright + 1
-                         );
-                         RESULT = crearExpr(i.toString(), "error");
-                     } else if (!nodo.getCategoria().equals("arreglo")) {
-                         manejadorErrores.agregarErrorSemantico(
-                             "'" + i + "' no es un arreglo",
-                             ileft + 1,
-                             iright + 1
-                         );
-                         RESULT = crearExpr(i.toString(), "error");
-                     } else {
-                         // Validar que el arreglo ha sido inicializado
-                         if (!nodo.getIntentoAsignacion()) {
-                             manejadorErrores.agregarErrorSemantico(
-                                 "El arreglo '" + i + "' no ha sido inicializado",
-                                 ileft + 1,
-                                 iright + 1
-                             );
-                         }
-                         
-                         // Validar que los índices sean int
-                         String tipoE1 = getTipoExpr(e1.toString());
-                         String tipoE2 = getTipoExpr(e2.toString());
-                         
-                         if (!tipoE1.equals("int") && !tipoE1.equals("error")) {
-                             manejadorErrores.agregarErrorSemantico(
-                                 "El índice del arreglo debe ser int, pero se encontró: " + tipoE1,
-                                 e1left + 1,
-                                 e1right + 1
-                             );
-                         }
-                         if (!tipoE2.equals("int") && !tipoE2.equals("error")) {
-                             manejadorErrores.agregarErrorSemantico(
-                                 "El índice del arreglo debe ser int, pero se encontró: " + tipoE2,
-                                 e2left + 1,
-                                 e2right + 1
-                             );
-                         }
-                         
-                         RESULT = crearExpr(i.toString(), nodo.getTipo());
+                        TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScopeAccesible(i.toString());
+                        if (nodo == null) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "El arreglo '" + i + "' no ha sido declarado",
+                                ileft + 1,
+                                iright + 1
+                            );
+                            RESULT = crearExpr(i.toString(), "error");
+                        } else if (!nodo.getCategoria().equals("arreglo")) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "'" + i + "' no es un arreglo",
+                                ileft + 1,
+                                iright + 1
+                            );
+                            RESULT = crearExpr(i.toString(), "error");
+                        } else {
+                            // Validar que el arreglo ha sido inicializado
+                            if (!nodo.getIntentoAsignacion()) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El arreglo '" + i + "' no ha sido inicializado",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                            }
+                            
+                            // Validar que los índices sean int
+                            String tipoE1 = getTipoExpr(e1.toString());
+                            String tipoE2 = getTipoExpr(e2.toString());
+                            
+                            if (!tipoE1.equals("int") && !tipoE1.equals("error")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El índice del arreglo debe ser int, pero se encontró: " + tipoE1,
+                                    e1left + 1,
+                                    e1right + 1
+                                );
+                            }
+                            if (!tipoE2.equals("int") && !tipoE2.equals("error")) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "El índice del arreglo debe ser int, pero se encontró: " + tipoE2,
+                                    e2left + 1,
+                                    e2right + 1
+                                );
+                            }
+
+
+                            // Generar código para acceder al arreglo
+                            //String temp = cod3d.nuevoTemp();
+                            String fila = getValorExpr(e1.toString());
+                            String columna = getValorExpr(e2.toString());
+                            String tAcceso = cod3d.genAccesoArray(i.toString(), fila, columna);
+                            RESULT = crearExpr(tAcceso, nodo.getTipo());
                      }
                  :};
 
@@ -732,11 +755,14 @@ creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO:filas 
                                    filasEsperadas = Integer.parseInt(filas.toString());
                                    columnasEsperadas = Integer.parseInt(columnas.toString());
                                    filasContadas = 0;
-                                   // columnasDelaPrimeraFila = 0;
+                                   columnasActual = 0;
+
+                                   valoresInicialesArray.clear();
                                :}
                                valores_array
                                {:
                                    tipoArregloActual = null;
+                                   boolean dimensionesValidas = true;
                                    
                                    // Validar dimensiones del array
                                    if (filasContadas != filasEsperadas) {
@@ -745,6 +771,7 @@ creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO:filas 
                                            ileft + 1,
                                            iright + 1
                                        );
+                                       dimensionesValidas = false;
                                    }
                                    
                                    // Validar que el tipo del arreglo sea int o float
@@ -754,6 +781,7 @@ creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO:filas 
                                            tleft + 1,
                                            tright + 1
                                        );
+                                       dimensionesValidas = false;
                                    } else if (tabla.existeEnScopeActual(i.toString())) {
                                        // Validar que no esté redeclarada en el scope actual
                                        manejadorErrores.agregarErrorSemantico(
@@ -761,6 +789,7 @@ creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO:filas 
                                            ileft + 1,
                                            iright + 1
                                        );
+                                        dimensionesValidas = false;
                                    } else {
                                        TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(t.toString(), i.toString(), lastLine, lastColumn);
                                        nodo.setCategoria("arreglo");
@@ -768,6 +797,39 @@ creacion_asignacion_array ::= tipo:t SEPARADOR ID:i INICIO_INDICES ENTERO:filas 
                                        nodo.setIntentoAsignacion(true);
                                        tabla.agregarNodo(nodo);
                                    }
+                                   int totalEsperado = filasEsperadas * columnasEsperadas;
+
+                                   if (valoresInicialesArray.size() != totalEsperado) {
+                                       dimensionesValidas = false;
+                                   }
+
+                                   if (dimensionesValidas) {
+                                       cod3d.genDeclaracionArray(
+                                           t.toString(),
+                                           i.toString(),
+                                           filas.toString(),
+                                           columnas.toString()
+                                       );
+
+                                       for (int pos = 0; pos < valoresInicialesArray.size(); pos++) {
+                                           String exprValor = valoresInicialesArray.get(pos);
+
+                                           String valor = getValorExpr(exprValor);
+                                           String temp = cod3d.genTemporal(valor);
+
+                                           int fila1 = pos / columnasEsperadas;
+                                           int columna2 = pos % columnasEsperadas;
+                                           String fila = Integer.toString(fila1);
+                                           String columna = Integer.toString(columna2);
+                                           cod3d.genAsignacionArray(
+                                               i.toString(),
+                                               fila,
+                                               columna,
+                                               temp
+                                           );
+                                       }
+                                   }
+                                   valoresInicialesArray.clear();
                                :};
 
 valores_array ::= INICIO_BLOQUE lista_filas FINAL_BLOQUE;
@@ -809,6 +871,7 @@ elemento_valor ::= expresion:e
                                  eright + 1
                              );
                          }
+                         valoresInicialesArray.add(e.toString());
                      }
                      RESULT = e;
                  :};
@@ -869,8 +932,9 @@ llamada_funcion ::= ID:i INICIO_PAREN lista_expresiones:l FINAL_PAREN
                                 for (int ind = 0; ind < expresionesRecibidas.size(); ind++) {
                                     String exprRecibida = expresionesRecibidas.get(ind);
                                     String valorRecibido = getValorExpr(exprRecibida);
+                                    String tempParam = cod3d.genTemporal(valorRecibido);
                                     String tipoRecibido = getTipoExpr(exprRecibida);
-                                    cod3d.genParametroInv(ind + 1,tipoRecibido,valorRecibido);
+                                    cod3d.genParametroInv(ind + 1,tipoRecibido,tempParam);
                                 }
                                 String tempCall = cod3d.genLlamada(i.toString(),expresionesRecibidas.size());
                                 RESULT = crearExpr(tempCall, nodo.getTipo());

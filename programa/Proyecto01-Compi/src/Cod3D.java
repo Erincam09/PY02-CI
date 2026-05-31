@@ -171,24 +171,6 @@ public class Cod3D {
         crearCodigo("return " + valor);
     }
 
-    public void reiniciarParametros() {
-        contParam = 1;
-    }
-
-    public void genParametro(String tipo, String valor) {
-        crearCodigo("param_" + contParam + "_" + tipo + "_" + valor);
-        contParam++;
-    }
-
-    public void genParametroInv(int numero, String tipo, String valor) {
-        crearCodigo("param_inv_" + numero + "_" + tipo + "_" + valor);
-    }
-
-    public String genLlamada(String funcion, int numParams) {
-        String temp = nuevoTemp();
-        crearCodigo(temp + " = call " + funcion + "," + numParams);
-        return temp;
-    }
 
     // ============ MÉTODOS PARA ESTRUCTURAS DE CONTROL ============
 
@@ -226,6 +208,27 @@ public class Cod3D {
         return etiqueta;
     }
 
+
+    // ================ MÉTODOS PARA FUNCIONES Y PARÁMETROS ================
+    public void reiniciarParametros() {
+        contParam = 1;
+    }
+
+    public void genParametro(String tipo, String valor) {
+        crearCodigo("param_" + contParam + "_" + tipo + "_" + valor);
+        contParam++;
+    }
+
+    public void genParametroInv(int numero, String tipo, String valor) {
+        crearCodigo("param_inv_" + numero + "_" + tipo + "_" + valor);
+    }
+
+    public String genLlamada(String funcion, int numParams) {
+        String temp = nuevoTemp();
+        crearCodigo(temp + " = call " + funcion + "," + numParams);
+        return temp;
+    }
+
     // ================ MÉTODOS PARA CIN (READ) Y COUT (PRINT) ================
 
     public void genPrint(String tipo, String valor) {
@@ -234,6 +237,26 @@ public class Cod3D {
 
     public void genRead(String tipo, String variable) {
         crearCodigo("cin, " + tipo + ", " + variable);
+    }
+
+    // ================ MÉTODO PARA ARRAYS ================
+    public void genDeclaracionArray(String nombre, String tipo, String filas, String columnas) {
+        crearCodigo("data_" + tipo + "_array " + nombre + " " + filas + "," + columnas);
+    }
+
+    /* public void genTempsArray(String nombre, String fila, String columna, String temp) {
+        crearCodigo(nombre + " " + fila + "," + columna + " = " + temp);
+    }
+    */
+
+    public void genAsignacionArray(String nombre, String fila, String columna, String valor) {
+        crearCodigo(nombre + " " + fila + "," + columna + " = " + valor);
+    }
+
+    public String genAccesoArray(String nombre, String fila, String columna) {
+        String temp = nuevoTemp();
+        crearCodigo(temp + " = " + nombre + " " + fila + "," + columna);
+        return temp;
     }
 
     // ================ MÉTODO PARA ESCRIBIR EL CÓDIGO EN UN ARCHIVO ================

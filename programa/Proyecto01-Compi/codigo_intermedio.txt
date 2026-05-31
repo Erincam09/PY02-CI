@@ -1,26 +1,17 @@
-_suma:
-param_1_int_a
-param_2_int_b
-t1 = a
-t2 = b
-t3 = t1 + t2
-data_int r
-t4 = t3
-r = t4
-t5 = r
-return t5
-_suma_end:
 main:
+data_matriz_array int 2,2
+t1 = 1
+matriz 0,0 = t1
+t2 = 2
+matriz 0,1 = t2
+t3 = 3
+matriz 1,0 = t3
+t4 = 4
+matriz 1,1 = t4
+t5 = matriz 0,1
 data_int x
-t6 = 5
+t6 = t5
 x = t6
-data_int y
-t7 = 3
-y = t7
-param_inv_1_int_x
-param_inv_2_int_y
-t8 = call suma,2
-data_int z
-t9 = t8
-z = t9
+t7 = x
+matriz 1,0 = t7
 main_end:
