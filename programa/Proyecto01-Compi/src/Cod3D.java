@@ -18,6 +18,8 @@ public class Cod3D {
     private int contDo = 1;
     private int contSwitch = 1;
     private int contCaso = 1;
+
+    private int contParam = 1;
     
     /**
      * Genera un nuevo temporal secuencial
@@ -69,6 +71,7 @@ public class Cod3D {
         contDo = 1;
         contSwitch = 1;
         contCaso = 1;
+        contParam = 1;
     }
     
     /**
@@ -168,12 +171,23 @@ public class Cod3D {
         crearCodigo("return " + valor);
     }
 
-    public void genPrint(String tipo, String valor) {
-        crearCodigo("cout, " + tipo + ", " + valor);
+    public void reiniciarParametros() {
+        contParam = 1;
     }
 
-    public void genRead(String tipo, String variable) {
-        crearCodigo("cin, " + tipo + ", " + variable);
+    public void genParametro(String tipo, String valor) {
+        crearCodigo("param_" + contParam + "_" + tipo + "_" + valor);
+        contParam++;
+    }
+
+    public void genParametroInv(int numero, String tipo, String valor) {
+        crearCodigo("param_inv_" + numero + "_" + tipo + "_" + valor);
+    }
+
+    public String genLlamada(String funcion, int numParams) {
+        String temp = nuevoTemp();
+        crearCodigo(temp + " = call " + funcion + "," + numParams);
+        return temp;
     }
 
     // ============ MÉTODOS PARA ESTRUCTURAS DE CONTROL ============
@@ -212,23 +226,17 @@ public class Cod3D {
         return etiqueta;
     }
 
-
     // ================ MÉTODOS PARA CIN (READ) Y COUT (PRINT) ================
 
+    public void genPrint(String tipo, String valor) {
+        crearCodigo("cout, " + tipo + ", " + valor);
+    }
 
+    public void genRead(String tipo, String variable) {
+        crearCodigo("cin, " + tipo + ", " + variable);
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
+    // ================ MÉTODO PARA ESCRIBIR EL CÓDIGO EN UN ARCHIVO ================
 
     public void escribirArchivo() {
         try {

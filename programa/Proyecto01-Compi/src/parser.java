@@ -1089,6 +1089,7 @@ public class parser extends java_cup.runtime.lr_parser {
     private String etiquetaSwitchActual = "";
     private String valorSwitchActual = "";
     private String banderaSwitchActual = "";
+    private String etiquetaFuncionActual = "";
 
     /*
      * Constructor del parser.
@@ -1319,33 +1320,38 @@ class CUP$parser$actions {
 		int iright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		
-                           // Validar que no exista otra función con el mismo nombre
-                           if (tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope()) != null) {
-                               funcionDuplicada = true;
-                               tipoFuncionDuplicada = t.toString();
-                               manejadorErrores.agregarErrorSemantico(
-                                   "Función '" + i + "' ya ha sido declarada",
-                                   ileft + 1,
-                                   iright + 1
-                               );
-                               // Crear scope temporal para procesar errores dentro de la función
-                               tabla.crearNuevoScope("duplicada_" + i.toString());
-                               tipoFuncionActual = t.toString();
-                           } else {
-                               funcionDuplicada = false;
-                               tipoFuncionDuplicada = null;
-                               TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
-                                   t.toString(),
-                                   i.toString(),
-                                   ileft + 1,
-                                   iright + 1
-                               );
-                               nodo.setCategoria("funcion");
-                               tabla.agregarNodo(nodo);
-                               tipoFuncionActual = t.toString();
+                            // Validar que no exista otra función con el mismo nombre
+                            if (tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope()) != null) {
+                                funcionDuplicada = true;
+                                tipoFuncionDuplicada = t.toString();
+                                manejadorErrores.agregarErrorSemantico(
+                                    "Función '" + i + "' ya ha sido declarada",
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                                // Crear scope temporal para procesar errores dentro de la función
+                                tabla.crearNuevoScope("duplicada_" + i.toString());
+                                tipoFuncionActual = t.toString();
+                                etiquetaFuncionActual = ""; // No se genera etiqueta para funciones duplicadas
+                            } else {
+                                funcionDuplicada = false;
+                                tipoFuncionDuplicada = null;
+                                TablaSimbolos.NodoToken nodo = new TablaSimbolos.NodoToken(
+                                    t.toString(),
+                                    i.toString(),
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                                nodo.setCategoria("funcion");
+                                tabla.agregarNodo(nodo);
+                                tipoFuncionActual = t.toString();
+                                tabla.crearNuevoScope(i.toString());
 
-                               tabla.crearNuevoScope(i.toString());
-                           }
+                                // Generar etiqueta para la función
+                                etiquetaFuncionActual = "_" + i.toString();
+                                cod3d.crearEtiqueta(etiquetaFuncionActual);
+                                cod3d.reiniciarParametros(); 
+                            }
                        
               CUP$parser$result = parser.getSymbolFactory().newSymbol("encabezado_funcion",3, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -1365,6 +1371,11 @@ class CUP$parser$actions {
                         lastLine,
                         lastColumn
                     );
+                }
+
+                if (etiquetaFuncionActual != "") {
+                    cod3d.crearEtiqueta(etiquetaFuncionActual + "_end");
+                    etiquetaFuncionActual = "";
                 }
                 tabla.salirDelScope();
             
@@ -1386,6 +1397,10 @@ class CUP$parser$actions {
                         lastLine,
                         lastColumn
                     );
+                }
+                if (etiquetaFuncionActual != "") {
+                    cod3d.crearEtiqueta(etiquetaFuncionActual + "_end");
+                    etiquetaFuncionActual = "";
                 }
                 tabla.salirDelScope();
             
@@ -1456,6 +1471,7 @@ class CUP$parser$actions {
                       // Los parámetros se consideran siempre inicializados
                       nodo.setIntentoAsignacion(true);
                       tabla.agregarNodo(nodo);
+                      cod3d.genParametro(t.toString(), i.toString());
 
                       // Agregar el parámetro a la función padre
                       TablaSimbolos.NodoToken nodoFuncion = tabla.buscarSimboloEnScope(
@@ -1774,10 +1790,9 @@ class CUP$parser$actions {
 		Object l = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		 
                         
-                        ArrayList<String> listaTipos = (ArrayList<String>)l;
-                        String tipoExpr = getTipoExpr(e.toString());
-                        listaTipos.add(0, tipoExpr); 
-                        RESULT = listaTipos;
+                        ArrayList<String> listaExpr = (ArrayList<String>)l;
+                        listaExpr.add(0, e.toString());
+                        RESULT = listaExpr;
                      
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",11, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -1791,10 +1806,9 @@ class CUP$parser$actions {
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		
-                        ArrayList<String> listaTipos = new ArrayList<>();
-                        String tipoExpr = getTipoExpr(e.toString());
-                        listaTipos.add(tipoExpr);
-                        RESULT = listaTipos;
+                        ArrayList<String> listaExpr = new ArrayList<>();
+                        listaExpr.add(0, e.toString());
+                        RESULT = listaExpr;
                     
               CUP$parser$result = parser.getSymbolFactory().newSymbol("lista_expresiones",11, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
@@ -2214,51 +2228,70 @@ class CUP$parser$actions {
 		int lright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
 		Object l = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
 		
-                      TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
-                      if (nodo == null) {
-                          manejadorErrores.agregarErrorSemantico(
-                              "La función '" + i + "' no ha sido declarada",
-                              ileft + 1,
-                              iright + 1
-                          );
-                          RESULT = crearExpr(i.toString(), "error");
-                      } else if (!nodo.getCategoria().equals("funcion")) {
-                          manejadorErrores.agregarErrorSemantico(
-                              "'" + i + "' no es una función",
-                              ileft + 1,
-                              iright + 1
-                          );
-                          RESULT = crearExpr(i.toString(), "error");
-                      } else {
-                          ArrayList<String> tiposRecibidos = (ArrayList<String>)l;
-                          List<TablaSimbolos.Parametro> parametrosEsperados = nodo.getParametros();
-
-                          if(tiposRecibidos.size() != parametrosEsperados.size()) {
-                              manejadorErrores.agregarErrorSemantico(
-                                  "La función '" + i + "' espera " + parametrosEsperados.size() + 
-                                  " parámetros, pero se recibieron " + tiposRecibidos.size(),
-                                  ileft + 1,
-                                  iright + 1
-                              );
-                          } else {
-                              for (int ind = 0; ind < tiposRecibidos.size(); ind++) {
-                                  String tipoRecibido = tiposRecibidos.get(ind);
-                                  String tipoEsperado = parametrosEsperados.get(ind).getTipo();
-
-                                  if (!tipoRecibido.equals("error") && !tipoRecibido.equals(tipoEsperado)) {
-                                      manejadorErrores.agregarErrorSemantico(
-                                          "En el parámetro " + (ind + 1) + " de la función '" + i +
-                                          "' se esperaba un valor de tipo " + tipoEsperado +
-                                          " pero se encontró " + tipoRecibido,
-                                          ileft + 1,
-                                          iright + 1
-                                      );
-                                  }
-                              }
-                          }
-                          RESULT = crearExpr(i.toString(), nodo.getTipo());
-                      }
-                  
+                        TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
+                        if (nodo == null) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "La función '" + i + "' no ha sido declarada",
+                                ileft + 1,
+                                iright + 1
+                            );
+                            RESULT = crearExpr(i.toString(), "error");
+                        } else if (!nodo.getCategoria().equals("funcion")) {
+                            manejadorErrores.agregarErrorSemantico(
+                                "'" + i + "' no es una función",
+                                ileft + 1,
+                                iright + 1
+                            );
+                            RESULT = crearExpr(i.toString(), "error");
+                        } else {
+                            ArrayList<String> expresionesRecibidas = (ArrayList<String>) l;
+                            List<TablaSimbolos.Parametro> parametrosEsperados = nodo.getParametros();
+                            boolean parametrosValidos = true;
+                            if (expresionesRecibidas.size() != parametrosEsperados.size()) {
+                                manejadorErrores.agregarErrorSemantico(
+                                    "La función '" + i + "' espera " +
+                                    parametrosEsperados.size() +
+                                    " parámetros, pero se recibieron " +
+                                    expresionesRecibidas.size(),
+                                    ileft + 1,
+                                    iright + 1
+                                );
+                                parametrosValidos = false;
+                            } else {
+                                for (int ind = 0; ind < expresionesRecibidas.size(); ind++) {
+                                    String exprRecibida = expresionesRecibidas.get(ind);
+                                    String tipoRecibido = getTipoExpr(exprRecibida);
+                                    String tipoEsperado = parametrosEsperados.get(ind).getTipo();
+                                    if (!tipoRecibido.equals("error") &&
+                                        !tipoRecibido.equals(tipoEsperado)) {
+                                        manejadorErrores.agregarErrorSemantico(
+                                            "En el parámetro " + (ind + 1) +
+                                            " de la función '" + i +
+                                            "' se esperaba un valor de tipo " +
+                                            tipoEsperado +
+                                            " pero se encontró " +
+                                            tipoRecibido,
+                                            ileft + 1,
+                                            iright + 1
+                                        );
+                                        parametrosValidos = false;
+                                    }
+                                }
+                            }
+                            if (parametrosValidos) {
+                                for (int ind = 0; ind < expresionesRecibidas.size(); ind++) {
+                                    String exprRecibida = expresionesRecibidas.get(ind);
+                                    String valorRecibido = getValorExpr(exprRecibida);
+                                    String tipoRecibido = getTipoExpr(exprRecibida);
+                                    cod3d.genParametroInv(ind + 1,tipoRecibido,valorRecibido);
+                                }
+                                String tempCall = cod3d.genLlamada(i.toString(),expresionesRecibidas.size());
+                                RESULT = crearExpr(tempCall, nodo.getTipo());
+                            } else {
+                                RESULT = crearExpr(i.toString(), "error");
+                            }
+                        }
+                    
               CUP$parser$result = parser.getSymbolFactory().newSymbol("llamada_funcion",10, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2272,16 +2305,6 @@ class CUP$parser$actions {
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
 		
                       TablaSimbolos.NodoToken nodo = tabla.buscarSimboloEnScope(i.toString(), tabla.getGlobalScope());
-                      if (nodo != null && nodo.getCategoria().equals("funcion")) {
-                          if (nodo.getParametros().size() > 0) {
-                              manejadorErrores.agregarErrorSemantico(
-                                  "La función '" + i + "' espera " + nodo.getParametros().size() + " parámetros, pero no se proporcionaron",
-                                  ileft + 1,
-                                  iright + 1
-                              );
-                          }
-                      }
-                      
                       if (nodo == null) {
                           manejadorErrores.agregarErrorSemantico(
                               "La función '" + i + "' no ha sido declarada",
@@ -2297,7 +2320,19 @@ class CUP$parser$actions {
                           );
                           RESULT = crearExpr(i.toString(), "error");
                       } else {
-                          RESULT = crearExpr(i.toString(), nodo.getTipo());
+                          if (nodo.getParametros().size() > 0) {
+                              manejadorErrores.agregarErrorSemantico(
+                                  "La función '" + i + "' espera " +
+                                  nodo.getParametros().size() +
+                                  " parámetros, pero no se proporcionaron",
+                                  ileft + 1,
+                                  iright + 1
+                              );
+                              RESULT = crearExpr(i.toString(), "error");
+                          } else {
+                              String tempCall = cod3d.genLlamada(i.toString(), 0);
+                              RESULT = crearExpr(tempCall, nodo.getTipo());
+                          }
                       }
                   
               CUP$parser$result = parser.getSymbolFactory().newSymbol("llamada_funcion",10, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
@@ -2721,7 +2756,7 @@ class CUP$parser$actions {
                             String tIzq = cod3d.genTemporal(izq);
                             String tDer = cod3d.genTemporal(der);
 
-                            String temp = cod3d.genOpRelacionales("equal", tIzq, tDer);
+                            String temp = cod3d.genOpRelacionales("n_equal", tIzq, tDer);
 
                             RESULT = crearExpr(temp, "bool");
                         }
@@ -4115,31 +4150,33 @@ class CUP$parser$actions {
 		int eright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		
-                  String scopeActual = tabla.getCurrentScope();
+                String scopeActual = tabla.getCurrentScope();
 
-                  if (scopeActual.contains("main")) {
-                      manejadorErrores.agregarErrorSemantico(
-                          "La función main no puede tener return",
-                          eleft + 1,
-                          eright + 1
-                      );
-                  } else {
-                      String tipoReturn = getTipoExpr(e.toString());
+                if (scopeActual.contains("main")) {
+                    manejadorErrores.agregarErrorSemantico(
+                        "La función main no puede tener return",
+                        eleft + 1,
+                        eright + 1
+                    );
+                } else {
+                    String tipoReturn = getTipoExpr(e.toString());
 
-                      if (tipoFuncionActual != null &&
-                          !tipoReturn.equals("error") &&
-                          !tipoFuncionActual.equals(tipoReturn)) {
-
-                          manejadorErrores.agregarErrorSemantico(
-                              "La función debe retornar " + tipoFuncionActual +
-                              " pero se encontró " + tipoReturn,
-                              eleft + 1,
-                              eright + 1
-                          );
-                      }
-                  }
-                  RESULT = crearExpr("return", "true");
-              
+                    if (tipoFuncionActual != null && !tipoReturn.equals("error") && !tipoFuncionActual.equals(tipoReturn)) {
+                        manejadorErrores.agregarErrorSemantico(
+                            "La función debe retornar " + tipoFuncionActual +
+                            " pero se encontró " + tipoReturn,
+                            eleft + 1,
+                            eright + 1
+                        );
+                    }
+                    if (!tipoReturn.equals("error")) {
+                            String valorReturn = getValorExpr(e.toString());
+                            String tempReturn = cod3d.genTemporal(valorReturn);
+                            cod3d.genReturn(tempReturn);
+                    }
+                }
+                RESULT = crearExpr("return", "true");
+            
               CUP$parser$result = parser.getSymbolFactory().newSymbol("return_nt",74, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;

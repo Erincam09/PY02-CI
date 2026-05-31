@@ -1,8 +1,26 @@
+_suma:
+param_1_int_a
+param_2_int_b
+t1 = a
+t2 = b
+t3 = t1 + t2
+data_int r
+t4 = t3
+r = t4
+t5 = r
+return t5
+_suma_end:
 main:
-data_int opcion
-t1 = 2
-opcion = t1
 data_int x
-t2 = x
-cout, int, t2
+t6 = 5
+x = t6
+data_int y
+t7 = 3
+y = t7
+param_inv_1_int_x
+param_inv_2_int_y
+t8 = call suma,2
+data_int z
+t9 = t8
+z = t9
 main_end:

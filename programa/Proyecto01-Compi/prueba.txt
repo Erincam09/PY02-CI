@@ -1,6 +1,12 @@
+int ~ suma <| int ~ a, int ~ b |>
+|:
+    int ~ r <- a + b!
+    return ~ r!
+:|
+
 empty ~ __main__ <| |>
 |:
-    int ~ opcion <- 2!
-    int ~ x!
-    cout <| x |>!
+    int ~ x <- 5!
+    int ~ y <- 3!
+    int ~ z <- suma <| x, y |>!
 :|
